@@ -1,0 +1,1182 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Cardiovascular &amp; Pulmonary Responses to Exercise — In-Class Activities</title>
+<style>
+  :root{
+    --accent:#9e1b32;
+    --accent-dark:#6e1223;
+    --bg:#f5f4f2;
+    --panel:#ffffff;
+    --ink:#26221f;
+    --muted:#6b6560;
+    --border:#e0dcd6;
+    --green:#2e7d32;
+    --amber:#b8860b;
+    --red:#b3261e;
+    --blue:#2f6fed;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Helvetica,Arial,sans-serif;
+    background:var(--bg);
+    color:var(--ink);
+  }
+  .app{
+    display:grid;
+    grid-template-columns:270px 1fr;
+    min-height:100vh;
+  }
+  .sidebar{
+    background:linear-gradient(180deg,var(--accent-dark),var(--accent));
+    color:#fff;
+    padding:22px 18px;
+    display:flex;
+    flex-direction:column;
+    gap:18px;
+  }
+  .sidebar h1{
+    font-size:16px;
+    line-height:1.35;
+    margin:0 0 4px 0;
+    font-weight:700;
+  }
+  .sidebar .sub{
+    font-size:12px;
+    opacity:0.85;
+    margin-top:-10px;
+  }
+  #navList{
+    list-style:none;
+    margin:0;
+    padding:0;
+    display:flex;
+    flex-direction:column;
+    gap:6px;
+  }
+  #navList li{
+    padding:9px 10px;
+    border-radius:8px;
+    font-size:13.5px;
+    cursor:pointer;
+    display:flex;
+    gap:8px;
+    align-items:flex-start;
+    background:rgba(255,255,255,0.06);
+    transition:background .15s;
+  }
+  #navList li:hover{background:rgba(255,255,255,0.16);}
+  #navList li.active{background:rgba(255,255,255,0.28);font-weight:600;}
+  #navList li .num{
+    flex:0 0 auto;
+    width:20px;height:20px;
+    border-radius:50%;
+    background:rgba(255,255,255,0.25);
+    display:flex;align-items:center;justify-content:center;
+    font-size:11px;
+  }
+  .content{
+    padding:30px 40px 60px;
+    max-width:920px;
+  }
+  .progress{
+    font-size:12.5px;
+    color:var(--muted);
+    text-transform:uppercase;
+    letter-spacing:.06em;
+    margin-bottom:6px;
+  }
+  #screen h2{
+    margin:0 0 4px 0;
+    font-size:24px;
+  }
+  #screen .meta{
+    color:var(--muted);
+    font-size:13.5px;
+    margin-bottom:18px;
+  }
+  .panel{
+    background:var(--panel);
+    border:1px solid var(--border);
+    border-radius:12px;
+    padding:20px 22px;
+    margin-bottom:16px;
+  }
+  .panel h3{margin-top:0;font-size:14.5px;color:var(--accent-dark);}
+  .panel ul{margin:8px 0;padding-left:20px;}
+  .panel li{margin-bottom:4px;font-size:14px;}
+  .prompt{
+    background:#fbf3ef;
+    border-left:4px solid var(--accent);
+    padding:12px 16px;
+    border-radius:0 8px 8px 0;
+    font-size:14px;
+    margin-bottom:16px;
+  }
+  .background-box{
+    background:#eef4fb;
+    border-left:4px solid var(--blue);
+    padding:12px 16px;
+    border-radius:0 8px 8px 0;
+    font-size:13.5px;
+    margin-bottom:14px;
+  }
+  .background-box strong{color:#1d4ea8;}
+  .refbox{
+    background:#f7f5f2;
+    border:1px solid var(--border);
+    border-radius:8px;
+    padding:12px 14px;
+    font-size:13px;
+    margin-bottom:14px;
+    display:none;
+  }
+  .refbox.show{display:block;}
+  .refbox div{margin-bottom:4px;}
+  textarea{
+    width:100%;
+    min-height:80px;
+    border:1px solid var(--border);
+    border-radius:8px;
+    padding:10px;
+    font-family:inherit;
+    font-size:14px;
+    resize:vertical;
+  }
+  button.action{
+    background:var(--accent);
+    color:#fff;
+    border:none;
+    padding:9px 16px;
+    border-radius:8px;
+    font-size:13.5px;
+    cursor:pointer;
+    margin-top:8px;
+  }
+  button.action:hover{background:var(--accent-dark);}
+  button.action:disabled{opacity:.4;cursor:not-allowed;}
+  button.ghost{
+    background:none;
+    border:1px solid var(--border);
+    padding:8px 14px;
+    border-radius:8px;
+    font-size:13px;
+    cursor:pointer;
+    margin-top:8px;
+    margin-left:6px;
+    color:var(--ink);
+  }
+  button.ghost:hover{background:#eee;}
+  .nav-buttons{
+    display:flex;
+    justify-content:space-between;
+    margin-top:24px;
+  }
+  .nav-buttons button{
+    background:var(--panel);
+    border:1px solid var(--border);
+    padding:10px 18px;
+    border-radius:8px;
+    cursor:pointer;
+    font-size:14px;
+  }
+  .nav-buttons button:hover{background:#efece8;}
+  .nav-buttons button:disabled{opacity:.4;cursor:not-allowed;}
+
+  /* Activity 1: predict */
+  .canvas-row{display:flex;gap:16px;flex-wrap:wrap;}
+  .canvas-block{text-align:center;}
+  .canvas-block canvas{
+    border:1px solid var(--border);
+    border-radius:8px;
+    background:#fff;
+    touch-action:none;
+    cursor:crosshair;
+  }
+  .canvas-block .cb-label{font-size:12.5px;color:var(--muted);margin-top:4px;}
+
+  /* Activity 2: HR lab */
+  table.hrtable{width:100%;border-collapse:collapse;font-size:12.5px;}
+  table.hrtable th, table.hrtable td{border:1px solid var(--border);padding:5px;text-align:center;}
+  table.hrtable input{width:52px;padding:4px;border:1px solid var(--border);border-radius:5px;text-align:center;}
+  .table-scroll{overflow-x:auto;padding-bottom:4px;}
+  .chart-wrap{margin-top:14px;}
+  .legend{font-size:12px;color:var(--muted);margin-top:4px;}
+  .legend span{display:inline-flex;align-items:center;gap:5px;margin-right:14px;}
+  .swatch{width:12px;height:3px;display:inline-block;border-radius:2px;}
+  .metric-box{
+    display:inline-block;
+    background:#f7f5f2;
+    border:1px solid var(--border);
+    border-radius:8px;
+    padding:10px 14px;
+    margin-top:12px;
+    font-size:13.5px;
+  }
+  .metric-box .val{font-size:20px;font-weight:700;color:var(--accent-dark);}
+  .flag-note{font-size:12px;color:var(--red);margin-top:4px;display:none;}
+  .flag-note.show{display:block;}
+
+  /* Activity 3: cases */
+  .case-progress{font-size:12.5px;color:var(--muted);margin-bottom:10px;}
+  .case-card{
+    border:1px solid var(--border);
+    border-radius:10px;
+    padding:16px 18px;
+    margin-bottom:10px;
+    background:#fff;
+  }
+  .case-card.correct{border-color:var(--green);background:#f2f8f1;}
+  .case-card.incorrect{border-color:var(--red);background:#fbf1f0;}
+  .case-text{font-size:14.5px;margin-bottom:10px;}
+  .case-choices{display:flex;gap:6px;flex-wrap:wrap;}
+  .case-choices button{
+    border:1px solid var(--border);
+    background:#fff;
+    padding:8px 12px;
+    border-radius:6px;
+    font-size:13px;
+    cursor:pointer;
+  }
+  .case-choices button.selected{background:var(--accent);color:#fff;border-color:var(--accent);}
+  .case-explain{font-size:12.5px;color:var(--muted);margin-top:10px;display:none;}
+  .case-card.revealed .case-explain{display:block;}
+  .summary-row{
+    border:1px solid var(--border);
+    border-radius:10px;
+    padding:10px 14px;
+    margin-bottom:8px;
+    font-size:12.5px;
+  }
+  .summary-row.correct{border-color:var(--green);background:#f2f8f1;}
+  .summary-row.incorrect{border-color:var(--red);background:#fbf1f0;}
+  .score-banner{
+    font-size:16px;
+    font-weight:700;
+    color:var(--accent-dark);
+    margin-bottom:14px;
+  }
+  .case-actions{
+    display:flex;
+    justify-content:space-between;
+    max-width:400px;
+    margin-top:16px;
+  }
+  .term{
+    color:var(--blue);
+    text-decoration:underline dotted;
+    cursor:pointer;
+    font-weight:600;
+  }
+  .term:hover, .term:focus{color:#1d4ea8;}
+  .useful-info .term-chips{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:8px;}
+  .useful-info .term-chip{
+    border:1px solid var(--blue);
+    background:#eef4fb;
+    color:#1d4ea8;
+    padding:6px 11px;
+    border-radius:20px;
+    font-size:12.5px;
+    cursor:pointer;
+  }
+  .useful-info .term-chip.opened{background:#1d4ea8;color:#fff;}
+  .term-def{
+    display:none;
+    font-size:13px;
+    background:#eef4fb;
+    border-left:4px solid var(--blue);
+    padding:10px 14px;
+    border-radius:0 8px 8px 0;
+    margin-bottom:8px;
+  }
+  .term-def.open{display:block;}
+
+  /* Activity 4: VT graphs */
+  .patient-tabs{display:flex;gap:6px;margin-bottom:12px;flex-wrap:wrap;}
+  .patient-tabs button{
+    border:1px solid var(--border);background:#fff;padding:7px 12px;border-radius:20px;font-size:13px;cursor:pointer;
+  }
+  .patient-tabs button.active{background:var(--accent);color:#fff;border-color:var(--accent);}
+  svg.vegraph{background:#fff;border:1px solid var(--border);border-radius:8px;width:100%;height:auto;}
+  .graph-explain{font-size:13px;margin-top:10px;background:#f7f5f2;padding:10px 12px;border-radius:8px;display:none;}
+  .graph-explain.show{display:block;}
+  .mystery-table{font-size:12px;border-collapse:collapse;margin-bottom:10px;}
+  .mystery-table th,.mystery-table td{border:1px solid var(--border);padding:3px 6px;text-align:center;}
+  .patient-vignette{font-size:13px;background:#f7f5f2;border-left:4px solid var(--accent);padding:8px 12px;border-radius:0 8px 8px 0;margin-bottom:10px;}
+  .patient-vignette b{color:var(--accent);}
+
+  /* Activity 5: jigsaw */
+  .flip-row{display:flex;gap:14px;flex-wrap:wrap;}
+  .flip-card{
+    flex:1 1 220px;
+    min-height:150px;
+    border:1px solid var(--border);
+    border-radius:10px;
+    padding:14px;
+    cursor:pointer;
+    background:#fff;
+    transition:background .15s;
+  }
+  .flip-card:hover{background:#faf7f4;}
+  .flip-card h4{margin:0 0 8px 0;font-size:14px;color:var(--accent-dark);}
+  .flip-card p{font-size:13px;margin:0;line-height:1.5;}
+  .flip-card .hint{font-size:11.5px;color:var(--muted);}
+  .sort-item{
+    border:1px solid var(--border);
+    border-radius:8px;
+    padding:10px 12px;
+    margin-bottom:8px;
+    background:#fff;
+  }
+  .sort-item.correct{border-color:var(--green);background:#f2f8f1;}
+  .sort-item.incorrect{border-color:var(--red);background:#fbf1f0;}
+  .sort-item .txt{font-size:13.5px;margin-bottom:6px;}
+  .sort-item .choices button{
+    border:1px solid var(--border);background:#fff;padding:5px 10px;border-radius:6px;font-size:12px;cursor:pointer;margin-right:5px;
+  }
+  .sort-item .choices button.selected{background:var(--accent);color:#fff;border-color:var(--accent);}
+  .sort-explain{font-size:12px;color:var(--muted);margin-top:6px;display:none;}
+  .sort-item.revealed .sort-explain{display:block;}
+
+  /* Activity 6: role play */
+  .checklist label{
+    display:flex;align-items:center;gap:8px;font-size:14px;padding:6px 0;border-bottom:1px solid var(--border);
+  }
+  .checklist input{width:16px;height:16px;}
+
+  /* Lock screens */
+  .lock-panel{text-align:center;padding:36px 22px;}
+  .lock-panel .lock-icon{font-size:32px;margin-bottom:10px;}
+  .lock-row{display:flex;gap:8px;justify-content:center;margin-top:14px;flex-wrap:wrap;}
+  .lock-row input{
+    border:1px solid var(--border);
+    border-radius:8px;
+    padding:10px 12px;
+    font-size:14px;
+    width:200px;
+    text-align:center;
+    letter-spacing:.05em;
+  }
+  .lock-error{color:var(--red);font-size:13px;margin-top:10px;min-height:16px;}
+  #navList li.locked{opacity:.7;}
+  #navList li .lockmark{margin-left:auto;font-size:11px;opacity:.8;}
+
+  footer.printnote{font-size:11.5px;color:var(--muted);margin-top:26px;text-align:center;}
+
+  /* Touch-friendly targets for tablet use */
+  button, .term, .term-chip, svg.vegraph, #navList li{
+    touch-action:manipulation;
+  }
+  .term{padding:1px 3px;}
+  .table-scroll{-webkit-overflow-scrolling:touch;}
+
+  @media (max-width:900px){
+    .app{grid-template-columns:1fr;}
+    .sidebar{flex-direction:row;flex-wrap:wrap;}
+    #navList{flex-direction:row;flex-wrap:wrap;}
+    .content{padding:20px;}
+  }
+</style>
+</head>
+<body>
+<div class="app">
+  <nav class="sidebar">
+    <div>
+      <h1>CV &amp; Pulmonary Responses to Exercise</h1>
+      <div class="sub">In-class activity sequence</div>
+    </div>
+    <ol id="navList"></ol>
+  </nav>
+
+  <main class="content">
+    <div class="progress">Activity <span id="stepNum">1</span> of <span id="stepTotal">7</span></div>
+    <section id="screen"></section>
+    <div class="nav-buttons">
+      <button id="prevBtn">&larr; Previous</button>
+      <button id="nextBtn">Next &rarr;</button>
+    </div>
+    <footer class="printnote">DPTD 732 — Foundational Movement Science · Cardiovascular &amp; Pulmonary Responses to Exercise</footer>
+  </main>
+</div>
+
+<script>
+/* ---------------------------------------------------------
+   Section passwords
+   Read these off to students in your lecture slides as you reach
+   each activity. Edit the values below to change them.
+--------------------------------------------------------- */
+const activityPasswords = {
+  predict:     "PREDICT",
+  hrlab:       "STARLING",
+  cases:       "REDFLAG",
+  vtstations:  "THRESHOLD",
+  jigsaw:      "BRADYCARDIA",
+  roleplay:    "VALSALVA",
+  exit:        "WRAPUP"
+};
+
+/* ---------------------------------------------------------
+   State
+--------------------------------------------------------- */
+const hrTimeLabels = ["Rest 0:00","Rest 1:00","Ex 0:30","Ex 1:00","Ex 1:30","Ex 2:00","Ex 2:30","Ex 3:00","Rec 0:30","Rec 1:00","Rec 1:30","Rec 2:00","Rec 3:00","Rec 4:00"];
+const hrReference =   [ 74,        76,         98,       118,      132,      140,      145,      148,      128,       112,       100,       92,        84,        78];
+
+const state = {
+  hrLab: Array(hrTimeLabels.length).fill(""),
+  cases: {},          // id -> chosen answer
+  caseIndex: 0,
+  caseFinished: false,
+  caseShowRef: false,
+  termOpen: {},        // "caseId|term" -> true/false
+  hrShowRef: true,
+  vt: { patient: "A", marks: {A:[], B:[], C:[], D:[], E:[]}, revealed: {A:false,B:false,C:false,D:false,E:false} },
+  jigsawFlipped: {central:false, peripheral:false, neural:false},
+  jigsawSort: {},      // idx -> chosen category
+  jigsawSortRevealed: false,
+  jigsawAnswer: "",
+  jigsawTransfer: "",
+  roleplayChecks: {},
+  rpReflect:"",
+  rpCompare:"",
+  exitAnswer: "",
+  exitStretchOpen:false,
+  exitStretchAnswer:"",
+  unlocked: {}
+};
+
+/* ---------------------------------------------------------
+   Data
+--------------------------------------------------------- */
+function veCurve(vt1, vt2, maxX){
+  const pts = [];
+  for(let x=0;x<=maxX;x+=0.25){
+    let y;
+    if(x<vt1) y = 20 + x*4;
+    else if(x<vt2) y = 20 + vt1*4 + (x-vt1)*10;
+    else y = 20 + vt1*4 + (vt2-vt1)*10 + (x-vt2)*20;
+    pts.push({x, y});
+  }
+  return pts;
+}
+const patients = {
+  A: {label:"Patient A — Endurance-Trained", vignette:"28-year-old competitive marathon runner, tested during a pre-season fitness assessment. Trains 6 days/week.", vt1:6,   vt2:8.5, note:"Trained athletes push both thresholds farther right — superior buffering capacity and oxygen extraction let them sustain higher relative workloads before hyperventilating.", mystery:false},
+  B: {label:"Patient B — Deconditioned",      vignette:"50-year-old with a sedentary desk job and no regular exercise history, tested at the start of a new wellness program.", vt1:3,   vt2:5,   note:"Lower thresholds mean lactate accumulates and buffering is overwhelmed at much lower absolute workloads — expect this patient to reach VT2 early in a graded test.", mystery:false},
+  C: {label:"Patient C — Recreationally Active", vignette:"34-year-old recreational cyclist who rides 2-3 times a week, tested for a general fitness baseline.", vt1:4.5, vt2:7, note:"A middle-of-the-road profile — useful reference point for comparing the trained and deconditioned patients.", mystery:false},
+  D: {label:"Patient D — Mystery Patient", vignette:"60-year-old referred for an exercise tolerance test ahead of a rehab program. Diagnosis intentionally withheld — you'll figure out what's going on with this patient from the data pattern alone, not from the label.", vt1:2, vt2:3.5, note:"Thresholds compress close together and occur early — ventilatory limitation, not cardiac output, is likely the limiting factor for this patient's exercise tolerance (a pattern consistent with a condition like COPD).", mystery:true}
+};
+const trainingZoneNote = "Clinical tie-in: below VT1 is an easy/recovery training zone, VT1–VT2 is a sustainable 'tempo' zone, and above VT2 is only sustainable for very short durations. These thresholds are how you'd set aerobic training zones for a real patient.";
+
+const glossary = {
+  CAD: "<strong>CAD (Coronary Artery Disease):</strong> narrowing of the arteries that supply the heart muscle itself with blood, which can limit how much oxygen the heart receives during exertion.",
+  RPE: "<strong>RPE (Rating of Perceived Exertion):</strong> a patient's own subjective rating of how hard they feel they're working, typically on a 6–20 (Borg) scale. Useful when HR can't be trusted as an intensity marker.",
+  MI: "<strong>MI (Myocardial Infarction):</strong> a heart attack — death of heart muscle tissue caused by a blocked blood supply to that area.",
+  REHAB: "<strong>Cardiac Rehab:</strong> a supervised exercise and education program for patients recovering from a cardiac event (like an MI), aimed at safely rebuilding exercise tolerance under monitoring.",
+  BETA: "<strong>Beta-Blocker:</strong> a medication that blocks sympathetic (beta-adrenergic) stimulation of the heart — one of the two main drivers of the normal exercise HR rise. Blunts HR response to exercise.",
+  ARRHYTHMIA: "<strong>Arrhythmia:</strong> an abnormal heart rhythm — too fast, too slow, or irregular.",
+  NEURO: "<strong>Cardiac Autonomic Neuropathy:</strong> nerve damage affecting the autonomic nervous system, impairing the body's ability to appropriately adjust HR and BP during exercise.",
+  T1D: "<strong>Type 1 Diabetes:</strong> an autoimmune condition where the pancreas produces little or no insulin. Long-standing cases can lead to nerve damage, including autonomic neuropathy."
+};
+function term(display, key){
+  return `<span class="term" data-term="${key}" tabindex="0" role="button">${display}</span>`;
+}
+const cases = [
+  {id:1, text:"45-year-old healthy adult, no cardiac history. During a graded exercise test, SBP rises steadily from 120→170 mmHg; DBP stays stable around 78 mmHg throughout.", answer:"normal", explain:"Classic normal response — SBP rises roughly linearly with workload because cardiac output has to climb to meet the muscles' oxygen demand, and the arterial system reflects that with a higher systolic pressure. DBP stays essentially flat because arterioles in the working muscle dilate and lower total peripheral resistance, roughly offsetting the pressure increase — this decoupling of SBP and DBP is exactly what a healthy exercise pressor response looks like.", terms:[]},
+  {id:2, text:`60-year-old with known ${term("CAD","CAD")}. SBP rises from 130→135 mmHg then plateaus and begins to fall as workload continues to increase; patient reports dizziness.`, answer:"stop", explain:"Exertional hypotension — a failure of SBP to rise, or an actual drop, as workload increases. In CAD, narrowed coronary arteries limit how much blood (and oxygen) the heart muscle itself can receive as demand climbs; at some point contractility and stroke volume can't keep pace, so cardiac output — and SBP — plateau and fall even though the body is asking for more. Combined with dizziness (a sign of falling cerebral perfusion), this is an ACSM-recognized indication to terminate exercise immediately.", terms:["CAD"]},
+  {id:3, text:"30-year-old healthy athlete. DBP rises from 80→98 mmHg (an 18 mmHg increase) over the course of an incremental test.", answer:"caution", explain:"DBP increase >10–15 mmHg is atypical. Normally, vasodilation in the working muscle lowers total peripheral resistance enough that DBP stays flat or even drops slightly as workload rises. An 18 mmHg climb suggests that vasodilation isn't happening as expected — possibly early vascular dysfunction, even in an otherwise healthy young athlete. It's not an immediate stop like a failure of SBP to rise, but it's atypical enough to flag for closer monitoring and follow-up.", terms:[]},
+  {id:4, text:`55-year-old with treated hypertension. SBP rises from 150→190 mmHg at a moderate workload; ${term("RPE","RPE")} reported as 13 ("somewhat hard").`, answer:"normal", explain:"Still a proportional, linear SBP rise with workload — no plateau, no fall, and no abnormal DBP spike. The elevated starting point and peak reflect her baseline hypertension shifting the whole curve upward, not a dangerous pattern in itself. RPE 13 ('somewhat hard') is a reasonable, expected effort rating at that workload. Continue with normal monitoring — treated hypertension changes the numbers you'd expect, not the shape of a healthy response.", terms:["RPE"]},
+  {id:5, text:"25-year-old healthy adult begins light jogging. HR jumps from 70→95 bpm within the first 5 seconds, before any real metabolic demand could explain it.", answer:"normal", explain:"This is the expected anticipatory response at exercise onset — HR rises via vagal withdrawal (and sometimes even starts before movement, from central/cortical anticipation) faster than any chemical or mechanical feedback from the muscles could explain. It's a feedforward mechanism, not a red flag: true metabolic demand hasn't caught up yet, but the nervous system is already preparing the cardiovascular system for it.", terms:[]},
+  {id:6, text:`50-year-old in ${term("cardiac rehab","REHAB")} post-${term("MI","MI")}. During a submax test, SBP drops from 140→110 mmHg as workload increases from moderate to vigorous; patient becomes pale and lightheaded.`, answer:"stop", explain:"Exertional hypotension with symptoms (pallor, lightheadedness) — stop exercise immediately and follow your facility's emergency protocol. This is the same underlying pattern as Case 2 (SBP falling instead of rising with workload), but it's higher-stakes here: a post-MI heart has reduced contractile reserve to begin with, so a falling SBP signals the heart is being pushed past what its remaining function can support, raising real risk of ischemia or arrhythmia.", terms:["REHAB","MI"]},
+  {id:7, text:"35-year-old healthy adult on a 45-minute run at constant pace. HR drifts from 130→155 bpm over the run while workload stays the same; SV gradually decreases.", answer:"normal", explain:"Classic cardiovascular drift. As plasma volume gradually falls from sweating, venous return and end-diastolic volume fall too, so stroke volume drifts down via the Frank-Starling mechanism. Cardiac output is preserved because HR climbs to compensate for the falling SV — that's why this isn't a red flag. It's an expected consequence of sustained, moderate-duration exercise; a hydration reminder is appropriate, but it's not a stop signal.", terms:[]},
+  {id:8, text:"65-year-old adult. DBP increases only 5 mmHg across a full graded exercise test while SBP rises appropriately with workload; no symptoms reported.", answer:"normal", explain:"A DBP change of only 5 mmHg across a full graded test is well within normal limits (under the ~10–15 mmHg threshold that would raise concern). Paired with an appropriately rising SBP and no symptoms, this is about as textbook a normal pressor response as you'll see — a useful contrast case against #3.", terms:[]},
+  {id:9, text:`58-year-old with a history of ${term("arrhythmia","ARRHYTHMIA")}, taking a ${term("beta-blocker","BETA")} (metoprolol). During a graded exercise test, HR only rises from 65→95 bpm despite the patient reaching a heavy workload and ${term("RPE","RPE")} of 16.`,
+     background:"<strong>Background — beta-blockers:</strong> these medications block sympathetic (beta-adrenergic) stimulation of the heart, which is one of the two main drivers of the normal exercise HR rise. For patients on beta-blockers, HR climbs much less than expected for a given workload — so HR is not a reliable way to gauge exercise intensity for them.",
+     answer:"caution", explain:"This blunted HR rise is an expected pharmacologic effect of beta-blockade, not a cardiac red flag on its own — but it means HR-based intensity targets (like target HR zones) are unreliable for this patient. Use RPE or workload-based prescription instead. Don't confuse this with exertional hypotension: what actually matters for that call is SBP behavior, which isn't described as abnormal here.", terms:["ARRHYTHMIA","BETA","RPE"]},
+  {id:10, text:`62-year-old with longstanding ${term("type 1 diabetes","T1D")} and diagnosed cardiac ${term("autonomic neuropathy","NEURO")}. HR stays flat around 78 bpm throughout a graded exercise test despite significant increases in workload and ${term("RPE","RPE")} up to 15.`,
+     background:"<strong>Background — autonomic neuropathy:</strong> this condition damages the nerves that normally adjust HR during exercise (vagal withdrawal and SNS outflow). Patients with autonomic neuropathy may show little to no HR rise even at high intensities — and this blunted response can also mask a genuine cardiac problem.",
+     answer:"caution", explain:"Similar surface presentation to the beta-blocker case — HR isn't a reliable intensity marker here either — but the mechanism and the risk are different. Because this blunted response comes from nerve damage rather than a medication, it can also mask early warning signs of a genuine cardiac problem developing during exercise. Stay especially alert to other cues (BP behavior, RPE, visible symptoms) rather than relying on HR.", terms:["T1D","NEURO","RPE"]}
+];
+const answerLabels = {normal:"Normal — Continue", caution:"Atypical — Caution", stop:"Stop Exercise Now"};
+
+const jigsawContent = {
+  central: "Left ventricle enlarges → greater end-diastolic volume (preload) → larger stroke volume per beat via the Frank-Starling mechanism. The ventricular wall thickens proportionally to generate the force needed to eject that larger volume. Net effect: fewer beats are needed to deliver the same resting cardiac output → resting bradycardia.",
+  peripheral: "Trained muscle grows more capillaries per fiber (more surface area for O2 diffusion) and more/larger mitochondria (greater capacity to use O2). Net effect: oxygen extraction improves, so the muscle can meet the same O2 demand with less blood flow delivered — easing the workload on the heart at a given intensity.",
+  neural: "Regular training increases resting parasympathetic (vagal) tone and decreases resting sympathetic outflow. Net effect: the heart's intrinsic pacemaker activity is dialed down at rest and during submaximal work — a direct driver of training bradycardia, independent of the structural changes above."
+};
+const jigsawSortItems = [
+  {text:"Ventricular wall thickens proportionally to eject a larger stroke volume", cat:"central", explain:"Structural heart change — Central."},
+  {text:"Resting parasympathetic (vagal) tone increases", cat:"neural", explain:"Autonomic balance shift — Neural."},
+  {text:"Capillary density in trained skeletal muscle increases", cat:"peripheral", explain:"Muscle-level structural change — Peripheral."},
+  {text:"Heart rate decreases for the same submaximal workload", cat:"neural", explain:"Driven primarily by increased vagal tone / decreased sympathetic outflow — Neural."},
+  {text:"Left ventricular chamber enlarges, increasing preload capacity", cat:"central", explain:"Structural heart change — Central."},
+  {text:"Total peripheral resistance decreases at rest, contributing to lower resting BP", cat:"peripheral", explain:"A vascular/peripheral change, driven by both lower sympathetic tone and greater capillarization — Peripheral."},
+  {text:"Mitochondrial number and size increase within muscle fibers", cat:"peripheral", explain:"Muscle-level structural change — Peripheral."},
+  {text:"Stroke volume significantly increases during maximal exercise", cat:"central", explain:"Driven by the enlarged, more contractile left ventricle — Central."},
+  {text:"Resting sympathetic nervous system outflow decreases", cat:"neural", explain:"Autonomic balance shift — Neural."}
+];
+const jigsawCatLabels = {central:"Central", peripheral:"Peripheral", neural:"Neural"};
+
+/* ---------------------------------------------------------
+   Activities
+--------------------------------------------------------- */
+const activities = [
+  {
+    id:"predict", title:"Predict & Commit", duration:8,
+    render(el){
+      el.innerHTML = `
+        <h2>1 · Predict &amp; Commit</h2>
+        <div class="meta">Individual, then pair share</div>
+        <div class="prompt">Without looking anything up, freehand-sketch what you think happens to each variable from rest, through exercise, into recovery. There's no wrong answer yet — you're about to find out what you actually know.</div>
+        <div class="panel">
+          <h3>Draw your prediction</h3>
+          <div class="canvas-row">
+            <div class="canvas-block"><canvas id="cv-hr" width="220" height="150"></canvas><div class="cb-label">Heart Rate</div></div>
+            <div class="canvas-block"><canvas id="cv-sv" width="220" height="150"></canvas><div class="cb-label">Stroke Volume</div></div>
+            <div class="canvas-block"><canvas id="cv-q" width="220" height="150"></canvas><div class="cb-label">Cardiac Output</div></div>
+            <div class="canvas-block"><canvas id="cv-sbp" width="220" height="150"></canvas><div class="cb-label">Systolic BP</div></div>
+            <div class="canvas-block"><canvas id="cv-dbp" width="220" height="150"></canvas><div class="cb-label">Diastolic BP</div></div>
+          </div>
+          <button class="action" id="clearCanvases">Clear All</button>
+        </div>
+        <div class="prompt">Now compare with a partner: where did your five sketches disagree — especially SBP vs. DBP? Keep that disagreement in mind, we'll come back to it.</div>
+      `;
+      const zones = ["Rest","Exercise","Recovery"];
+      function setupCanvas(id){
+        const canvas = document.getElementById(id);
+        const ctx = canvas.getContext("2d");
+        drawBase();
+        function drawBase(){
+          ctx.clearRect(0,0,canvas.width,canvas.height);
+          ctx.fillStyle="#faf8f6";
+          ctx.fillRect(0,0,canvas.width,canvas.height);
+          const w3 = canvas.width/3;
+          ctx.strokeStyle="#e0dcd6";
+          ctx.beginPath();
+          ctx.moveTo(w3,0); ctx.lineTo(w3,canvas.height);
+          ctx.moveTo(w3*2,0); ctx.lineTo(w3*2,canvas.height);
+          ctx.stroke();
+          ctx.fillStyle="#a09a92";
+          ctx.font="9px sans-serif";
+          zones.forEach((z,i)=> ctx.fillText(z, w3*i+6, 12));
+          ctx.strokeStyle="#8a847c";
+          ctx.beginPath();
+          ctx.moveTo(4,canvas.height-4); ctx.lineTo(canvas.width-4,canvas.height-4);
+          ctx.moveTo(4,4); ctx.lineTo(4,canvas.height-4);
+          ctx.stroke();
+        }
+        let drawing=false;
+        function pos(e){
+          const r = canvas.getBoundingClientRect();
+          const cx = (e.touches? e.touches[0].clientX : e.clientX) - r.left;
+          const cy = (e.touches? e.touches[0].clientY : e.clientY) - r.top;
+          return [cx,cy];
+        }
+        function start(e){ drawing=true; const [x,y]=pos(e); ctx.beginPath(); ctx.moveTo(x,y); ctx.strokeStyle="#9e1b32"; ctx.lineWidth=2.5; e.preventDefault();}
+        function move(e){ if(!drawing) return; const [x,y]=pos(e); ctx.lineTo(x,y); ctx.stroke(); e.preventDefault();}
+        function end(){ drawing=false; }
+        canvas.addEventListener("mousedown",start);
+        canvas.addEventListener("mousemove",move);
+        window.addEventListener("mouseup",end);
+        canvas.addEventListener("touchstart",start);
+        canvas.addEventListener("touchmove",move);
+        canvas.addEventListener("touchend",end);
+        return drawBase;
+      }
+      const resets = ["cv-hr","cv-sv","cv-q","cv-sbp","cv-dbp"].map(setupCanvas);
+      document.getElementById("clearCanvases").onclick = ()=> resets.forEach(r=>r());
+    }
+  },
+  {
+    id:"hrlab", title:"HR Monitor Lab", duration:15,
+    render(el){
+      el.innerHTML = `
+        <h2>2 · HR Monitor Lab</h2>
+        <div class="meta">Pairs, with pulse ox / HR strap</div>
+        <div class="panel">
+          <h3>What you need</h3>
+          <ul>
+            <li>One HR monitor or pulse ox per pair</li>
+            <li>Open space or a step for step-ups / bodyweight squats</li>
+            <li>A stopwatch (phone is fine)</li>
+          </ul>
+          <h3>Protocol</h3>
+          <ul>
+            <li>Recorder sits with exerciser for 1 min baseline, noting HR at 0:00 and 1:00.</li>
+            <li>Exerciser performs steady step-ups or squats for 3 min. Recorder calls out / logs HR every 30 sec.</li>
+            <li>Stop and continue logging HR every 30–60 sec through 4 min of recovery, so you can see HR fully settle.</li>
+            <li>Swap roles if time allows.</li>
+          </ul>
+        </div>
+        <div class="panel">
+          <h3>Log your data</h3>
+          <div class="table-scroll">
+            <table class="hrtable" id="hrTable">
+              <thead><tr>${hrTimeLabels.map(l=>`<th>${l}</th>`).join("")}</tr></thead>
+              <tbody><tr>${hrTimeLabels.map((_,i)=>`<td><input type="number" min="30" max="220" data-i="${i}" value="${state.hrLab[i]}"></td>`).join("")}</tr></tbody>
+            </table>
+          </div>
+          <div class="chart-wrap">
+            <svg id="hrChart" class="vegraph" viewBox="0 0 520 220"></svg>
+            <div class="legend">
+              <span><span class="swatch" style="background:#9e1b32"></span>Your data</span>
+              <span><span class="swatch" style="background:#a09a92"></span>Typical reference shape</span>
+            </div>
+            <button class="ghost" id="toggleRefCurve">${state.hrShowRef ? "Hide" : "Show"} Reference Curve</button>
+          </div>
+          <div class="metric-box">
+            HR Recovery at 1 min (HRR1) = Peak HR (Ex 3:00) &minus; HR at Rec 1:00 &nbsp;=&nbsp; <span class="val" id="hrrVal">—</span>
+            <div class="flag-note" id="hrrFlag">Clinically, HRR1 &lt;12 bpm is associated with worse cardiovascular prognosis — a real reason this number matters beyond curve-shape.</div>
+          </div>
+        </div>
+        <div class="prompt">Overlay your curve on the reference. Where does yours diverge — and why? Would you expect to see cardiovascular drift in only 3 minutes of exercise? What does your HRR1 suggest about fitness level?</div>
+      `;
+      const inputs = el.querySelectorAll("#hrTable input");
+      inputs.forEach(inp=>{
+        inp.addEventListener("input", ()=>{
+          state.hrLab[+inp.dataset.i] = inp.value;
+          drawChart();
+        });
+      });
+      document.getElementById("toggleRefCurve").addEventListener("click", (e)=>{
+        state.hrShowRef = !state.hrShowRef;
+        e.target.textContent = `${state.hrShowRef ? "Hide" : "Show"} Reference Curve`;
+        drawChart();
+      });
+
+      function drawChart(){
+        const svg = document.getElementById("hrChart");
+        const w=520,h=220,pad=40;
+        const maxY = 170, minY = 50;
+        const xStep = (w-pad*1.4)/(hrTimeLabels.length-1);
+        const yScale = y => h-pad - ((y-minY)/(maxY-minY))*(h-pad*1.6);
+        const xScale = i => pad + i*xStep;
+        let svgParts = [];
+        svgParts.push(`<line x1="${pad}" y1="${h-pad}" x2="${w-8}" y2="${h-pad}" stroke="#8a847c"/>`);
+        svgParts.push(`<line x1="${pad}" y1="12" x2="${pad}" y2="${h-pad}" stroke="#8a847c"/>`);
+        [60,100,140].forEach(v=>{
+          svgParts.push(`<text x="4" y="${yScale(v)+4}" font-size="9" fill="#a09a92">${v}</text>`);
+          svgParts.push(`<line x1="${pad}" y1="${yScale(v)}" x2="${w-8}" y2="${yScale(v)}" stroke="#f0ede9"/>`);
+        });
+        if(state.hrShowRef){
+          const refPts = hrReference.map((v,i)=>`${xScale(i)},${yScale(v)}`).join(" ");
+          svgParts.push(`<polyline points="${refPts}" fill="none" stroke="#a09a92" stroke-width="2" stroke-dasharray="4,3"/>`);
+        }
+        const dataPts = state.hrLab.map((v,i)=> v!=="" ? [xScale(i), yScale(+v)] : null).filter(Boolean);
+        if(dataPts.length>0){
+          const line = dataPts.map(p=>p.join(",")).join(" ");
+          svgParts.push(`<polyline points="${line}" fill="none" stroke="#9e1b32" stroke-width="2.5"/>`);
+          dataPts.forEach(p=> svgParts.push(`<circle cx="${p[0]}" cy="${p[1]}" r="3" fill="#9e1b32"/>`));
+        }
+        svg.innerHTML = svgParts.join("");
+
+        const peak = state.hrLab[7];
+        const rec1 = state.hrLab[9];
+        const hrrEl = document.getElementById("hrrVal");
+        const flagEl = document.getElementById("hrrFlag");
+        if(peak!=="" && rec1!==""){
+          const hrr = (+peak) - (+rec1);
+          hrrEl.textContent = `${hrr} bpm`;
+          flagEl.classList.toggle("show", hrr<12);
+        } else {
+          hrrEl.textContent = "—";
+          flagEl.classList.remove("show");
+        }
+      }
+      drawChart();
+    }
+  },
+  {
+    id:"cases", title:"Red-Flag Case Sort", duration:12,
+    render(el){
+      const refBoxHTML = `
+        <div class="refbox ${state.caseShowRef?'show':''}" id="refbox">
+          <div><strong>Normal — Continue:</strong> SBP rises proportionally with workload; DBP stable or slightly ↓.</div>
+          <div><strong>Atypical — Caution:</strong> DBP rises &gt;15 mmHg; or HR response is unreliable due to medication/pathology (needs alternate monitoring, not automatically dangerous).</div>
+          <div><strong>Stop Exercise Now:</strong> SBP fails to rise or falls with increasing workload (exertional hypotension), especially with symptoms.</div>
+        </div>`;
+      if(state.caseFinished){
+        const correctCount = cases.filter(c=>state.cases[c.id]===c.answer).length;
+        el.innerHTML = `
+          <h2>3 · Red-Flag Case Sort — Summary</h2>
+          <div class="meta">Review &middot; discuss any misses as a group</div>
+          <div class="score-banner">${correctCount} / ${cases.length} correct</div>
+          ${cases.map(c=>{
+            const chosen = state.cases[c.id];
+            const ok = chosen===c.answer;
+            return `<div class="summary-row ${ok?'correct':'incorrect'}">
+              <strong>Case ${c.id}.</strong> ${c.text}<br>
+              Your answer: <strong>${answerLabels[chosen]||"—"}</strong> &nbsp;|&nbsp; Correct: <strong>${answerLabels[c.answer]}</strong><br>
+              <span style="color:var(--muted)">${c.explain}</span>
+            </div>`;
+          }).join("")}
+          <button class="action" id="restartCases">Restart Case Sort</button>
+        `;
+        document.getElementById("restartCases").onclick = ()=>{
+          state.cases = {}; state.caseIndex = 0; state.caseFinished = false;
+          activities.find(a=>a.id==="cases").render(document.getElementById("screen"));
+        };
+        return;
+      }
+
+      const c = cases[state.caseIndex];
+      const chosen = state.cases[c.id];
+      el.innerHTML = `
+        <h2>3 · Red-Flag Case Sort</h2>
+        <div class="meta">Small groups &middot; work through one case at a time</div>
+        <button class="ghost" id="toggleRef">${state.caseShowRef?'Hide':'Show'} Red-Flag Reference Criteria</button>
+        ${refBoxHTML}
+        <div class="case-progress">Case ${state.caseIndex+1} of ${cases.length}</div>
+        <div class="case-card" id="case-${c.id}">
+          ${c.background ? `<div class="background-box">${c.background}</div>` : ""}
+          <div class="case-text"><strong>Case ${c.id}.</strong> ${c.text}</div>
+          <div class="case-choices" data-id="${c.id}">
+            ${Object.keys(answerLabels).map(k=>`<button data-val="${k}" class="${chosen===k?'selected':''}">${answerLabels[k]}</button>`).join("")}
+          </div>
+        </div>
+        ${c.terms && c.terms.length ? `
+        <div class="panel useful-info">
+          <h3>Useful Information</h3>
+          <div class="meta" style="margin-bottom:8px;">Click a term to see what it means.</div>
+          <div class="term-chips">
+            ${c.terms.map(t=>`<button class="term-chip ${state.termOpen[c.id+"|"+t]?'opened':''}" data-term="${t}">${t}</button>`).join("")}
+          </div>
+          ${c.terms.map(t=>`<div class="term-def ${state.termOpen[c.id+"|"+t]?'open':''}" data-term="${t}">${glossary[t]}</div>`).join("")}
+        </div>` : ""}
+        <div class="case-actions">
+          <button class="ghost" id="prevCase" ${state.caseIndex===0?"disabled":""}>&larr; Previous Case</button>
+          <button class="action" id="nextCase" ${chosen?"":"disabled"}>${state.caseIndex===cases.length-1 ? "See Summary" : "Next Case →"}</button>
+        </div>
+      `;
+      document.getElementById("toggleRef").onclick = ()=>{
+        state.caseShowRef = !state.caseShowRef;
+        activities.find(a=>a.id==="cases").render(el);
+      };
+      el.querySelector(".case-choices").querySelectorAll("button").forEach(btn=>{
+        btn.addEventListener("click", ()=>{
+          state.cases[c.id] = btn.dataset.val;
+          activities.find(a=>a.id==="cases").render(el);
+        });
+      });
+      function toggleTerm(key){
+        const stateKey = c.id+"|"+key;
+        state.termOpen[stateKey] = !state.termOpen[stateKey];
+        const isOpen = state.termOpen[stateKey];
+        el.querySelectorAll(`.term-def[data-term="${key}"]`).forEach(d=> d.classList.toggle("open", isOpen));
+        el.querySelectorAll(`.term-chip[data-term="${key}"]`).forEach(chip=> chip.classList.toggle("opened", isOpen));
+      }
+      el.querySelectorAll(".term-chip").forEach(chip=>{
+        chip.addEventListener("click", ()=> toggleTerm(chip.dataset.term));
+      });
+      el.querySelectorAll(".case-text .term").forEach(span=>{
+        span.addEventListener("click", ()=> toggleTerm(span.dataset.term));
+        span.addEventListener("keydown", (e)=>{ if(e.key==="Enter" || e.key===" "){ e.preventDefault(); toggleTerm(span.dataset.term); } });
+      });
+      document.getElementById("prevCase").onclick = ()=>{
+        if(state.caseIndex>0){ state.caseIndex--; activities.find(a=>a.id==="cases").render(el); }
+      };
+      document.getElementById("nextCase").onclick = ()=>{
+        if(!state.cases[c.id]) return;
+        if(state.caseIndex === cases.length-1){ state.caseFinished = true; }
+        else { state.caseIndex++; }
+        activities.find(a=>a.id==="cases").render(el);
+      };
+    }
+  },
+  {
+    id:"vtstations", title:"VT1 / VT2 Stations", duration:13,
+    render(el){
+      el.innerHTML = `
+        <h2>4 · VT1 / VT2 Station Rotation</h2>
+        <div class="meta">Small groups, rotate through patients</div>
+        <div class="panel">
+          <h3>How this station works</h3>
+          <ul>
+            <li>Each tab below (A, B, C, D) is a different patient's ventilation (VE) vs. workload graph from a graded exercise test.</li>
+            <li><strong>VT1</strong> is the first spot where the line's slope visibly gets steeper (ventilation starts climbing faster than workload alone would predict). <strong>VT2</strong> is the second, even sharper bend farther along the same line.</li>
+            <li><strong>Step 1:</strong> Look at the curve and click once on the graph at the workload where you think <strong>VT1</strong> occurs. A blue dashed line will appear marking your guess.</li>
+            <li><strong>Step 2:</strong> Click a second time where you think <strong>VT2</strong> occurs. An amber dashed line will appear.</li>
+            <li><strong>Step 3:</strong> Click "Reveal" to see the actual VT1 (green) and VT2 (red) lines plus an explanation, then discuss as a group whether your guesses were close and why.</li>
+            <li>Use "Clear My Marks" to try again, or the tabs to move to the next patient. Patient D is a <strong>mystery patient</strong> — you'll only see discrete data points, not a smooth curve, so you'll need to mentally connect the dots to spot where the slope changes.</li>
+          </ul>
+        </div>
+        <div class="panel">
+          <div class="patient-tabs" id="patientTabs"></div>
+          <div class="patient-vignette" id="patientVignette"></div>
+          <div class="meta" id="stepStatus" style="margin-bottom:8px;"></div>
+          <div id="mysteryTableWrap"></div>
+          <svg id="veSvg" class="vegraph" viewBox="0 0 500 260"></svg>
+          <div style="margin-top:8px;">
+            <button class="action" id="revealVT">Reveal</button>
+            <button class="ghost" id="clearVT">Clear My Marks</button>
+          </div>
+          <div class="graph-explain" id="graphExplain"></div>
+        </div>
+        <div class="prompt">${trainingZoneNote}</div>
+      `;
+      const tabsEl = document.getElementById("patientTabs");
+      tabsEl.innerHTML = Object.keys(patients).map(k=>
+        `<button data-p="${k}" class="${state.vt.patient===k?'active':''}">${k}${patients[k].mystery?" (mystery)":""}</button>`
+      ).join("");
+      tabsEl.querySelectorAll("button").forEach(btn=>{
+        btn.addEventListener("click", ()=>{
+          state.vt.patient = btn.dataset.p;
+          activities.find(a=>a.id==="vtstations").render(el);
+        });
+      });
+
+      const pid0 = state.vt.patient;
+      document.getElementById("patientVignette").innerHTML = `<b>${patients[pid0].label}:</b> ${patients[pid0].vignette}`;
+      const mysteryWrap = document.getElementById("mysteryTableWrap");
+      if(patients[pid0].mystery){
+        const p = patients[pid0];
+        const raw = veCurve(p.vt1, p.vt2, 10).filter((_,i)=> i%4===0);
+        mysteryWrap.innerHTML = `<table class="mystery-table"><thead><tr><th>Workload</th>${raw.map(pt=>`<th>${pt.x}</th>`).join("")}</tr></thead>
+          <tbody><tr><th>VE</th>${raw.map(pt=>`<td>${Math.round(pt.y)}</td>`).join("")}</tr></tbody></table>`;
+      } else {
+        mysteryWrap.innerHTML = "";
+      }
+
+      const svg = document.getElementById("veSvg");
+      const w=500,h=260,padL=44,padB=34,padT=14,padR=10;
+      const maxX=10, maxY=190;
+      const xScale = x => padL + (x/maxX)*(w-padL-padR);
+      const yScale = y => h-padB - (y/maxY)*(h-padB-padT);
+      const invX = px => ((px-padL)/(w-padL-padR))*maxX;
+
+      function draw(){
+        const pid = state.vt.patient;
+        const p = patients[pid];
+        const pts = veCurve(p.vt1, p.vt2, maxX);
+        let parts=[];
+        parts.push(`<line x1="${padL}" y1="${h-padB}" x2="${w-padR}" y2="${h-padB}" stroke="#8a847c"/>`);
+        parts.push(`<line x1="${padL}" y1="${padT}" x2="${padL}" y2="${h-padB}" stroke="#8a847c"/>`);
+        parts.push(`<text x="${w/2-30}" y="${h-6}" font-size="11" fill="#6b6560">Workload</text>`);
+        parts.push(`<text x="6" y="${padT+8}" font-size="11" fill="#6b6560">VE</text>`);
+
+        if(p.mystery && !state.vt.revealed[pid]){
+          pts.filter((_,i)=>i%4===0).forEach(pt=>{
+            parts.push(`<circle cx="${xScale(pt.x)}" cy="${yScale(pt.y)}" r="3" fill="#9e1b32"/>`);
+          });
+        } else {
+          const line = pts.map(pt=>`${xScale(pt.x)},${yScale(pt.y)}`).join(" ");
+          parts.push(`<polyline points="${line}" fill="none" stroke="#9e1b32" stroke-width="2.5"/>`);
+        }
+
+        state.vt.marks[pid].forEach((mx,i)=>{
+          const color = i===0 ? "#2f6fed" : "#b8860b";
+          const label = i===0 ? "Your VT1" : "Your VT2";
+          parts.push(`<line x1="${xScale(mx)}" y1="${padT}" x2="${xScale(mx)}" y2="${h-padB}" stroke="${color}" stroke-width="1.5" stroke-dasharray="5,3"/>`);
+          parts.push(`<text x="${xScale(mx)+3}" y="${padT+12}" font-size="10" fill="${color}">${label}</text>`);
+        });
+
+        if(state.vt.revealed[pid]){
+          parts.push(`<line x1="${xScale(p.vt1)}" y1="${padT}" x2="${xScale(p.vt1)}" y2="${h-padB}" stroke="#2e7d32" stroke-width="2"/>`);
+          parts.push(`<text x="${xScale(p.vt1)+3}" y="${h-padB-6}" font-size="10" fill="#2e7d32">VT1</text>`);
+          parts.push(`<line x1="${xScale(p.vt2)}" y1="${padT}" x2="${xScale(p.vt2)}" y2="${h-padB}" stroke="#b3261e" stroke-width="2"/>`);
+          parts.push(`<text x="${xScale(p.vt2)+3}" y="${h-padB-6}" font-size="10" fill="#b3261e">VT2</text>`);
+        }
+        svg.innerHTML = parts.join("");
+
+        const explainEl = document.getElementById("graphExplain");
+        if(state.vt.revealed[pid]){
+          explainEl.textContent = `${p.label}: ${p.note}`;
+          explainEl.classList.add("show");
+        } else {
+          explainEl.classList.remove("show");
+        }
+
+        const statusEl = document.getElementById("stepStatus");
+        const n = state.vt.marks[pid].length;
+        if(state.vt.revealed[pid]){
+          statusEl.textContent = "Revealed — compare your marks to the actual VT1/VT2 above.";
+        } else if(n===0){
+          statusEl.textContent = "Step 1: click on the graph where you think VT1 occurs.";
+        } else if(n===1){
+          statusEl.textContent = "Step 2: now click where you think VT2 occurs.";
+        } else {
+          statusEl.textContent = "Both marks placed — click Reveal to check yourself, or Clear My Marks to try again.";
+        }
+      }
+      draw();
+
+      svg.addEventListener("click",(e)=>{
+        const pid = state.vt.patient;
+        if(state.vt.marks[pid].length>=2) return;
+        const r = svg.getBoundingClientRect();
+        const px = ((e.clientX - r.left)/r.width)*w;
+        let x = invX(px);
+        x = Math.max(0, Math.min(maxX, x));
+        state.vt.marks[pid].push(x);
+        draw();
+      });
+      document.getElementById("revealVT").onclick = ()=>{ state.vt.revealed[state.vt.patient]=true; draw(); };
+      document.getElementById("clearVT").onclick = ()=>{ state.vt.marks[state.vt.patient]=[]; state.vt.revealed[state.vt.patient]=false; draw(); };
+    }
+  },
+  {
+    id:"jigsaw", title:"Adaptation Jigsaw", duration:10,
+    render(el){
+      el.innerHTML = `
+        <h2>5 · Chronic Adaptation Jigsaw</h2>
+        <div class="meta">Expert groups &rarr; mixed groups</div>
+        <div class="panel">
+          <h3>What do these three categories mean?</h3>
+          <ul>
+            <li><strong>Central</strong> — changes to the heart itself: the chambers and muscle wall remodeling with training.</li>
+            <li><strong>Peripheral</strong> — changes out in the tissues: the muscles, capillaries, mitochondria, and blood vessels that receive and use the blood the heart pumps.</li>
+            <li><strong>Neural</strong> — changes in autonomic nervous system balance: how much sympathetic vs. parasympathetic tone is acting on the heart at rest.</li>
+          </ul>
+        </div>
+        <div class="prompt">Step 1 — as a full group, sort each adaptation below into Central, Peripheral, or Neural using the definitions above. Discuss before you click.</div>
+        <div class="panel" id="sortPanel"></div>
+        <button class="action" id="checkSort">Check My Sort</button>
+        <div class="prompt" style="margin-top:18px;">Step 2 — go to your expert card (Central / Peripheral / Neural) and click to reveal the underlying mechanism. Prepare a 60-second explanation, then regroup with one expert from each area.</div>
+        <div class="flip-row">
+          <div class="flip-card" id="card-central">
+            <h4>Central — Cardiac Remodeling</h4>
+            <p id="central-text" class="hint">Click to reveal</p>
+          </div>
+          <div class="flip-card" id="card-peripheral">
+            <h4>Peripheral — Capillaries &amp; Mitochondria</h4>
+            <p id="peripheral-text" class="hint">Click to reveal</p>
+          </div>
+          <div class="flip-card" id="card-neural">
+            <h4>Neural — Autonomic Balance</h4>
+            <p id="neural-text" class="hint">Click to reveal</p>
+          </div>
+        </div>
+        <div class="panel" style="margin-top:16px;">
+          <h3>Mixed-group synthesis</h3>
+          <div class="prompt">Using all three mechanisms, explain why a trained patient's resting HR might be 52 bpm instead of 72 bpm.</div>
+          <textarea id="jigsawAnswer" placeholder="Type your group's synthesis here...">${state.jigsawAnswer}</textarea>
+        </div>
+        <div class="panel">
+          <h3>Transfer question</h3>
+          <div class="prompt">Now apply the same three mechanisms to a different variable: explain why stroke volume increases more than resting heart rate decreases in a highly trained endurance athlete.</div>
+          <textarea id="jigsawTransfer" placeholder="Type your group's answer here...">${state.jigsawTransfer}</textarea>
+        </div>
+      `;
+      const sortPanel = document.getElementById("sortPanel");
+      sortPanel.innerHTML = jigsawSortItems.map((item,i)=>{
+        const chosen = state.jigsawSort[i];
+        const revealed = state.jigsawSortRevealed;
+        const cls = revealed ? (chosen===item.cat ? "correct":"incorrect") : "";
+        return `<div class="sort-item ${cls} ${revealed?'revealed':''}" data-i="${i}">
+          <div class="txt">${item.text}</div>
+          <div class="choices">
+            ${Object.keys(jigsawCatLabels).map(k=>`<button data-cat="${k}" class="${chosen===k?'selected':''}">${jigsawCatLabels[k]}</button>`).join("")}
+          </div>
+          <div class="sort-explain">${item.explain}</div>
+        </div>`;
+      }).join("");
+      sortPanel.querySelectorAll(".sort-item").forEach(row=>{
+        const i = +row.dataset.i;
+        row.querySelectorAll("button").forEach(btn=>{
+          btn.addEventListener("click", ()=>{
+            state.jigsawSort[i] = btn.dataset.cat;
+            row.querySelectorAll("button").forEach(b=>b.classList.remove("selected"));
+            btn.classList.add("selected");
+            if(state.jigsawSortRevealed){
+              row.classList.remove("correct","incorrect");
+              row.classList.add(state.jigsawSort[i]===jigsawSortItems[i].cat ? "correct":"incorrect");
+            }
+          });
+        });
+      });
+      document.getElementById("checkSort").onclick = ()=>{
+        state.jigsawSortRevealed = true;
+        activities.find(a=>a.id==="jigsaw").render(el);
+      };
+
+      ["central","peripheral","neural"].forEach(key=>{
+        const card = document.getElementById(`card-${key}`);
+        if(state.jigsawFlipped[key]){
+          document.getElementById(`${key}-text`).textContent = jigsawContent[key];
+          document.getElementById(`${key}-text`).classList.remove("hint");
+        }
+        card.addEventListener("click", ()=>{
+          state.jigsawFlipped[key] = true;
+          document.getElementById(`${key}-text`).textContent = jigsawContent[key];
+          document.getElementById(`${key}-text`).classList.remove("hint");
+        });
+      });
+      document.getElementById("jigsawAnswer").addEventListener("input",(e)=>{ state.jigsawAnswer = e.target.value; });
+      document.getElementById("jigsawTransfer").addEventListener("input",(e)=>{ state.jigsawTransfer = e.target.value; });
+    }
+  },
+  {
+    id:"roleplay", title:"Coaching Role-Play", duration:10,
+    render(el){
+      const items = [
+        "Breath-holding through the sticking point",
+        "Facial flushing / visible straining",
+        "Grunting or a catch in the breath",
+        "Delayed exhale after the hardest part of the lift",
+        "Rising perceived effort / tension in the face or neck"
+      ];
+      el.innerHTML = `
+        <h2>6 · Coaching Role-Play</h2>
+        <div class="meta">Pairs</div>
+        <div class="panel">
+          <h3>Setup — Dynamic Resistance</h3>
+          <ul>
+            <li>Partner A performs a bodyweight squat or resistance-band press.</li>
+            <li>Partner B coaches breathing out loud: "exhale as you push."</li>
+            <li>Halfway through, Partner A deliberately holds their breath / bears down (Valsalva) without announcing it — Partner B has to notice and correct it live.</li>
+          </ul>
+          <h3>Setup — Isometric Hold</h3>
+          <ul>
+            <li>Partner A now holds a wall sit or a sustained hard grip squeeze for 20–30 seconds.</li>
+            <li>Partner B watches for the same Valsalva cues below, and notes whether they show up faster or more intensely than during the dynamic lift — the handout notes isometric resistance produces the most pronounced BP response.</li>
+            <li>Swap roles when your instructor gives the signal.</li>
+          </ul>
+          <h3>Partner B: cues to watch for</h3>
+          <div class="checklist" id="checklist">
+            ${items.map((t,i)=>`<label><input type="checkbox" data-i="${i}" ${state.roleplayChecks[i]?"checked":""}> ${t}</label>`).join("")}
+          </div>
+        </div>
+        <div class="prompt">Reflection: what did it feel like or look like when your partner started Valsalva-ing, and what cue tipped you off?</div>
+        <textarea id="rpReflect" placeholder="Type your reflection here...">${state.rpReflect}</textarea>
+        <div class="prompt" style="margin-top:14px;">Compare: what was different about the cues or intensity between the dynamic lift and the isometric hold?</div>
+        <textarea id="rpCompare" placeholder="Type your comparison here...">${state.rpCompare}</textarea>
+      `;
+      document.getElementById("checklist").querySelectorAll("input").forEach(inp=>{
+        inp.addEventListener("change",(e)=>{ state.roleplayChecks[e.target.dataset.i] = e.target.checked; });
+      });
+      document.getElementById("rpReflect").addEventListener("input",(e)=>{ state.rpReflect = e.target.value; });
+      document.getElementById("rpCompare").addEventListener("input",(e)=>{ state.rpCompare = e.target.value; });
+    }
+  },
+  {
+    id:"exit", title:"Exit Ticket", duration:8,
+    render(el){
+      el.innerHTML = `
+        <h2>7 · Exit Ticket</h2>
+        <div class="meta">Individual &middot; formative, not graded</div>
+        <div class="prompt">Your patient is a 68-year-old with a history of hypertension, starting a progressive resistance training program for the first time. In 2–3 sentences, describe what you would monitor during their first session and why — reference at least one <strong>acute cardiovascular response</strong> and one <strong>safety consideration specific to resistance exercise</strong>.</div>
+        <textarea id="exitAnswer" placeholder="Type your response here...">${state.exitAnswer}</textarea>
+        <div>
+          <button class="action" id="copyExit">Copy My Response</button>
+          <span id="copyStatus" style="font-size:12.5px;color:var(--muted);margin-left:8px;"></span>
+        </div>
+        <div class="prompt" style="margin-top:16px;">Submit this response the way your instructor requests (LMS, show-of-screen, etc.) — nothing here is saved automatically.</div>
+        <div style="margin-top:20px;">
+          <button class="ghost" id="stretchToggle">${state.exitStretchOpen ? "Hide" : "Finished early? Try a stretch case"}</button>
+          <div id="stretchArea" style="${state.exitStretchOpen ? "" : "display:none;"} margin-top:12px;">
+            <div class="prompt">A 24-year-old healthy athlete asks why holding their breath during a heavy back squat feels like it helps them lift more, but you discourage it. In 2–3 sentences, explain the physiology of what's actually happening to their blood pressure, and why you coach exhale-on-exertion instead.</div>
+            <textarea id="exitStretchAnswer" placeholder="Type your response here...">${state.exitStretchAnswer}</textarea>
+          </div>
+        </div>
+      `;
+      const ta = document.getElementById("exitAnswer");
+      ta.addEventListener("input",(e)=>{ state.exitAnswer = e.target.value; });
+      document.getElementById("copyExit").onclick = ()=>{
+        const text = ta.value;
+        const status = document.getElementById("copyStatus");
+        const showCopied = ()=>{ status.textContent = "Copied!"; setTimeout(()=>status.textContent="",1800); };
+        const showManual = ()=>{ status.textContent = "Couldn't auto-copy — select the text above and copy manually."; };
+        if(navigator.clipboard && window.isSecureContext){
+          navigator.clipboard.writeText(text).then(showCopied).catch(showManual);
+        } else {
+          try{
+            ta.focus();
+            ta.setSelectionRange(0, ta.value.length);
+            const ok = document.execCommand("copy");
+            ok ? showCopied() : showManual();
+          } catch(err){
+            showManual();
+          }
+        }
+      };
+      document.getElementById("stretchToggle").onclick = ()=>{
+        state.exitStretchOpen = !state.exitStretchOpen;
+        activities.find(a=>a.id==="exit").render(el);
+      };
+      const stretchTa = document.getElementById("exitStretchAnswer");
+      if(stretchTa){
+        stretchTa.addEventListener("input",(e)=>{ state.exitStretchAnswer = e.target.value; });
+      }
+    }
+  }
+];
+
+/* ---------------------------------------------------------
+   Navigation
+--------------------------------------------------------- */
+let current = 0;
+
+// First activity is open by default so students can start without a password.
+state.unlocked[activities[0].id] = true;
+
+const navList = document.getElementById("navList");
+function renderNavList(){
+  navList.innerHTML = activities.map((a,i)=>
+    `<li data-i="${i}" class="${state.unlocked[a.id]?'':'locked'}"><span class="num">${i+1}</span><span>${a.title}</span><span class="lockmark">${state.unlocked[a.id]?'':'🔒'}</span></li>`
+  ).join("");
+  navList.querySelectorAll("li").forEach(li=>{
+    li.addEventListener("click", ()=> goTo(+li.dataset.i));
+  });
+  renderNav();
+}
+function renderNav(){
+  navList.querySelectorAll("li").forEach(li=>{
+    li.classList.toggle("active", +li.dataset.i === current);
+  });
+}
+renderNavList();
+
+document.getElementById("prevBtn").addEventListener("click", ()=> goTo(current-1));
+document.getElementById("nextBtn").addEventListener("click", ()=> goTo(current+1));
+
+function renderLockScreen(container, activity){
+  container.innerHTML = `
+    <h2>${activity.title}</h2>
+    <div class="meta">Locked</div>
+    <div class="panel lock-panel">
+      <div class="lock-icon">🔒</div>
+      <p>This section is locked. Wait for your instructor to give the password when the lecture reaches this point.</p>
+      <div class="lock-row">
+        <input type="password" id="lockPass" placeholder="Enter password" autocomplete="off">
+        <button class="action" id="unlockBtn">Unlock</button>
+      </div>
+      <div class="lock-error" id="lockError"></div>
+    </div>
+  `;
+  function attemptUnlock(){
+    const val = document.getElementById("lockPass").value.trim();
+    if(val.toUpperCase() === activityPasswords[activity.id]){
+      state.unlocked[activity.id] = true;
+      renderNavList();
+      activity.render(container);
+    } else {
+      document.getElementById("lockError").textContent = "Incorrect password — try again.";
+    }
+  }
+  document.getElementById("unlockBtn").addEventListener("click", attemptUnlock);
+  document.getElementById("lockPass").addEventListener("keydown", (e)=>{ if(e.key==="Enter") attemptUnlock(); });
+}
+
+function goTo(i){
+  if(i<0 || i>=activities.length) return;
+  current = i;
+  const a = activities[current];
+  document.getElementById("stepNum").textContent = current+1;
+  document.getElementById("stepTotal").textContent = activities.length;
+  const container = document.getElementById("screen");
+  if(state.unlocked[a.id]){
+    a.render(container);
+  } else {
+    renderLockScreen(container, a);
+  }
+  renderNav();
+  document.getElementById("prevBtn").disabled = current===0;
+  document.getElementById("nextBtn").disabled = current===activities.length-1;
+  window.scrollTo(0,0);
+}
+
+goTo(0);
+</script>
+</body>
+</html>
