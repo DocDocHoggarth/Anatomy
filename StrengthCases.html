@@ -1,8 +1,3 @@
-That is perfect. Since you are hosting it yourself, all you need is the raw code to drop into your server environment.
-
-You can copy the code below, save it as an `index.html` file, and upload it directly to your hosting provider. It is entirely self-contained, meaning the styling, the interactive notepad, and all 8 clinical cases are bundled into this single block of code.
-
-```html
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -11,7 +6,7 @@ You can copy the code below, save it as an `index.html` file, and upload it dire
     <title>DPTD 733: Clinical Program Audit</title>
     <style>
         :root {
-            --primary: #8E001C; /* North Central College Red */
+            --primary: #8E001C;
             --primary-dark: #660012;
             --bg-color: #f4f5f7;
             --card-bg: #ffffff;
@@ -31,7 +26,6 @@ You can copy the code below, save it as an `index.html` file, and upload it dire
             overflow: hidden;
         }
 
-        /* Sidebar */
         .sidebar {
             width: 300px;
             background-color: var(--card-bg);
@@ -73,7 +67,6 @@ You can copy the code below, save it as an `index.html` file, and upload it dire
             color: var(--primary);
         }
 
-        /* Main Content */
         .main-content {
             flex: 1;
             padding: 40px;
@@ -111,7 +104,6 @@ You can copy the code below, save it as an `index.html` file, and upload it dire
             margin-bottom: 5px;
         }
 
-        /* Interactive Area */
         .audit-area {
             width: 100%;
             max-width: 800px;
@@ -178,7 +170,66 @@ You can copy the code below, save it as an `index.html` file, and upload it dire
             margin-top: 0;
             color: #22543d;
         }
-        
+
+        /* Click-to-highlight chart note sentences */
+        .sentence {
+            cursor: pointer;
+            border-radius: 3px;
+            padding: 1px 3px;
+            margin: -1px -3px;
+            transition: background-color 0.15s;
+        }
+        .sentence:hover {
+            background-color: #fefcbf;
+        }
+        .sentence.highlighted {
+            background-color: #fef08a;
+            box-shadow: inset 0 0 0 1px #d69e2e;
+        }
+
+        /* LO5 framework tagging chips */
+        .framework-tags {
+            margin-bottom: 20px;
+        }
+        .framework-label {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            margin: 0 0 10px 0;
+        }
+        .tag-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+        .tag-chip {
+            display: flex;
+            align-items: center;
+            gap: 7px;
+            padding: 8px 14px;
+            border: 2px solid var(--border-color);
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            font-weight: 500;
+            color: var(--text-main);
+            transition: background-color 0.15s, border-color 0.15s, color 0.15s;
+            user-select: none;
+        }
+        .tag-chip:hover {
+            border-color: var(--primary);
+        }
+        .tag-chip.checked {
+            background-color: #fff5f5;
+            border-color: var(--primary);
+            color: var(--primary);
+        }
+        .tag-chip input {
+            width: 15px;
+            height: 15px;
+            accent-color: var(--primary);
+            cursor: pointer;
+        }
+
         #placeholder-msg {
             text-align: center;
             color: var(--text-muted);
@@ -194,14 +245,13 @@ You can copy the code below, save it as an `index.html` file, and upload it dire
             <h2>DPTD 733 Audit</h2>
         </div>
         <ul class="case-list" id="case-list">
-            <!-- Populated by JS -->
         </ul>
     </div>
 
     <div class="main-content">
         <div id="placeholder-msg">Select a station from the menu to begin your clinical audit.</div>
         
-        <div id="active-case-view" style="display: none; width: 100%; display: flex; flex-direction: column; align-items: center;">
+        <div id="active-case-view" style="display: none; width: 100%; flex-direction: column; align-items: center;">
             <div class="case-container">
                 <h2 class="case-title" id="display-title">Case Title</h2>
                 <div class="emr-section">
@@ -216,9 +266,28 @@ You can copy the code below, save it as an `index.html` file, and upload it dire
 
             <div class="audit-area">
                 <h3>Team Audit Notes</h3>
-                <p style="font-size: 0.9rem; color: #718096; margin-top: -10px;">Identify physiological, safety, and programming errors below.</p>
-                <textarea id="team-notes" placeholder="e.g., Error 1: The patient is holding their breath, which triggers the Valsalva maneuver..."></textarea>
-                
+                <p style="font-size: 0.9rem; color: #718096; margin-top: -10px;">Click any sentence in the chart note above to flag where you think an error lives, then tag and describe it below.</p>
+
+                <div class="framework-tags">
+                    <p class="framework-label">Which part(s) of the LO5 framework does this error violate? (check all that apply)</p>
+                    <div class="tag-row" id="tag-row">
+                        <label class="tag-chip" data-key="goal">
+                            <input type="checkbox" data-key="goal"> Patient Goal
+                        </label>
+                        <label class="tag-chip" data-key="principle">
+                            <input type="checkbox" data-key="principle"> Principle Check
+                        </label>
+                        <label class="tag-chip" data-key="mode">
+                            <input type="checkbox" data-key="mode"> Mode Selection
+                        </label>
+                        <label class="tag-chip" data-key="safety">
+                            <input type="checkbox" data-key="safety"> Safety Flags
+                        </label>
+                    </div>
+                </div>
+
+                <textarea id="team-notes" placeholder="e.g., Error 1: The patient is holding their breath..."></textarea>
+
                 <button class="btn" id="reveal-btn" onclick="toggleAnswer()">Reveal Instructor Key</button>
                 
                 <div class="answer-key" id="answer-key">
@@ -289,10 +358,44 @@ You can copy the code below, save it as an `index.html` file, and upload it dire
             }
         ];
 
-        // Object to store team notes for each case
         const teamNotesData = {};
-
+        const teamFrameworkData = {};
+        const teamHighlightData = {};
         let currentCaseId = null;
+
+        const FRAMEWORK_KEYS = ["goal", "principle", "mode", "safety"];
+
+        // Splits a chart-note paragraph into sentence-sized chunks so each one
+        // can be rendered as its own clickable <span>. Handles trailing quotes
+        // after sentence punctuation (e.g. `...at all.'`), which a plain split
+        // on ". " would miss.
+        function splitSentences(text) {
+            const matches = text.match(/[^.!?]+[.!?]+[)'"]*\s*/g);
+            return matches ? matches.map(s => s.trim()).filter(Boolean) : [text];
+        }
+
+        function renderField(fieldName, text, caseId) {
+            const sentences = splitSentences(text);
+            const highlighted = teamHighlightData[caseId][fieldName];
+            return sentences
+                .map((s, i) => `<span class="sentence${highlighted.has(i) ? " highlighted" : ""}" data-field="${fieldName}" data-idx="${i}">${s}</span>`)
+                .join(" ");
+        }
+
+        function handleSentenceClick(e) {
+            const span = e.target.closest(".sentence");
+            if (!span || !currentCaseId) return;
+            const field = span.dataset.field;
+            const idx = parseInt(span.dataset.idx, 10);
+            const set = teamHighlightData[currentCaseId][field];
+            if (set.has(idx)) {
+                set.delete(idx);
+                span.classList.remove("highlighted");
+            } else {
+                set.add(idx);
+                span.classList.add("highlighted");
+            }
+        }
 
         function initApp() {
             const list = document.getElementById('case-list');
@@ -303,39 +406,53 @@ You can copy the code below, save it as an `index.html` file, and upload it dire
                 li.onclick = () => loadCase(c.id);
                 li.id = `nav-${c.id}`;
                 list.appendChild(li);
-                teamNotesData[c.id] = ""; // Initialize empty notes
+                teamNotesData[c.id] = "";
+                teamFrameworkData[c.id] = { goal: false, principle: false, mode: false, safety: false };
+                teamHighlightData[c.id] = { subjective: new Set(), objective: new Set() };
             });
-            
-            // Auto-save notes when typing
+
             document.getElementById('team-notes').addEventListener('input', function(e) {
                 if (currentCaseId) {
                     teamNotesData[currentCaseId] = e.target.value;
                 }
             });
+
+            document.querySelectorAll('#tag-row input[type="checkbox"]').forEach((cb) => {
+                cb.addEventListener('change', function () {
+                    if (!currentCaseId) return;
+                    teamFrameworkData[currentCaseId][this.dataset.key] = this.checked;
+                    this.closest('.tag-chip').classList.toggle('checked', this.checked);
+                });
+            });
+
+            document.getElementById('display-subjective').addEventListener('click', handleSentenceClick);
+            document.getElementById('display-objective').addEventListener('click', handleSentenceClick);
         }
 
         function loadCase(id) {
             currentCaseId = id;
             const currentCase = cases.find(c => c.id === id);
-            
-            // Update UI Nav
+
             document.querySelectorAll('.case-item').forEach(el => el.classList.remove('active'));
             document.getElementById(`nav-${id}`).classList.add('active');
 
-            // Toggle visibility
             document.getElementById('placeholder-msg').style.display = 'none';
             document.getElementById('active-case-view').style.display = 'flex';
 
-            // Populate text
             document.getElementById('display-title').innerText = currentCase.title;
-            document.getElementById('display-subjective').innerHTML = currentCase.subjective;
-            document.getElementById('display-objective').innerHTML = currentCase.objective;
+            document.getElementById('display-subjective').innerHTML = renderField('subjective', currentCase.subjective, id);
+            document.getElementById('display-objective').innerHTML = renderField('objective', currentCase.objective, id);
             document.getElementById('display-answer').innerHTML = currentCase.answer;
-            
-            // Restore notes
+
             document.getElementById('team-notes').value = teamNotesData[id];
 
-            // Hide answer key
+            const fw = teamFrameworkData[id];
+            document.querySelectorAll('#tag-row input[type="checkbox"]').forEach((cb) => {
+                const checked = fw[cb.dataset.key];
+                cb.checked = checked;
+                cb.closest('.tag-chip').classList.toggle('checked', checked);
+            });
+
             document.getElementById('answer-key').classList.remove('visible');
             document.getElementById('reveal-btn').innerText = "Reveal Instructor Key";
         }
@@ -356,5 +473,3 @@ You can copy the code below, save it as an `index.html` file, and upload it dire
     </script>
 </body>
 </html>
-
-```
