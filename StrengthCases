@@ -1,0 +1,360 @@
+That is perfect. Since you are hosting it yourself, all you need is the raw code to drop into your server environment.
+
+You can copy the code below, save it as an `index.html` file, and upload it directly to your hosting provider. It is entirely self-contained, meaning the styling, the interactive notepad, and all 8 clinical cases are bundled into this single block of code.
+
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DPTD 733: Clinical Program Audit</title>
+    <style>
+        :root {
+            --primary: #8E001C; /* North Central College Red */
+            --primary-dark: #660012;
+            --bg-color: #f4f5f7;
+            --card-bg: #ffffff;
+            --text-main: #2d3748;
+            --text-muted: #718096;
+            --border-color: #e2e8f0;
+        }
+        
+        body {
+            font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            display: flex;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        /* Sidebar */
+        .sidebar {
+            width: 300px;
+            background-color: var(--card-bg);
+            border-right: 1px solid var(--border-color);
+            display: flex;
+            flex-direction: column;
+            overflow-y: auto;
+        }
+        .sidebar-header {
+            background-color: var(--primary);
+            color: white;
+            padding: 20px;
+            text-align: center;
+        }
+        .sidebar-header h2 {
+            margin: 0;
+            font-size: 1.2rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        .case-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+        .case-item {
+            padding: 15px 20px;
+            border-bottom: 1px solid var(--border-color);
+            cursor: pointer;
+            transition: background-color 0.2s;
+            font-weight: 500;
+        }
+        .case-item:hover {
+            background-color: #f8fafc;
+        }
+        .case-item.active {
+            background-color: #fff5f5;
+            border-left: 4px solid var(--primary);
+            color: var(--primary);
+        }
+
+        /* Main Content */
+        .main-content {
+            flex: 1;
+            padding: 40px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        .case-container {
+            width: 100%;
+            max-width: 800px;
+            background: var(--card-bg);
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+            padding: 30px;
+            margin-bottom: 20px;
+        }
+        .case-title {
+            font-size: 1.5rem;
+            color: var(--primary);
+            border-bottom: 2px solid var(--border-color);
+            padding-bottom: 10px;
+            margin-top: 0;
+        }
+        .emr-section {
+            margin-bottom: 20px;
+            line-height: 1.6;
+        }
+        .emr-label {
+            font-weight: bold;
+            color: #4a5568;
+            text-transform: uppercase;
+            font-size: 0.9rem;
+            display: block;
+            margin-bottom: 5px;
+        }
+
+        /* Interactive Area */
+        .audit-area {
+            width: 100%;
+            max-width: 800px;
+            background: var(--card-bg);
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+            padding: 30px;
+        }
+        .audit-area h3 {
+            margin-top: 0;
+            color: #4a5568;
+        }
+        textarea {
+            width: 100%;
+            height: 120px;
+            padding: 15px;
+            border: 2px dashed var(--border-color);
+            border-radius: 6px;
+            font-family: inherit;
+            font-size: 1rem;
+            resize: vertical;
+            box-sizing: border-box;
+            margin-bottom: 20px;
+            transition: border-color 0.2s;
+        }
+        textarea:focus {
+            outline: none;
+            border-color: var(--primary);
+        }
+        
+        .btn {
+            background-color: var(--primary);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            font-size: 1rem;
+            font-weight: bold;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: background-color 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 100%;
+        }
+        .btn:hover {
+            background-color: var(--primary-dark);
+        }
+
+        .answer-key {
+            display: none;
+            margin-top: 20px;
+            padding: 20px;
+            background-color: #f0fff4;
+            border-left: 4px solid #38a169;
+            border-radius: 4px;
+            color: #276749;
+            line-height: 1.5;
+        }
+        .answer-key.visible {
+            display: block;
+        }
+        .answer-key h4 {
+            margin-top: 0;
+            color: #22543d;
+        }
+        
+        #placeholder-msg {
+            text-align: center;
+            color: var(--text-muted);
+            margin-top: 20%;
+            font-size: 1.2rem;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="sidebar">
+        <div class="sidebar-header">
+            <h2>DPTD 733 Audit</h2>
+        </div>
+        <ul class="case-list" id="case-list">
+            <!-- Populated by JS -->
+        </ul>
+    </div>
+
+    <div class="main-content">
+        <div id="placeholder-msg">Select a station from the menu to begin your clinical audit.</div>
+        
+        <div id="active-case-view" style="display: none; width: 100%; display: flex; flex-direction: column; align-items: center;">
+            <div class="case-container">
+                <h2 class="case-title" id="display-title">Case Title</h2>
+                <div class="emr-section">
+                    <span class="emr-label">Subjective</span>
+                    <div id="display-subjective">Subjective text...</div>
+                </div>
+                <div class="emr-section">
+                    <span class="emr-label">Objective</span>
+                    <div id="display-objective">Objective text...</div>
+                </div>
+            </div>
+
+            <div class="audit-area">
+                <h3>Team Audit Notes</h3>
+                <p style="font-size: 0.9rem; color: #718096; margin-top: -10px;">Identify physiological, safety, and programming errors below.</p>
+                <textarea id="team-notes" placeholder="e.g., Error 1: The patient is holding their breath, which triggers the Valsalva maneuver..."></textarea>
+                
+                <button class="btn" id="reveal-btn" onclick="toggleAnswer()">Reveal Instructor Key</button>
+                
+                <div class="answer-key" id="answer-key">
+                    <h4>Instructor Key</h4>
+                    <div id="display-answer">Answer goes here...</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const cases = [
+            {
+                id: 1,
+                title: "Station 1: Patient Status Post Knee Arthroplasty",
+                subjective: "A 63-year-old female is 3 weeks status post right total knee arthroplasty (TKA). PMH includes a 10-year history of mild essential hypertension. Patient reports minimal pain but states, 'The home exercises feel too easy now, like I'm doing nothing at all.'",
+                objective: "Current HEP consists of 3 sets of 10 straight-leg raises (SLRs) with no external resistance, executed at the exact parameters prescribed on post-op day 1. Therapist also observed the patient performing 45-second maximal isometric quadriceps sets. Patient was observed holding her breath throughout the entire duration of the hold. Upon completion, patient reported brief episodes of lightheadedness and unsteadiness, stating she needs to 'hold tight to focus on the contraction.'",
+                answer: "<b>1. Overload/Progression Error:</b> No resistance progression in 3 weeks; the tissue has adapted and requires a new stimulus.<br><b>2. Cardiopulmonary Safety (Valsalva):</b> Maximal isometric holds combined with breath-holding induces a dangerous pressor-response/blood pressure spike, which is strictly contraindicated for a patient with a history of hypertension."
+            },
+            {
+                id: 2,
+                title: "Station 2: Lower Extremity Conditioning for Distance Runner",
+                subjective: "A 28-year-old male recreational runner presents with a primary goal of completing a 25K mountainous trail race featuring significant elevation changes. Patient reports, 'My legs feel like lead on the downhill sections, and I'm cramping up early in my long runs. Am I doing enough strength work?'",
+                objective: "Current training volume includes flat treadmill running at 0% incline twice per week. The only resistance training element consists of high-velocity back squats utilizing 95% of his 1-Rep Max (1RM). The protocol is performed for 15 continuous repetitions per set, with rest intervals strictly limited to 30 seconds between sets. Therapist noted significant lateral knee deviation during the terminal 5 repetitions of each set.",
+                answer: "<b>1. Specificity Mismatch:</b> Flat treadmill running provides zero eccentric preparation for mountainous downhill running.<br><b>2. Force-Velocity/Parameter Error:</b> 95% 1RM is an absolute maximum strength load. Performing 15 continuous reps with only 30s rest is physiologically impossible and highly dangerous, leading to the observed biomechanical breakdown (lateral knee deviation)."
+            },
+            {
+                id: 3,
+                title: "Station 3: Performance Management for Achilles Tendinopathy",
+                subjective: "A 55-year-old female with a 4-month history of chronic left Achilles tendinopathy returns to the clinic following a 6-week international vacation. Patient reports complete compliance with zero physical activity or exercise load during the trip. She states, 'My heel felt completely fine while away, but it is throbbing and warm again immediately after my first workout back.'",
+                objective: "Clinical flow notes indicate the patient immediately resumed her pre-vacation progressive resistance volume at the exact prior load threshold. The current manual specifies concentric-only, rapid calf raises (rising onto toes on bilateral lower extremities) while deliberately stepping down uninvolved-limb-first to avoid loading the target tendon during the lengthening phase.",
+                answer: "<b>1. Reversibility Oversight:</b> The therapist ignored 6 weeks of detraining. Resuming at the previous peak load guarantees tissue overload.<br><b>2. Contraction Type Mismatch:</b> Tendinopathy rehabilitation requires heavy, slow eccentric loading to remodel collagen. This program actively avoids the specific contraction type the patient needs."
+            },
+            {
+                id: 4,
+                title: "Station 4: Therapeutic Exercise Plan for Intermittent Claudication",
+                subjective: "A 68-year-old male presenting with peripheral arterial disease (PAD) and uncontrolled essential hypertension is referred for peripheral conditioning. The primary goal is to improve pain-free walking distance. Patient's spouse notes, 'He gets a terrible, throbbing headache and his face turns bright red every time he practices his home exercises.'",
+                objective: "The current plan of care outlines a 'cardiac-safe' isometric routine designed to limit dynamic joint stress. The circuit consists of three rounds of 60-second maximal-effort isometric wall-sits paired with heavy isometric handgrip holds. Rest periods are fixed at 15 seconds between intervals to maintain a high cardiovascular demand. Exertional blood pressure was not recorded during the last session.",
+                answer: "<b>1. Cardiopulmonary Contraindication:</b> Maximal isometric holds (especially grip) elicit the strongest exercise pressor reflex, causing severe BP spikes. This is extremely dangerous for uncontrolled hypertension and PAD (not 'cardiac-safe').<br><b>2. Acute Fatigue Risk:</b> 15 seconds of rest is inadequate to clear metabolites or allow heart rate/BP to recover, compounding the systemic stress."
+            },
+            {
+                id: 5,
+                title: "Station 5: Functional Capacity Evaluation & Load Progression",
+                subjective: "A 40-year-old commercial construction laborer presents following a localized mechanical low back strain. The functional target is returning to full occupational duties, specifically lifting and moving structural timber beams weighing up to 80 lbs. Patient states, 'I need to be able to carry heavy loads on site, but I'm just getting tired doing these tiny band exercises.'",
+                objective: "The present tier-1 intervention consists of 4 sets of 30 repetitions utilizing a low-tension yellow theraband, performed at an ultra-slow tempo. Documented plan indicates that if the patient reports generalized muscular fatigue at the upcoming week 2 reassessment, the clinician will immediately advance the band resistance by 50% to accelerate structural myofibrillar hypertrophy.",
+                answer: "<b>1. Specificity / Parameter Error:</b> High-rep (30) light-band work trains muscular endurance, which does not match the patient's need for absolute strength (80 lb beams).<br><b>2. Timeline Mismatch & Premature Overload:</b> Week 2 fatigue/gains are purely neural, not hypertrophic. A sudden 50% jump in load is an inappropriate and excessive progression."
+            },
+            {
+                id: 6,
+                title: "Station 6: Post-Dislocation Rehab for Collegiate Athlete",
+                subjective: "A 22-year-old female collegiate volleyball player is undergoing late-stage conditioning following a conservative reduction of a right patellar dislocation. She reports, 'My vertical jump feels slow and sluggish on the court, and my thighs go completely numb while I am lifting weights in the gym.'",
+                objective: "To build explosive triple-extension vertical power, the current clinical routine mandates heavy bilateral back squats at 95% 1RM. Movement cues dictate a 4-second eccentric descent and a slow, controlled concentric ascent to avoid acceleration tracking issues. Additionally, the patient self-applies elastic medical tourniquets proximal to the inguinal crease, tightened to maximum physical tolerance during the lifting sets.",
+                answer: "<b>1. Force-Velocity Power Mismatch:</b> Training at 95% 1RM at a deliberately slow tempo trains absolute strength, not explosive power/velocity.<br><b>2. BFR Misapplication & Safety Risk:</b> Blood Flow Restriction (BFR) requires very low loads (20-30% 1RM) and calibrated pneumatic pressure. Using maximal uncalibrated tourniquets with 95% 1RM risks severe nerve/vascular damage and tissue ischemia."
+            },
+            {
+                id: 7,
+                title: "Station 7: Pulmonary Rehabilitation & Core Stabilization",
+                subjective: "A 72-year-old male with a history of Stage III Chronic Obstructive Pulmonary Disease (COPD) presents for global reconditioning following an acute exacerbation. Following the intervention, the patient gasps heavily and notes, 'I feel like I'm going to pass out when I try to hold my breath to stabilize my back.'",
+                objective: "The documented intervention plan is labeled as a 'high-volume muscular endurance protocol.' The actual exercise execution requires the patient to perform heavy barbell deadlifts at a verified 5-Rep Max (5RM) threshold. Standing verbal coaching cues dictate that the patient take a maximal inhalation and perform a sustained Valsalva maneuver throughout the entire upward phase of the lift.",
+                answer: "<b>1. Definition/Parameter Error:</b> 5RM is a maximum absolute strength parameter, directly contradicting the documented goal of 'high-volume muscular endurance.'<br><b>2. Cardiopulmonary Contraindication:</b> Cueing a Valsalva maneuver in a Stage III COPD patient severely compromises venous return and places critical strain on already compromised pulmonary and cardiovascular systems."
+            },
+            {
+                id: 8,
+                title: "Station 8: Upper Extremity Conditioning Timeline",
+                subjective: "A 28-year-old male mechanical assembly worker is participating in a work-conditioning program following a repetitive strain injury. Patient presents on week 2 of the intervention complaining of severe, localized muscle soreness. He reports, 'I am so sore I can barely move my arms, and my grip strength actually feels weaker than last week.'",
+                objective: "During the previous session (marking the start of week 2), the clinician noted that the patient's grip dynamometry reading matched the prior session exactly. The therapist documented a 'hypertrophy plateau,' immediately added 6 new distinct high-volume upper extremity accessory exercises, and altered the instructions to mandate that every set be driven to absolute mechanical failure daily.",
+                answer: "<b>1. Neural Timeline Misread:</b> Week 2 plateaus are natural variations in motor learning/neural drive, not 'hypertrophy plateaus' (which occur much later).<br><b>2. Central/Peripheral Fatigue Overload:</b> Adding 6 exercises and demanding absolute daily failure prevents recovery, compounding central and peripheral fatigue rather than stimulating growth."
+            }
+        ];
+
+        // Object to store team notes for each case
+        const teamNotesData = {};
+
+        let currentCaseId = null;
+
+        function initApp() {
+            const list = document.getElementById('case-list');
+            cases.forEach(c => {
+                const li = document.createElement('li');
+                li.className = 'case-item';
+                li.innerText = `Station ${c.id}`;
+                li.onclick = () => loadCase(c.id);
+                li.id = `nav-${c.id}`;
+                list.appendChild(li);
+                teamNotesData[c.id] = ""; // Initialize empty notes
+            });
+            
+            // Auto-save notes when typing
+            document.getElementById('team-notes').addEventListener('input', function(e) {
+                if (currentCaseId) {
+                    teamNotesData[currentCaseId] = e.target.value;
+                }
+            });
+        }
+
+        function loadCase(id) {
+            currentCaseId = id;
+            const currentCase = cases.find(c => c.id === id);
+            
+            // Update UI Nav
+            document.querySelectorAll('.case-item').forEach(el => el.classList.remove('active'));
+            document.getElementById(`nav-${id}`).classList.add('active');
+
+            // Toggle visibility
+            document.getElementById('placeholder-msg').style.display = 'none';
+            document.getElementById('active-case-view').style.display = 'flex';
+
+            // Populate text
+            document.getElementById('display-title').innerText = currentCase.title;
+            document.getElementById('display-subjective').innerHTML = currentCase.subjective;
+            document.getElementById('display-objective').innerHTML = currentCase.objective;
+            document.getElementById('display-answer').innerHTML = currentCase.answer;
+            
+            // Restore notes
+            document.getElementById('team-notes').value = teamNotesData[id];
+
+            // Hide answer key
+            document.getElementById('answer-key').classList.remove('visible');
+            document.getElementById('reveal-btn').innerText = "Reveal Instructor Key";
+        }
+
+        function toggleAnswer() {
+            const key = document.getElementById('answer-key');
+            const btn = document.getElementById('reveal-btn');
+            if (key.classList.contains('visible')) {
+                key.classList.remove('visible');
+                btn.innerText = "Reveal Instructor Key";
+            } else {
+                key.classList.add('visible');
+                btn.innerText = "Hide Instructor Key";
+            }
+        }
+
+        window.onload = initApp;
+    </script>
+</body>
+</html>
+
+```
