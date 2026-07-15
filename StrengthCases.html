@@ -186,6 +186,144 @@
             background-color: #fef08a;
             box-shadow: inset 0 0 0 1px #d69e2e;
         }
+        .sentence.highlighted::after {
+            content: "\270E";
+            font-size: 0.7em;
+            margin-left: 3px;
+            opacity: 0.7;
+        }
+
+        /* Modal for "how would you modify this sentence" prompts */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(45, 55, 72, 0.55);
+            z-index: 100;
+            align-items: center;
+            justify-content: center;
+        }
+        .modal-overlay.visible {
+            display: flex;
+        }
+        .modal-box {
+            background: var(--card-bg);
+            border-radius: 8px;
+            padding: 24px;
+            width: 90%;
+            max-width: 480px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.25);
+        }
+        .modal-box h4 {
+            margin: 0 0 4px 0;
+            color: var(--primary);
+        }
+        .modal-quote {
+            background: var(--bg-color);
+            border-left: 3px solid var(--primary);
+            padding: 10px 12px;
+            margin: 12px 0;
+            font-style: italic;
+            color: var(--text-main);
+            font-size: 0.95rem;
+        }
+        .modal-question {
+            font-size: 0.9rem;
+            color: var(--text-muted);
+            margin: 0 0 8px 0;
+        }
+        .modal-box textarea {
+            width: 100%;
+            min-height: 90px;
+            box-sizing: border-box;
+            font-family: inherit;
+            font-size: 0.95rem;
+            padding: 10px;
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            resize: vertical;
+        }
+        .modal-actions {
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+            margin-top: 16px;
+        }
+        .modal-actions button {
+            padding: 8px 16px;
+            border-radius: 6px;
+            border: none;
+            font-size: 0.9rem;
+            font-weight: 600;
+            cursor: pointer;
+        }
+        .modal-cancel-btn {
+            background: var(--bg-color);
+            color: var(--text-main);
+            border: 1px solid var(--border-color) !important;
+        }
+        .modal-save-btn {
+            background: var(--primary);
+            color: white;
+        }
+        .modal-save-btn:hover {
+            background: var(--primary-dark);
+        }
+
+        /* Save indicator */
+        .save-indicator {
+            font-size: 0.85rem;
+            font-weight: 500;
+            color: #22543d;
+            margin-left: 10px;
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+        .save-indicator.visible {
+            opacity: 1;
+        }
+
+        /* Running list of flagged sentences + student-proposed fixes */
+        .modifications-panel {
+            margin-bottom: 20px;
+        }
+        #modifications-list {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        .modifications-empty {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            font-style: italic;
+            margin: 0;
+        }
+        .modification-item {
+            border: 1px solid var(--border-color);
+            border-left: 3px solid var(--primary);
+            border-radius: 6px;
+            padding: 10px 12px;
+            cursor: pointer;
+            background: var(--bg-color);
+            transition: background-color 0.15s;
+        }
+        .modification-item:hover {
+            background-color: #fff5f5;
+        }
+        .modification-item .mod-quote {
+            font-style: italic;
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            margin: 0 0 4px 0;
+        }
+        .modification-item .mod-fix {
+            font-size: 0.95rem;
+            color: var(--text-main);
+            margin: 0;
+        }
+        .modification-item .mod-fix strong {
+            color: var(--primary);
+        }
 
         /* LO5 framework tagging chips */
         .framework-tags {
@@ -265,8 +403,8 @@
             </div>
 
             <div class="audit-area">
-                <h3>Team Audit Notes</h3>
-                <p style="font-size: 0.9rem; color: #718096; margin-top: -10px;">Click any sentence in the chart note above to flag where you think an error lives, then tag and describe it below.</p>
+                <h3>Team Audit Notes <span class="save-indicator" id="save-indicator">&#10003; Saved</span></h3>
+                <p style="font-size: 0.9rem; color: #718096; margin-top: -10px;">Click any sentence in the chart note above to flag where you think an error lives and write how you'd modify it. Tag the framework category and add any overall notes below.</p>
 
                 <div class="framework-tags">
                     <p class="framework-label">Which part(s) of the LO5 framework does this error violate? (check all that apply)</p>
@@ -286,6 +424,13 @@
                     </div>
                 </div>
 
+                <div class="modifications-panel">
+                    <p class="framework-label">Your flagged sentences &amp; proposed fixes</p>
+                    <div id="modifications-list">
+                        <p class="modifications-empty" id="modifications-empty">No sentences flagged yet — click a sentence above to flag it and describe your fix.</p>
+                    </div>
+                </div>
+
                 <textarea id="team-notes" placeholder="e.g., Error 1: The patient is holding their breath..."></textarea>
 
                 <button class="btn" id="reveal-btn" onclick="toggleAnswer()">Reveal Instructor Key</button>
@@ -294,6 +439,19 @@
                     <h4>Instructor Key</h4>
                     <div id="display-answer">Answer goes here...</div>
                 </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal-overlay" id="modal-overlay">
+        <div class="modal-box">
+            <h4>Flag &amp; Fix This Sentence</h4>
+            <div class="modal-quote" id="modal-quote">Sentence text...</div>
+            <p class="modal-question">How would you modify this to fix the error?</p>
+            <textarea id="modal-textarea" placeholder="e.g., Add resistance progression by increasing reps or adding light ankle weights..."></textarea>
+            <div class="modal-actions">
+                <button type="button" class="modal-cancel-btn" id="modal-cancel-btn">Cancel</button>
+                <button type="button" class="modal-save-btn" id="modal-save-btn">Save</button>
             </div>
         </div>
     </div>
@@ -360,10 +518,19 @@
 
         const teamNotesData = {};
         const teamFrameworkData = {};
+        // teamHighlightData[caseId][field] is an object mapping sentence index -> the
+        // student-written text describing how they'd modify that sentence. A sentence
+        // is considered "flagged" whenever it has a non-empty entry here.
         const teamHighlightData = {};
         let currentCaseId = null;
 
+        // Which sentence the modal is currently open for.
+        let modalField = null;
+        let modalIdx = null;
+        let modalSpan = null;
+
         const FRAMEWORK_KEYS = ["goal", "principle", "mode", "safety"];
+        const STORAGE_KEY = "dptd733_gallery_walk_progress_v1";
 
         // Splits a chart-note paragraph into sentence-sized chunks so each one
         // can be rendered as its own clickable <span>. Handles trailing quotes
@@ -376,24 +543,144 @@
 
         function renderField(fieldName, text, caseId) {
             const sentences = splitSentences(text);
-            const highlighted = teamHighlightData[caseId][fieldName];
+            const mods = teamHighlightData[caseId][fieldName];
             return sentences
-                .map((s, i) => `<span class="sentence${highlighted.has(i) ? " highlighted" : ""}" data-field="${fieldName}" data-idx="${i}">${s}</span>`)
+                .map((s, i) => `<span class="sentence${mods[i] ? " highlighted" : ""}" data-field="${fieldName}" data-idx="${i}">${s}</span>`)
                 .join(" ");
         }
 
+        // Clicking a sentence opens the modal rather than toggling a highlight directly.
         function handleSentenceClick(e) {
             const span = e.target.closest(".sentence");
             if (!span || !currentCaseId) return;
-            const field = span.dataset.field;
-            const idx = parseInt(span.dataset.idx, 10);
-            const set = teamHighlightData[currentCaseId][field];
-            if (set.has(idx)) {
-                set.delete(idx);
-                span.classList.remove("highlighted");
-            } else {
-                set.add(idx);
-                span.classList.add("highlighted");
+            openModal(span);
+        }
+
+        function openModal(span) {
+            modalField = span.dataset.field;
+            modalIdx = parseInt(span.dataset.idx, 10);
+            modalSpan = span;
+
+            document.getElementById("modal-quote").textContent = span.textContent.trim();
+            document.getElementById("modal-textarea").value =
+                teamHighlightData[currentCaseId][modalField][modalIdx] || "";
+
+            document.getElementById("modal-overlay").classList.add("visible");
+            document.getElementById("modal-textarea").focus();
+        }
+
+        function closeModal() {
+            document.getElementById("modal-overlay").classList.remove("visible");
+            modalField = null;
+            modalIdx = null;
+            modalSpan = null;
+        }
+
+        function saveModal() {
+            if (!currentCaseId || modalField === null || modalIdx === null) return;
+            const text = document.getElementById("modal-textarea").value.trim();
+            teamHighlightData[currentCaseId][modalField][modalIdx] = text;
+
+            if (modalSpan) {
+                modalSpan.classList.toggle("highlighted", !!text);
+            }
+
+            saveToStorage();
+            flashSavedIndicator();
+            renderModificationsList(currentCaseId);
+            closeModal();
+        }
+
+        const FIELD_LABELS = { subjective: "Subjective", objective: "Objective" };
+
+        function escapeHtml(str) {
+            const div = document.createElement("div");
+            div.textContent = str;
+            return div.innerHTML;
+        }
+
+        // Builds the persistent "Your flagged sentences & proposed fixes" list so
+        // students can see everything they've written without having to reopen
+        // each sentence's popup. Reflects teamHighlightData for the given case.
+        function renderModificationsList(caseId) {
+            const container = document.getElementById("modifications-list");
+            const currentCase = cases.find(c => c.id === caseId);
+            if (!container || !currentCase) return;
+
+            const entries = [];
+            ["subjective", "objective"].forEach(field => {
+                const sentences = splitSentences(currentCase[field]);
+                const mods = teamHighlightData[caseId][field];
+                sentences.forEach((sentence, idx) => {
+                    const text = mods[idx];
+                    if (text) {
+                        entries.push({ field, idx, sentence, text });
+                    }
+                });
+            });
+
+            if (entries.length === 0) {
+                container.innerHTML = '<p class="modifications-empty" id="modifications-empty">No sentences flagged yet — click a sentence above to flag it and describe your fix.</p>';
+                return;
+            }
+
+            container.innerHTML = entries.map(entry => `
+                <div class="modification-item" data-field="${entry.field}" data-idx="${entry.idx}">
+                    <p class="mod-quote">${FIELD_LABELS[entry.field]}: "${escapeHtml(entry.sentence)}"</p>
+                    <p class="mod-fix"><strong>Your fix:</strong> ${escapeHtml(entry.text)}</p>
+                </div>
+            `).join("");
+
+            // Clicking a saved entry reopens the modal on that sentence so students
+            // can revise their answer.
+            container.querySelectorAll(".modification-item").forEach(item => {
+                item.addEventListener("click", () => {
+                    const field = item.dataset.field;
+                    const idx = parseInt(item.dataset.idx, 10);
+                    const span = document.querySelector(
+                        `#display-${field} .sentence[data-idx="${idx}"]`
+                    );
+                    if (span) openModal(span);
+                });
+            });
+        }
+
+        function flashSavedIndicator() {
+            const el = document.getElementById("save-indicator");
+            if (!el) return;
+            el.classList.add("visible");
+            clearTimeout(flashSavedIndicator._t);
+            flashSavedIndicator._t = setTimeout(() => el.classList.remove("visible"), 1500);
+        }
+
+        // Persists all team progress (notes, framework tags, sentence modifications)
+        // to sessionStorage so work survives navigation and accidental reloads
+        // *within the same browser tab*. sessionStorage (unlike localStorage) is
+        // scoped per-tab and is wiped once that tab/window is closed — so the next
+        // group that opens this file (or opens it in a separate tab) always starts
+        // from a blank slate instead of seeing a previous group's notes. This is a
+        // best-effort layer on top of the in-memory objects above — wrapped in
+        // try/catch because storage access for pages opened via a file:// URL can
+        // be blocked or unreliable in some browsers.
+        function saveToStorage() {
+            try {
+                const payload = { teamNotesData, teamFrameworkData, teamHighlightData };
+                sessionStorage.setItem(STORAGE_KEY, JSON.stringify(payload));
+            } catch (err) {
+                // Ignore — in-memory state still works for the current session.
+            }
+        }
+
+        function loadFromStorage() {
+            try {
+                const raw = sessionStorage.getItem(STORAGE_KEY);
+                if (!raw) return;
+                const saved = JSON.parse(raw);
+                if (saved.teamNotesData) Object.assign(teamNotesData, saved.teamNotesData);
+                if (saved.teamFrameworkData) Object.assign(teamFrameworkData, saved.teamFrameworkData);
+                if (saved.teamHighlightData) Object.assign(teamHighlightData, saved.teamHighlightData);
+            } catch (err) {
+                // Ignore corrupt/unavailable storage and fall back to fresh defaults.
             }
         }
 
@@ -408,12 +695,17 @@
                 list.appendChild(li);
                 teamNotesData[c.id] = "";
                 teamFrameworkData[c.id] = { goal: false, principle: false, mode: false, safety: false };
-                teamHighlightData[c.id] = { subjective: new Set(), objective: new Set() };
+                teamHighlightData[c.id] = { subjective: {}, objective: {} };
             });
+
+            // Restore any previously saved progress (e.g. from an earlier session or
+            // an accidental reload) on top of the freshly-initialized defaults above.
+            loadFromStorage();
 
             document.getElementById('team-notes').addEventListener('input', function(e) {
                 if (currentCaseId) {
                     teamNotesData[currentCaseId] = e.target.value;
+                    saveToStorage();
                 }
             });
 
@@ -422,14 +714,28 @@
                     if (!currentCaseId) return;
                     teamFrameworkData[currentCaseId][this.dataset.key] = this.checked;
                     this.closest('.tag-chip').classList.toggle('checked', this.checked);
+                    saveToStorage();
+                    flashSavedIndicator();
                 });
             });
 
             document.getElementById('display-subjective').addEventListener('click', handleSentenceClick);
             document.getElementById('display-objective').addEventListener('click', handleSentenceClick);
+
+            document.getElementById('modal-save-btn').addEventListener('click', saveModal);
+            document.getElementById('modal-cancel-btn').addEventListener('click', closeModal);
+            document.getElementById('modal-overlay').addEventListener('click', function (e) {
+                if (e.target === this) closeModal();
+            });
+            document.addEventListener('keydown', function (e) {
+                if (e.key === 'Escape' && document.getElementById('modal-overlay').classList.contains('visible')) {
+                    closeModal();
+                }
+            });
         }
 
         function loadCase(id) {
+            closeModal();
             currentCaseId = id;
             const currentCase = cases.find(c => c.id === id);
 
@@ -455,6 +761,8 @@
 
             document.getElementById('answer-key').classList.remove('visible');
             document.getElementById('reveal-btn').innerText = "Reveal Instructor Key";
+
+            renderModificationsList(id);
         }
 
         function toggleAnswer() {
