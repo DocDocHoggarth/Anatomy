@@ -1,0 +1,1267 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Thermoregulation Feedback Loop — Interactive Simulator</title>
+<style>
+  :root{
+    --bg: #f4f6f8;
+    --card: #ffffff;
+    --ink: #1f2733;
+    --ink-soft: #5b6673;
+    --border: #e2e6eb;
+    --cold: #2563eb;
+    --cold-soft: #dbeafe;
+    --hot: #ea580c;
+    --hot-soft: #ffedd5;
+    --ok: #16a34a;
+    --ok-soft: #dcfce7;
+    --warn: #d97706;
+    --warn-soft: #fef3c7;
+    --bad: #dc2626;
+    --bad-soft: #fee2e2;
+    --accent: #334155;
+    --radius: 14px;
+  }
+  * { box-sizing: border-box; }
+  html, body {
+    margin: 0; padding: 0;
+    background: var(--bg);
+    color: var(--ink);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  }
+  .app { max-width: 1180px; margin: 0 auto; padding: 20px 20px 40px; }
+
+  header.top { margin-bottom: 18px; }
+  header.top h1 { font-size: 1.5rem; margin: 0 0 4px; }
+  header.top p { margin: 0; color: var(--ink-soft); font-size: 0.95rem; max-width: 820px; }
+  header.top .lo-tag {
+    display: inline-block; margin-top: 10px; font-size: 0.78rem; font-weight: 600;
+    color: var(--accent); background: #eef1f5; border: 1px solid var(--border);
+    border-radius: 999px; padding: 4px 12px;
+  }
+
+  .layout {
+    display: grid;
+    grid-template-columns: 300px 1fr;
+    grid-template-rows: auto auto;
+    gap: 16px;
+  }
+  .panel {
+    background: var(--card); border: 1px solid var(--border); border-radius: var(--radius);
+    padding: 16px 18px; box-shadow: 0 1px 2px rgba(20,20,30,0.04);
+  }
+  .panel h2 { font-size: 0.95rem; margin: 0 0 12px; letter-spacing: 0.01em; }
+  .panel h3 { font-size: 0.8rem; margin: 16px 0 8px; color: var(--ink-soft); text-transform: uppercase; letter-spacing: 0.04em; }
+
+  .controls { grid-row: 1 / 3; }
+
+  .mode-toggle { display: flex; gap: 6px; margin-bottom: 14px; background: #eef1f5; border-radius: 10px; padding: 4px; }
+  .mode-toggle button {
+    flex: 1; border: none; background: transparent; padding: 7px 4px; border-radius: 8px;
+    font-size: 0.8rem; font-weight: 600; color: var(--ink-soft); cursor: pointer;
+  }
+  .mode-toggle button.active { background: var(--card); color: var(--ink); box-shadow: 0 1px 2px rgba(0,0,0,0.08); }
+
+  label.field { display: block; font-size: 0.82rem; font-weight: 600; margin-top: 14px; margin-bottom: 6px; }
+  label.field .val { font-weight: 400; color: var(--ink-soft); float: right; }
+  input[type=range] { width: 100%; accent-color: var(--accent); }
+  .hint { font-size: 0.74rem; color: var(--ink-soft); margin-top: 3px; line-height: 1.35; }
+
+  .preset-grid { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
+  .preset-grid button {
+    font-size: 0.74rem; padding: 6px 10px; border-radius: 8px; border: 1px solid var(--border);
+    background: #fafbfc; cursor: pointer; color: var(--ink); text-align: left;
+  }
+  .preset-grid button:hover { background: #f0f2f5; }
+  .preset-grid.clinical button { flex-basis: 100%; }
+
+  .playback { display: flex; gap: 8px; margin-top: 10px; }
+  .playback button {
+    flex: 1; padding: 9px 8px; border-radius: 10px; border: none; cursor: pointer;
+    font-weight: 700; font-size: 0.85rem;
+  }
+  #playBtn, #guidedNextBtn { background: var(--accent); color: #fff; }
+  #resetBtn { background: #eef1f5; color: var(--ink); width: 100%; margin-top: 10px; }
+  .speed-row { display: flex; gap: 6px; margin-top: 8px; }
+  .speed-row button {
+    flex: 1; font-size: 0.72rem; padding: 6px; border-radius: 8px; border: 1px solid var(--border);
+    background: #fafbfc; cursor: pointer;
+  }
+  .speed-row button.active { background: var(--accent); color: #fff; border-color: var(--accent); }
+
+  .diagram-panel { display: flex; flex-direction: column; }
+  .status-row { display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px; }
+  .status-badge {
+    display: inline-flex; align-items: center; gap: 6px; font-weight: 700; font-size: 0.85rem;
+    padding: 6px 14px; border-radius: 999px; transition: background .3s, color .3s;
+  }
+  .status-badge.compensated { background: var(--ok-soft); color: #14532d; }
+  .status-badge.compensating { background: var(--warn-soft); color: #92400e; }
+  .status-badge.decompensated { background: var(--bad-soft); color: #7f1d1d; }
+  .status-badge .dot { width: 8px; height: 8px; border-radius: 50%; background: currentColor; }
+
+  .temp-readout { text-align: right; }
+  .temp-readout .big { font-size: 1.9rem; font-weight: 800; line-height: 1; }
+  .temp-readout .sub { font-size: 0.72rem; color: var(--ink-soft); }
+
+  .loop {
+    display: flex; align-items: stretch; gap: 6px; margin: 6px 0 16px; overflow-x: auto;
+  }
+  .stage {
+    flex: 1; min-width: 130px; border: 2px solid var(--border); border-radius: 12px;
+    padding: 10px 10px 12px; background: #fbfcfd;
+    transition: border-color .25s, background .25s, transform .2s, opacity .3s, filter .3s;
+  }
+  .stage.flow-active { border-color: var(--accent); transform: translateY(-2px); }
+  .stage.dim { opacity: 0.32; filter: saturate(0.4); transform: none; }
+  .stage.glow { animation: glowPulse 0.6s ease-out; }
+  @keyframes glowPulse {
+    0%   { box-shadow: 0 0 0 0 rgba(51,65,85,0.28); }
+    100% { box-shadow: 0 0 0 12px rgba(51,65,85,0); }
+  }
+  .stage .label { font-size: 0.68rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.04em; color: var(--ink-soft); }
+  .stage .name { font-size: 0.86rem; font-weight: 700; margin: 3px 0 4px; }
+  .stage .detail { font-size: 0.72rem; color: var(--ink-soft); line-height: 1.35; min-height: 30px; }
+  .arrow { display: flex; align-items: center; justify-content: center; color: var(--ink-soft); font-size: 1.1rem; min-width: 14px; }
+
+  .bar-wrap { margin-top: 6px; height: 5px; border-radius: 4px; background: #eef1f5; overflow: hidden; }
+  .bar-fill { height: 100%; border-radius: 4px; background: var(--accent); width: 0%; transition: width .3s ease, background .3s; }
+
+  .alert-banner {
+    display: none; margin-top: 4px; margin-bottom: 12px; padding: 10px 14px; border-radius: 10px;
+    background: var(--bad-soft); color: #7f1d1d; font-size: 0.82rem; font-weight: 600;
+  }
+  .alert-banner.show { display: block; }
+
+  canvas#chart { width: 100%; height: 200px; display: block; background: #fbfcfd; border-radius: 10px; border: 1px solid var(--border); }
+  .chart-legend { display: flex; gap: 16px; margin-top: 8px; font-size: 0.72rem; color: var(--ink-soft); }
+  .chart-legend span { display: inline-flex; align-items: center; gap: 5px; }
+  .swatch { width: 12px; height: 3px; border-radius: 2px; display: inline-block; }
+
+  .log-header { display: flex; align-items: center; justify-content: space-between; margin-top: 16px; }
+  .log-header h3 { margin: 0; font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.04em; color: var(--ink-soft); }
+  .log-header button {
+    font-size: 0.7rem; border: 1px solid var(--border); background: #fafbfc; border-radius: 8px;
+    padding: 4px 9px; cursor: pointer; color: var(--ink-soft);
+  }
+  .log-panel {
+    margin-top: 6px; max-height: 190px; overflow-y: auto; border: 1px solid var(--border);
+    border-radius: 10px; background: #fbfcfd; padding: 4px 10px;
+  }
+  .log-empty { color: var(--ink-soft); font-size: 0.78rem; padding: 10px 2px; }
+  .log-entry {
+    display: flex; gap: 10px; align-items: baseline; padding: 6px 2px; border-bottom: 1px dashed var(--border);
+    font-size: 0.78rem; line-height: 1.4; animation: fadeIn .3s ease;
+  }
+  .log-entry:last-child { border-bottom: none; }
+  .log-entry .tag { flex-shrink: 0; width: 108px; font-weight: 800; font-size: 0.66rem; text-transform: uppercase; letter-spacing: 0.03em; }
+  .log-entry.compensated .tag { color: var(--ok); }
+  .log-entry.compensating .tag { color: var(--warn); }
+  .log-entry.decompensated .tag { color: var(--bad); }
+  .log-entry .msg { color: var(--ink); }
+  @keyframes fadeIn { from { opacity: 0; transform: translateY(-3px); } to { opacity: 1; transform: translateY(0); } }
+
+  .log-entry.milestone { background: #fff7ed; border-left: 3px solid var(--warn); padding-left: 7px; font-weight: 700; }
+
+  .danger-scale { margin-bottom: 16px; }
+  .danger-scale h3 { margin: 0 0 8px; }
+  .danger-marker-row { position: relative; height: 10px; }
+  .danger-marker {
+    position: absolute; top: 0; width: 0; height: 0; left: 50%;
+    border-left: 6px solid transparent; border-right: 6px solid transparent; border-top: 8px solid var(--ink);
+    transform: translateX(-50%); transition: left .3s ease;
+  }
+  .danger-track { display: flex; height: 14px; border-radius: 7px; overflow: hidden; box-shadow: inset 0 0 0 1px rgba(0,0,0,0.06); }
+  .danger-track .seg { height: 100%; }
+  .danger-scale.danger-flash .danger-track { animation: dangerPulse 1s ease-in-out infinite; }
+  @keyframes dangerPulse {
+    0%, 100% { box-shadow: inset 0 0 0 1px rgba(0,0,0,0.06); }
+    50% { box-shadow: 0 0 0 4px rgba(220,38,38,0.35); }
+  }
+  .danger-current { margin-top: 8px; font-size: 0.82rem; display: flex; align-items: baseline; gap: 6px; flex-wrap: wrap; }
+  .danger-current .dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; background: var(--ok); }
+  .danger-current .zone-label { font-weight: 800; }
+  .danger-current .zone-desc { color: var(--ink-soft); }
+  .danger-scale-labels { display: flex; justify-content: space-between; font-size: 0.62rem; color: var(--ink-soft); margin-top: 4px; }
+
+  footer.debrief { margin-top: 18px; }
+  footer.debrief summary { cursor: pointer; font-weight: 700; font-size: 0.9rem; padding: 4px 0; }
+  footer.debrief ol { margin: 10px 0 0; padding-left: 20px; font-size: 0.88rem; line-height: 1.6; color: var(--ink); }
+
+  .sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+
+  /* ---- student worksheet ---- */
+  .worksheet {
+    margin-top: 18px; background: var(--card); border: 1px solid var(--border); border-radius: var(--radius);
+    padding: 20px 24px 26px;
+  }
+  .ws-header { display: flex; justify-content: space-between; align-items: flex-start; gap: 16px; flex-wrap: wrap; }
+  .ws-header h2 { margin: 0 0 4px; font-size: 1.15rem; }
+  .ws-header .hint { max-width: 560px; }
+  .ws-actions { display: flex; gap: 8px; flex-shrink: 0; }
+  .ws-actions button {
+    font-size: 0.78rem; font-weight: 700; border-radius: 9px; padding: 8px 12px; cursor: pointer; border: 1px solid var(--border);
+  }
+  #printWorksheetBtn { background: var(--accent); color: #fff; border-color: var(--accent); }
+  #clearWorksheetBtn { background: #eef1f5; color: var(--ink); }
+
+  h3.ws-section {
+    margin: 24px 0 10px; font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.04em;
+    color: var(--accent); border-bottom: 1px solid var(--border); padding-bottom: 6px;
+  }
+  .wq { margin-bottom: 18px; }
+  .wq-prompt { font-size: 0.88rem; line-height: 1.5; margin-bottom: 8px; }
+  .wq-input {
+    width: 100%; font-family: inherit; font-size: 0.86rem; padding: 8px 10px; border: 1px solid var(--border);
+    border-radius: 8px; resize: vertical; background: #fbfcfd; color: var(--ink);
+  }
+  .wq-print-text { display: none; }
+
+  /* multiple choice */
+  .wq-mc { list-style: none; margin: 4px 0 0; padding: 0; display: flex; flex-direction: column; gap: 7px; }
+  .wq-mc li label { display: flex; align-items: flex-start; gap: 9px; font-size: 0.85rem; line-height: 1.4; cursor: pointer; }
+  .wq-mc input[type=radio] { accent-color: var(--accent); margin-top: 3px; flex-shrink: 0; }
+
+  /* matching */
+  .wq-match-row { display: flex; align-items: center; gap: 12px; margin-bottom: 8px; font-size: 0.85rem; }
+  .wq-match-row .wq-match-label { flex: 0 0 190px; font-weight: 700; }
+  .wq-match-row select {
+    flex: 1; font-size: 0.82rem; padding: 7px 8px; border: 1px solid var(--border); border-radius: 8px;
+    background: #fbfcfd; color: var(--ink); font-family: inherit;
+  }
+
+  /* multi-part short answer */
+  .wq-multi-input { display: flex; flex-direction: column; gap: 7px; margin-top: 4px; }
+  .wq-multi-input label { font-size: 0.78rem; font-weight: 700; color: var(--ink-soft); display: flex; align-items: center; gap: 8px; }
+  .wq-multi-input input[type=text] {
+    flex: 1; font-size: 0.85rem; padding: 6px 9px; border: 1px solid var(--border); border-radius: 8px;
+    background: #fbfcfd; font-weight: 400; color: var(--ink); font-family: inherit;
+  }
+
+  @media print {
+    .layout, footer.debrief, .no-print, .no-print-controls .ws-actions, header.top .lo-tag { display: none !important; }
+    .ws-actions { display: none !important; }
+    body { background: #fff; }
+    .worksheet { border: none; padding: 0; margin: 0; }
+    .wq-input, .wq-mc, .wq-match, .wq-multi-input { display: none !important; }
+    .wq-print-text {
+      display: block; border: 1px solid #ccc; border-radius: 6px; min-height: 34px; padding: 7px 9px;
+      font-size: 11.5pt; white-space: pre-wrap; color: #111;
+    }
+    .wq { break-inside: avoid; }
+    h3.ws-section { break-after: avoid; }
+  }
+
+  @media (max-width: 860px) {
+    .layout { grid-template-columns: 1fr; }
+    .controls { grid-row: auto; }
+  }
+</style>
+</head>
+<body>
+<div class="app">
+
+  <header class="top">
+    <h1>Thermoregulation Feedback Loop</h1>
+    <p>Drive the loop with an environmental trigger, then push further and adjust individual stages to see when the body can no longer keep up. Use <strong>Walk the Loop</strong> to step through one correction cycle at a time.</p>
+    <span class="lo-tag">LO2 · Negative feedback — Stimulus → Receptor → Control Center → Effector → Response</span>
+  </header>
+
+  <div class="layout">
+
+    <div class="panel controls">
+      <h2>Parameters</h2>
+
+      <div class="mode-toggle">
+        <button id="modeSimpleBtn" class="active">Simple</button>
+        <button id="modeAdvancedBtn">Advanced</button>
+      </div>
+
+      <label class="field">Ambient Temperature / Exertion <span class="val" id="ambientVal">0</span></label>
+      <input type="range" id="ambientSlider" min="-10" max="10" step="0.5" value="0">
+      <div class="hint">Negative = cold exposure. Positive = heat / exercise load. This is the stimulus driving the loop.</div>
+
+      <div class="preset-grid" id="simplePresets">
+        <button data-ambient="-9">Cold plunge</button>
+        <button data-ambient="-3">Cool day</button>
+        <button data-ambient="0">Neutral</button>
+        <button data-ambient="5">Warm exercise</button>
+        <button data-ambient="9">Heat wave + exertion</button>
+      </div>
+
+      <div id="advancedControls" style="display:none;">
+        <h3>Loop parameters</h3>
+
+        <label class="field">Set Point (hypothalamus) <span class="val" id="setpointVal">37.0°C</span></label>
+        <input type="range" id="setpointSlider" min="37" max="40" step="0.1" value="37">
+        <div class="hint">Raising this simulates fever — the loop still works, it's just defending a new target.</div>
+
+        <label class="field">Thermoreceptor Sensitivity <span class="val" id="sensVal">1.0×</span></label>
+        <input type="range" id="sensSlider" min="0.2" max="2" step="0.1" value="1">
+        <div class="hint">How strongly the receptor signals a given deviation (e.g., reduced with peripheral neuropathy or age).</div>
+
+        <label class="field">Effector Capacity <span class="val" id="strVal">1.0×</span></label>
+        <input type="range" id="strSlider" min="0.2" max="2" step="0.1" value="1">
+        <div class="hint">Max output of sweat glands / shivering (e.g., reduced with dehydration, anhidrosis, low muscle mass).</div>
+
+        <h3>Clinical presets</h3>
+        <div class="preset-grid clinical">
+          <button id="presetNormal">Reset to normal physiology</button>
+          <button id="presetFever">Fever (infection): set point → 39°C</button>
+          <button id="presetSweat">Impaired sweating (dehydration/aging): effector ↓</button>
+          <button id="presetNeuro">Peripheral neuropathy: sensitivity ↓</button>
+          <button id="presetHeatstroke">Heat stroke risk: impaired effector + heat wave</button>
+        </div>
+      </div>
+
+      <h3>Playback</h3>
+      <div class="mode-toggle">
+        <button id="playbackContinuousBtn" class="active">Continuous</button>
+        <button id="playbackGuidedBtn">Walk the Loop</button>
+      </div>
+
+      <div id="continuousControls">
+        <div class="playback">
+          <button id="playBtn">▶ Start</button>
+        </div>
+        <div class="speed-row">
+          <button data-speed="1" class="active">1×</button>
+          <button data-speed="3">3×</button>
+          <button data-speed="6">6×</button>
+        </div>
+        <div class="hint">Messages update in a short, staggered sequence every ~0.9s so each stage is readable, even while the chart runs smoothly in real time.</div>
+      </div>
+
+      <div id="guidedControls" style="display:none;">
+        <div class="hint" id="guidedCaption">Click "Next" to begin a correction cycle.</div>
+        <div class="playback">
+          <button id="guidedNextBtn">Next →</button>
+        </div>
+      </div>
+
+      <button id="resetBtn">Reset</button>
+    </div>
+
+    <div class="panel diagram-panel">
+      <h2>Live Loop</h2>
+      <div class="status-row">
+        <span class="status-badge compensated" id="statusBadge"><span class="dot"></span><span id="statusText">Within normal range</span></span>
+        <div class="temp-readout">
+          <div class="big"><span id="tempBig">37.0</span>°C</div>
+          <div class="sub">core temperature</div>
+        </div>
+      </div>
+
+      <div class="danger-scale" id="dangerScale">
+        <h3>Danger Zones — Core Temperature</h3>
+        <div class="danger-marker-row"><div class="danger-marker" id="dangerMarker"></div></div>
+        <div class="danger-track" id="dangerTrack"></div>
+        <div class="danger-scale-labels"><span>← colder</span><span>hotter →</span></div>
+        <div class="danger-current">
+          <span class="dot" id="dangerDot"></span>
+          <span class="zone-label" id="dangerZoneLabel">Normal</span>
+          <span class="zone-desc" id="dangerZoneDesc">— Core temperature within the normal regulated range.</span>
+        </div>
+      </div>
+
+      <div class="loop">
+        <div class="stage" id="stageStimulus" data-stage="0">
+          <div class="label">1 · Stimulus</div>
+          <div class="name">Deviation</div>
+          <div class="detail" id="detStimulus">Core temp at set point.</div>
+        </div>
+        <div class="arrow">→</div>
+        <div class="stage" id="stageReceptor" data-stage="1">
+          <div class="label">2 · Receptor</div>
+          <div class="name">Thermoreceptors</div>
+          <div class="detail" id="detReceptor">Skin + hypothalamus, quiet.</div>
+          <div class="bar-wrap"><div class="bar-fill" id="barReceptor"></div></div>
+        </div>
+        <div class="arrow">→</div>
+        <div class="stage" id="stageControl" data-stage="2">
+          <div class="label">3 · Control Center</div>
+          <div class="name">Hypothalamus</div>
+          <div class="detail" id="detControl">Comparing to set point.</div>
+        </div>
+        <div class="arrow">→</div>
+        <div class="stage" id="stageEffector" data-stage="3">
+          <div class="label">4 · Effector</div>
+          <div class="name" id="effName">Sweat / shiver</div>
+          <div class="detail" id="detEffector">Standing by.</div>
+          <div class="bar-wrap"><div class="bar-fill" id="barEffector"></div></div>
+        </div>
+        <div class="arrow">→</div>
+        <div class="stage" id="stageResponse" data-stage="4">
+          <div class="label">5 · Response</div>
+          <div class="name">Net Effect</div>
+          <div class="detail" id="detResponse">Maintaining set point.</div>
+        </div>
+      </div>
+
+      <div class="alert-banner" id="alertBanner"></div>
+
+      <canvas id="chart" width="900" height="200"></canvas>
+      <div class="chart-legend">
+        <span><span class="swatch" style="background:var(--accent)"></span>Core temperature</span>
+        <span><span class="swatch" style="background:#94a3b8; border-top:2px dashed #94a3b8; height:0;"></span>Set point</span>
+        <span><span class="swatch" style="background:var(--ok-soft)"></span>Normal band (±0.3°C)</span>
+      </div>
+
+      <div class="log-header">
+        <h3>Activity Log</h3>
+        <button id="clearLogBtn">Clear</button>
+      </div>
+      <div class="log-panel" id="logPanel">
+        <div class="log-empty" id="logEmpty">Messages will appear here as the loop runs — read back at your own pace.</div>
+      </div>
+
+      <div class="sr-only" role="status" aria-live="polite" id="ariaStatus"></div>
+    </div>
+
+  </div>
+
+  <section class="worksheet no-print-controls" id="worksheet">
+    <div class="ws-header">
+      <div>
+        <h2>Student Worksheet</h2>
+        <p class="hint">Work through this while you use the simulator above. Answers stay on this page only — use <strong>Print / Save Worksheet</strong> before you close the tab if you want a copy.</p>
+      </div>
+      <div class="ws-actions no-print">
+        <button id="printWorksheetBtn">🖨 Print / Save Worksheet</button>
+        <button id="clearWorksheetBtn">Clear answers</button>
+      </div>
+    </div>
+
+    <h3 class="ws-section">Part 1 — Walk the Loop (Simple mode)</h3>
+
+    <div class="wq" data-q="1" data-type="short-multi">
+      <div class="wq-prompt"><strong>1.</strong> Switch to <strong>Walk the Loop</strong> mode, leave the ambient slider at Neutral (0), and click through one full cycle. In one short phrase per stage, what did each box say?</div>
+      <div class="wq-multi-input">
+        <label>Stimulus <input type="text" data-part="Stimulus"></label>
+        <label>Receptor <input type="text" data-part="Receptor"></label>
+        <label>Control Center <input type="text" data-part="Control Center"></label>
+        <label>Effector <input type="text" data-part="Effector"></label>
+        <label>Response <input type="text" data-part="Response"></label>
+      </div>
+      <div class="wq-print-text"></div>
+    </div>
+
+    <div class="wq" data-q="2" data-type="mc">
+      <div class="wq-prompt"><strong>2.</strong> Switch to Continuous mode, set the ambient slider to <strong>Warm exercise (+5)</strong>, and let it run for about 15 seconds. What status does the badge settle into?</div>
+      <ul class="wq-mc">
+        <li><label><input type="radio" name="q2" value="Compensated"><span>Compensated — within normal range</span></label></li>
+        <li><label><input type="radio" name="q2" value="Compensating"><span>Compensating — loop is correcting</span></label></li>
+        <li><label><input type="radio" name="q2" value="Decompensated"><span>Decompensated — loop overwhelmed</span></label></li>
+        <li><label><input type="radio" name="q2" value="Keeps changing"><span>It never settles — keeps cycling between states</span></label></li>
+      </ul>
+      <div class="wq-print-text"></div>
+    </div>
+
+    <h3 class="ws-section">Part 2 — Pushing to Decompensation</h3>
+
+    <div class="wq" data-q="3" data-type="mc">
+      <div class="wq-prompt"><strong>3.</strong> Reset, then run the <strong>Heat wave + exertion (+9)</strong> preset at 3× or 6× speed. Watch the Danger Scale — which zone is core temperature in the moment the status badge turns red (DECOMPENSATED)?</div>
+      <ul class="wq-mc">
+        <li><label><input type="radio" name="q3" value="Fever"><span>Fever</span></label></li>
+        <li><label><input type="radio" name="q3" value="Heat Exhaustion"><span>Heat Exhaustion</span></label></li>
+        <li><label><input type="radio" name="q3" value="Heat Stroke"><span>Heat Stroke</span></label></li>
+        <li><label><input type="radio" name="q3" value="Critical Hyperthermia"><span>Critical Hyperthermia</span></label></li>
+      </ul>
+      <div class="wq-print-text"></div>
+    </div>
+
+    <div class="wq" data-q="4" data-type="short">
+      <div class="wq-prompt"><strong>4.</strong> Keep watching the Activity Log. At what temperature did it announce "Entered Heat Stroke zone"? Did that happen at the same moment the badge turned red, before, or after — and why do you think that is?</div>
+      <textarea class="wq-input" rows="3"></textarea>
+      <div class="wq-print-text"></div>
+    </div>
+
+    <div class="wq" data-q="5" data-type="match">
+      <div class="wq-prompt"><strong>5.</strong> Reset, then try <strong>Cold plunge (-9)</strong> and watch the Danger Scale as core temperature falls. Match each hypothermia stage to its approximate temperature range (check the tool if you're not sure).</div>
+      <div class="wq-match">
+        <div class="wq-match-row"><span class="wq-match-label">Mild Hypothermia</span>
+          <select data-match="Mild Hypothermia">
+            <option value="">— choose a range —</option>
+            <option>32–35°C</option><option>28–32°C</option><option>24–28°C</option><option>Below 24°C</option>
+          </select></div>
+        <div class="wq-match-row"><span class="wq-match-label">Moderate Hypothermia</span>
+          <select data-match="Moderate Hypothermia">
+            <option value="">— choose a range —</option>
+            <option>32–35°C</option><option>28–32°C</option><option>24–28°C</option><option>Below 24°C</option>
+          </select></div>
+        <div class="wq-match-row"><span class="wq-match-label">Severe Hypothermia</span>
+          <select data-match="Severe Hypothermia">
+            <option value="">— choose a range —</option>
+            <option>32–35°C</option><option>28–32°C</option><option>24–28°C</option><option>Below 24°C</option>
+          </select></div>
+        <div class="wq-match-row"><span class="wq-match-label">Profound Hypothermia</span>
+          <select data-match="Profound Hypothermia">
+            <option value="">— choose a range —</option>
+            <option>32–35°C</option><option>28–32°C</option><option>24–28°C</option><option>Below 24°C</option>
+          </select></div>
+      </div>
+      <div class="wq-print-text"></div>
+    </div>
+
+    <h3 class="ws-section">Part 3 — Advanced Mode: Isolating Variables</h3>
+
+    <div class="wq" data-q="6" data-type="short">
+      <div class="wq-prompt"><strong>6.</strong> Reset to normal physiology, switch to Advanced mode, and apply the <strong>Impaired sweating (dehydration/aging)</strong> preset with the ambient slider at 0. Does the loop decompensate at rest? Now raise the ambient slider slowly — at roughly what value does it decompensate? How does that compare to the heat-wave threshold you found in Question 3 with normal effector capacity?</div>
+      <textarea class="wq-input" rows="3"></textarea>
+      <div class="wq-print-text"></div>
+    </div>
+
+    <div class="wq" data-q="7" data-type="mc">
+      <div class="wq-prompt"><strong>7.</strong> Compare <strong>Peripheral neuropathy</strong> (sensitivity ↓) against <strong>Impaired sweating</strong> (capacity ↓) at the same ambient load (try +5 for both). Which statement best describes the difference?</div>
+      <ul class="wq-mc">
+        <li><label><input type="radio" name="q7" value="A"><span>Neuropathy is a detection problem — the receptor under-reports the deviation; impaired sweating is a correction problem — the effector can't produce enough output even once it's told to.</span></label></li>
+        <li><label><input type="radio" name="q7" value="B"><span>They're the same problem — both just reduce the effector's maximum output.</span></label></li>
+        <li><label><input type="radio" name="q7" value="C"><span>Neuropathy affects the control center's set point; impaired sweating affects the stimulus.</span></label></li>
+        <li><label><input type="radio" name="q7" value="D"><span>Neither actually changes how or whether the loop decompensates.</span></label></li>
+      </ul>
+      <div class="wq-print-text"></div>
+    </div>
+
+    <div class="wq" data-q="8" data-type="short">
+      <div class="wq-prompt"><strong>8.</strong> Run the <strong>Fever</strong> preset. Does the status badge ever turn red? Why or why not — connect your answer to how this activity defines "decompensated."</div>
+      <textarea class="wq-input" rows="3"></textarea>
+      <div class="wq-print-text"></div>
+    </div>
+
+    <h3 class="ws-section">Part 4 — Synthesis</h3>
+
+    <div class="wq" data-q="9" data-type="match">
+      <div class="wq-prompt"><strong>9.</strong> Match each hyperthermia zone to its clinical description (hover the Danger Scale in the tool to check).</div>
+      <div class="wq-match">
+        <div class="wq-match-row"><span class="wq-match-label">Fever</span>
+          <select data-match="Fever">
+            <option value="">— choose a description —</option>
+            <option>Set point shifted up (e.g., infection) — the loop is still working</option>
+            <option>Heavy sweating, dehydration, electrolyte loss; still conscious</option>
+            <option>CNS dysfunction begins (confusion, seizure) — medical emergency</option>
+            <option>Severe cellular/protein damage risk — often fatal without rapid cooling</option>
+          </select></div>
+        <div class="wq-match-row"><span class="wq-match-label">Heat Exhaustion</span>
+          <select data-match="Heat Exhaustion">
+            <option value="">— choose a description —</option>
+            <option>Set point shifted up (e.g., infection) — the loop is still working</option>
+            <option>Heavy sweating, dehydration, electrolyte loss; still conscious</option>
+            <option>CNS dysfunction begins (confusion, seizure) — medical emergency</option>
+            <option>Severe cellular/protein damage risk — often fatal without rapid cooling</option>
+          </select></div>
+        <div class="wq-match-row"><span class="wq-match-label">Heat Stroke</span>
+          <select data-match="Heat Stroke">
+            <option value="">— choose a description —</option>
+            <option>Set point shifted up (e.g., infection) — the loop is still working</option>
+            <option>Heavy sweating, dehydration, electrolyte loss; still conscious</option>
+            <option>CNS dysfunction begins (confusion, seizure) — medical emergency</option>
+            <option>Severe cellular/protein damage risk — often fatal without rapid cooling</option>
+          </select></div>
+        <div class="wq-match-row"><span class="wq-match-label">Critical Hyperthermia</span>
+          <select data-match="Critical Hyperthermia">
+            <option value="">— choose a description —</option>
+            <option>Set point shifted up (e.g., infection) — the loop is still working</option>
+            <option>Heavy sweating, dehydration, electrolyte loss; still conscious</option>
+            <option>CNS dysfunction begins (confusion, seizure) — medical emergency</option>
+            <option>Severe cellular/protein damage risk — often fatal without rapid cooling</option>
+          </select></div>
+      </div>
+      <div class="wq-print-text"></div>
+    </div>
+  </section>
+
+  <footer class="debrief no-print">
+    <details>
+      <summary>Instructor debrief prompts</summary>
+      <ol>
+        <li>Use <strong>Walk the Loop</strong> mode to step through one full correction cycle deliberately. At each step, say out loud what changed and why, before clicking Next.</li>
+        <li>Switch to Continuous mode and watch the Activity Log while you push the ambient slider to an extreme. What's the first word in the log that tells you the loop has stopped keeping up?</li>
+        <li>In Advanced mode, compare lowering Effector Capacity vs. lowering Thermoreceptor Sensitivity at the same ambient load. Both can decompensate the system — which one is a problem with detecting the deviation, and which is a problem with correcting it?</li>
+        <li>Run the Fever preset. Why does the log settle into a quiet, compensated state instead of showing the same escalating pattern as heat stroke? What does that say about whether fever is the loop failing or the loop working differently?</li>
+        <li>Connect this back to the handout: where is the line between this activity (physiology) and pathophysiology? What has to be true about the loop for a state to count as "decompensated"?</li>
+        <li>Using 6× speed and the Cold Plunge / Heat Wave presets, watch the Danger Zones bar and the Activity Log together. Note the exact temperature where the log announces a new zone — how does the loop's own status (compensating vs. decompensated) relate to when a zone becomes clinically dangerous?</li>
+      </ol>
+    </details>
+  </footer>
+
+</div>
+
+<script>
+(function(){
+  // ---------- constants ----------
+  const AMBIENT_GAIN = 0.006;
+  const BASE_CAPACITY = 0.05;
+  const CORRECTION_GAIN = 2.5;
+  const TICK_MS = 100;
+  const NARRATE_MS = 900;
+  const STAGGER_STEP_MS = 150;
+  const GLOW_MS = 600;
+  const MAX_POINTS = 220;
+  const MAX_LOG = 60;
+  const STAGE_LABELS = ['Stimulus', 'Receptor', 'Control Center', 'Effector', 'Response'];
+  const CLAMP_MIN = 20;
+  const CLAMP_MAX = 44;
+  const DANGER_DOMAIN = [20, 44];
+
+  // Clinically-grounded staging (Celsius). Cold side: original Swiss hypothermia
+  // staging (Stage I 35–32°C, II 32–28°C, III 28–24°C, IV <24°C). Hot side: normal
+  // range 36.5–37.5°C, fever as a set-point shift, heat exhaustion <40°C, heat
+  // stroke >40°C with CNS dysfunction (per Cleveland Clinic / StatPearls).
+  const DANGER_ZONES = [
+    { key: 'profound',       label: 'Profound Hypothermia',  min: -Infinity, max: 24,        color: '#1e3a8a', dangerous: true,  desc: 'Vital signs may be undetectable — cardiac arrest risk.' },
+    { key: 'severe-cold',    label: 'Severe Hypothermia',    min: 24,        max: 28,         color: '#1d4ed8', dangerous: true,  desc: 'Unconscious; high risk of cardiac arrhythmia.' },
+    { key: 'moderate-cold',  label: 'Moderate Hypothermia',  min: 28,        max: 32,         color: '#3b82f6', dangerous: false, desc: 'Impaired consciousness; shivering may stop.' },
+    { key: 'mild-cold',      label: 'Mild Hypothermia',      min: 32,        max: 35,         color: '#93c5fd', dangerous: false, desc: 'Conscious, shivering, reduced coordination.' },
+    { key: 'normal',         label: 'Normal',                min: 35,        max: 37.5,       color: '#16a34a', dangerous: false, desc: 'Core temperature within the normal regulated range.' },
+    { key: 'fever',          label: 'Fever',                 min: 37.5,      max: 39,         color: '#facc15', dangerous: false, desc: 'Set point shifted up (e.g., infection) — the loop is still working.' },
+    { key: 'heat-exhaustion',label: 'Heat Exhaustion',       min: 39,        max: 40,         color: '#f97316', dangerous: false, desc: 'Heavy sweating, dehydration, electrolyte loss; still conscious.' },
+    { key: 'heat-stroke',    label: 'Heat Stroke',           min: 40,        max: 41.5,       color: '#dc2626', dangerous: true,  desc: 'CNS dysfunction begins (confusion, seizure) — medical emergency.' },
+    { key: 'critical-hot',   label: 'Critical Hyperthermia', min: 41.5,      max: Infinity,   color: '#7f1d1d', dangerous: true,  desc: 'Severe cellular/protein damage risk — often fatal without rapid cooling.' }
+  ];
+
+  function getZone(temp){
+    return DANGER_ZONES.find(z => temp >= z.min && temp < z.max) || DANGER_ZONES[DANGER_ZONES.length - 1];
+  }
+
+  // ---------- state ----------
+  const state = {
+    mode: 'simple',
+    playback: 'continuous',
+    running: false,
+    speed: 1,
+    tick: 0,
+    ambientLoad: 0,
+    setPoint: 37.0,
+    sensitivity: 1.0,
+    strength: 1.0,
+    coreTemp: 37.0,
+    status: 'compensated',
+    prevStatus: 'compensated',
+    history: [],
+    devHistory: [],
+    lastFrame: null,
+    logLastStatus: null,
+    logLastBucket: null,
+    logBeatCount: 0,
+    lastZoneKey: 'normal',
+    guided: { stage: -1, frame: null }
+  };
+
+  // ---------- elements ----------
+  const el = id => document.getElementById(id);
+  const ambientSlider = el('ambientSlider');
+  const ambientVal = el('ambientVal');
+  const setpointSlider = el('setpointSlider');
+  const setpointVal = el('setpointVal');
+  const sensSlider = el('sensSlider');
+  const sensVal = el('sensVal');
+  const strSlider = el('strSlider');
+  const strVal = el('strVal');
+  const playBtn = el('playBtn');
+  const resetBtn = el('resetBtn');
+  const modeSimpleBtn = el('modeSimpleBtn');
+  const modeAdvancedBtn = el('modeAdvancedBtn');
+  const advancedControls = el('advancedControls');
+  const simplePresets = el('simplePresets');
+  const playbackContinuousBtn = el('playbackContinuousBtn');
+  const playbackGuidedBtn = el('playbackGuidedBtn');
+  const continuousControls = el('continuousControls');
+  const guidedControls = el('guidedControls');
+  const guidedCaption = el('guidedCaption');
+  const guidedNextBtn = el('guidedNextBtn');
+  const statusBadge = el('statusBadge');
+  const statusText = el('statusText');
+  const tempBig = el('tempBig');
+  const alertBanner = el('alertBanner');
+  const ariaStatus = el('ariaStatus');
+  const canvas = el('chart');
+  const ctx = canvas.getContext('2d');
+  const stages = [el('stageStimulus'), el('stageReceptor'), el('stageControl'), el('stageEffector'), el('stageResponse')];
+  const detailEls = [el('detStimulus'), el('detReceptor'), el('detControl'), el('detEffector'), el('detResponse')];
+  const effNameEl = el('effName');
+  const barReceptor = el('barReceptor');
+  const barEffector = el('barEffector');
+  const logPanel = el('logPanel');
+  const logEmpty = el('logEmpty');
+  const clearLogBtn = el('clearLogBtn');
+  const dangerScaleEl = el('dangerScale');
+  const dangerTrack = el('dangerTrack');
+  const dangerMarker = el('dangerMarker');
+  const dangerDot = el('dangerDot');
+  const dangerZoneLabel = el('dangerZoneLabel');
+  const dangerZoneDesc = el('dangerZoneDesc');
+
+  function buildDangerTrack(){
+    const [domainMin, domainMax] = DANGER_DOMAIN;
+    DANGER_ZONES.forEach(z => {
+      const lo = Math.max(z.min, domainMin);
+      const hi = Math.min(z.max, domainMax);
+      const pct = Math.max(0, (hi - lo) / (domainMax - domainMin) * 100);
+      const seg = document.createElement('div');
+      seg.className = 'seg';
+      seg.style.flex = pct.toFixed(3);
+      seg.style.background = z.color;
+      const rangeLabel = z.min === -Infinity ? `below ${z.max}°C` : z.max === Infinity ? `above ${z.min}°C` : `${lo}–${hi}°C`;
+      seg.title = `${z.label} (${rangeLabel})`;
+      dangerTrack.appendChild(seg);
+    });
+  }
+
+  function updateDangerScale(temp){
+    const [domainMin, domainMax] = DANGER_DOMAIN;
+    const pct = Math.max(0, Math.min(100, (temp - domainMin) / (domainMax - domainMin) * 100));
+    dangerMarker.style.left = pct + '%';
+    const zone = getZone(temp);
+    dangerZoneLabel.textContent = zone.label;
+    dangerZoneDesc.textContent = '— ' + zone.desc;
+    dangerDot.style.background = zone.color;
+    dangerScaleEl.classList.toggle('danger-flash', zone.dangerous);
+    return zone;
+  }
+
+  function checkZoneMilestone(temp, status){
+    const zone = getZone(temp);
+    if(zone.key !== state.lastZoneKey){
+      state.lastZoneKey = zone.key;
+      appendLogEntry(`🌡 Entered ${zone.label} zone (${temp.toFixed(1)}°C) — ${zone.desc}`, status, true);
+    }
+  }
+
+  function fitCanvas(){
+    const rect = canvas.getBoundingClientRect();
+    canvas.width = Math.max(300, Math.floor(rect.width));
+    canvas.height = 200;
+  }
+  window.addEventListener('resize', fitCanvas);
+
+  // ---------- parameter controls ----------
+  ambientSlider.addEventListener('input', () => {
+    state.ambientLoad = parseFloat(ambientSlider.value);
+    ambientVal.textContent = state.ambientLoad.toFixed(1);
+  });
+  setpointSlider.addEventListener('input', () => {
+    state.setPoint = parseFloat(setpointSlider.value);
+    setpointVal.textContent = state.setPoint.toFixed(1) + '°C';
+  });
+  sensSlider.addEventListener('input', () => {
+    state.sensitivity = parseFloat(sensSlider.value);
+    sensVal.textContent = state.sensitivity.toFixed(1) + '×';
+  });
+  strSlider.addEventListener('input', () => {
+    state.strength = parseFloat(strSlider.value);
+    strVal.textContent = state.strength.toFixed(1) + '×';
+  });
+
+  simplePresets.addEventListener('click', (e) => {
+    const btn = e.target.closest('button[data-ambient]');
+    if(!btn) return;
+    const v = parseFloat(btn.dataset.ambient);
+    state.ambientLoad = v;
+    ambientSlider.value = v;
+    ambientVal.textContent = v.toFixed(1);
+  });
+
+  function setAdvanced(setpoint, sens, str, ambient){
+    if(setpoint !== undefined){ state.setPoint = setpoint; setpointSlider.value = setpoint; setpointVal.textContent = setpoint.toFixed(1)+'°C'; }
+    if(sens !== undefined){ state.sensitivity = sens; sensSlider.value = sens; sensVal.textContent = sens.toFixed(1)+'×'; }
+    if(str !== undefined){ state.strength = str; strSlider.value = str; strVal.textContent = str.toFixed(1)+'×'; }
+    if(ambient !== undefined){ state.ambientLoad = ambient; ambientSlider.value = ambient; ambientVal.textContent = ambient.toFixed(1); }
+  }
+  el('presetNormal').addEventListener('click', () => setAdvanced(37, 1, 1, 0));
+  el('presetFever').addEventListener('click', () => setAdvanced(39, 1, 1, undefined));
+  el('presetSweat').addEventListener('click', () => setAdvanced(37, 1, 0.4, undefined));
+  el('presetNeuro').addEventListener('click', () => setAdvanced(37, 0.3, 1, undefined));
+  el('presetHeatstroke').addEventListener('click', () => setAdvanced(37, 1, 0.4, 8));
+
+  modeSimpleBtn.addEventListener('click', () => {
+    state.mode = 'simple';
+    modeSimpleBtn.classList.add('active'); modeAdvancedBtn.classList.remove('active');
+    advancedControls.style.display = 'none';
+  });
+  modeAdvancedBtn.addEventListener('click', () => {
+    state.mode = 'advanced';
+    modeAdvancedBtn.classList.add('active'); modeSimpleBtn.classList.remove('active');
+    advancedControls.style.display = 'block';
+  });
+
+  // ---------- playback mode switching ----------
+  playbackContinuousBtn.addEventListener('click', () => switchPlayback('continuous'));
+  playbackGuidedBtn.addEventListener('click', () => switchPlayback('guided'));
+
+  function switchPlayback(mode){
+    stopLoop();
+    state.running = false;
+    playBtn.textContent = '▶ Start';
+    state.playback = mode;
+    if(mode === 'continuous'){
+      playbackContinuousBtn.classList.add('active'); playbackGuidedBtn.classList.remove('active');
+      continuousControls.style.display = 'block'; guidedControls.style.display = 'none';
+      stages.forEach(s => s.classList.remove('dim', 'flow-active', 'glow'));
+    } else {
+      playbackGuidedBtn.classList.add('active'); playbackContinuousBtn.classList.remove('active');
+      guidedControls.style.display = 'block'; continuousControls.style.display = 'none';
+      state.guided.stage = -1;
+      guidedCaption.textContent = 'Click "Next" to begin a correction cycle.';
+      guidedNextBtn.textContent = 'Next →';
+      stages.forEach(s => { s.classList.add('dim'); s.classList.remove('flow-active', 'glow'); });
+    }
+  }
+
+  // ---------- continuous playback ----------
+  let simInterval = null;
+  let narrateInterval = null;
+
+  playBtn.addEventListener('click', () => {
+    state.running = !state.running;
+    playBtn.textContent = state.running ? '⏸ Pause' : '▶ Start';
+    if(state.running) startLoop(); else stopLoop();
+  });
+
+  document.querySelectorAll('.speed-row button').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.speed-row button').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      state.speed = parseFloat(btn.dataset.speed);
+    });
+  });
+
+  function startLoop(){
+    if(simInterval) return;
+    simInterval = setInterval(() => {
+      for(let i=0;i<state.speed;i++) tick();
+    }, TICK_MS);
+    narrateInterval = setInterval(narrateBeat, NARRATE_MS);
+    narrateBeat(); // immediate first beat so it doesn't feel like it stalled
+  }
+  function stopLoop(){
+    clearInterval(simInterval); simInterval = null;
+    clearInterval(narrateInterval); narrateInterval = null;
+  }
+
+  resetBtn.addEventListener('click', resetSim);
+
+  function resetSim(){
+    stopLoop();
+    state.running = false;
+    playBtn.textContent = '▶ Start';
+    state.tick = 0;
+    state.coreTemp = state.setPoint;
+    state.history = [];
+    state.devHistory = [];
+    state.status = 'compensated';
+    state.prevStatus = 'compensated';
+    state.lastFrame = null;
+    state.logLastStatus = null;
+    state.logLastBucket = null;
+    state.logBeatCount = 0;
+    state.lastZoneKey = getZone(state.coreTemp).key;
+    state.guided.stage = -1;
+    guidedCaption.textContent = 'Click "Next" to begin a correction cycle.';
+    guidedNextBtn.textContent = 'Next →';
+    clearLog();
+    stages.forEach(s => s.classList.remove('flow-active', 'glow'));
+    if(state.playback === 'guided') stages.forEach(s => s.classList.add('dim'));
+    resetStageText();
+    updateDangerScale(state.coreTemp);
+    renderLive();
+  }
+
+  function resetStageText(){
+    detailEls[0].textContent = 'Core temp at set point.';
+    detailEls[1].textContent = 'Skin + hypothalamus, quiet.';
+    detailEls[2].textContent = 'Comparing to set point.';
+    detailEls[3].textContent = 'Standing by.';
+    detailEls[4].textContent = 'Maintaining set point.';
+    effNameEl.textContent = 'Sweat / shiver';
+    barReceptor.style.width = '0%';
+    barEffector.style.width = '0%';
+    alertBanner.classList.remove('show');
+  }
+
+  // ---------- shared math ----------
+  function computeFrame(coreTemp){
+    const deviation = coreTemp - state.setPoint;
+    const sensedDeviation = deviation * state.sensitivity;
+    const capacity = BASE_CAPACITY * state.strength;
+    let correction = -Math.sign(deviation) * Math.min(Math.abs(sensedDeviation) * CORRECTION_GAIN, capacity);
+    if(Math.abs(deviation) < 0.02) correction = 0;
+    const ambientEffect = state.ambientLoad * AMBIENT_GAIN;
+    return { deviation, sensedDeviation, correction, ambientEffect, capacity, setPoint: state.setPoint, sensitivity: state.sensitivity };
+  }
+
+  function classifyStatus(deviation, devHistory, coreTemp){
+    const absDev = Math.abs(deviation);
+    let status;
+    if(absDev <= 0.3){
+      status = 'compensated';
+    } else if(devHistory.length >= 10){
+      const first = devHistory[0];
+      const last = devHistory[devHistory.length - 1];
+      const improving = Math.abs(last) < Math.abs(first) - 0.02;
+      const worsening = Math.abs(last) > Math.abs(first) + 0.02;
+      if(worsening && absDev > 1.0) status = 'decompensated';
+      else if(improving) status = 'compensating';
+      else status = absDev > 1.5 ? 'decompensated' : 'compensating';
+    } else {
+      status = 'compensating';
+    }
+    if(coreTemp > 40.0 || coreTemp < 35.0) status = 'decompensated';
+    return status;
+  }
+
+  function buildNarrative(frame, status){
+    const { deviation, sensedDeviation, correction, capacity, setPoint, sensitivity } = frame;
+    const hot = deviation > 0.05;
+    const cold = deviation < -0.05;
+    const stimulus = hot ? `Core temp ${deviation.toFixed(2)}°C above set point.`
+                    : cold ? `Core temp ${Math.abs(deviation).toFixed(2)}°C below set point.`
+                    : 'Core temp at set point.';
+    const sensedMag = Math.abs(sensedDeviation);
+    const receptor = sensedMag < 0.05 ? 'Skin + hypothalamic thermoreceptors, quiet.'
+                    : `Thermoreceptor firing rate elevated (sensitivity ${sensitivity.toFixed(1)}×).`;
+    const control = `Hypothalamus comparing to set point (${setPoint.toFixed(1)}°C).`;
+    const effName = hot ? 'Sweat glands + vasodilation' : cold ? 'Shivering + vasoconstriction' : 'Sweat / shiver';
+    const capacityPct = capacity > 0 ? Math.min(100, Math.abs(correction) / capacity * 100) : 0;
+    const effector = Math.abs(correction) < 0.0005 ? 'Standing by.'
+                    : `${hot ? 'Cooling' : 'Warming'} output at ${capacityPct.toFixed(0)}% of capacity.`;
+    const response = status === 'decompensated'
+                    ? (hot ? 'Core temp still climbing — effectors maxed out.' : 'Core temp still falling — effectors maxed out.')
+                    : hot ? 'Cooling body toward set point.'
+                    : cold ? 'Warming body toward set point.'
+                    : 'Maintaining set point.';
+    let chain;
+    if(!hot && !cold){
+      chain = 'At set point — loop quiet.';
+    } else {
+      const dirWord = hot ? 'above' : 'below';
+      const effVerb = hot ? 'cooling' : 'warming';
+      chain = `Stimulus ${Math.abs(deviation).toFixed(2)}°C ${dirWord} set point → Receptor ↑ → Effector ${effVerb} ${capacityPct.toFixed(0)}% → ${status === 'decompensated' ? 'not keeping up' : 'correcting'}.`;
+    }
+    return { stimulus, receptor, control, effName, effector, response, capacityPct, hot, cold, chain };
+  }
+
+  // ---------- continuous physics tick (fast, drives chart) ----------
+  function tick(){
+    const frame = computeFrame(state.coreTemp);
+    const dT = frame.ambientEffect + frame.correction;
+    state.coreTemp = Math.max(CLAMP_MIN, Math.min(CLAMP_MAX, state.coreTemp + dT));
+    state.tick++;
+
+    state.history.push({ t: state.tick, temp: state.coreTemp });
+    if(state.history.length > MAX_POINTS) state.history.shift();
+
+    const newDeviation = state.coreTemp - state.setPoint;
+    state.devHistory.push(newDeviation);
+    if(state.devHistory.length > 30) state.devHistory.shift();
+
+    state.prevStatus = state.status;
+    state.status = classifyStatus(newDeviation, state.devHistory, state.coreTemp);
+    state.lastFrame = { ...computeFrame(state.coreTemp), status: state.status };
+
+    checkZoneMilestone(state.coreTemp, state.status);
+    renderLive();
+  }
+
+  // renders every physics tick: the single always-current number + chart + danger marker, kept smooth
+  function renderLive(){
+    tempBig.textContent = state.coreTemp.toFixed(1);
+    statusBadge.className = 'status-badge ' + state.status;
+    const labels = {
+      compensated: 'Within normal range',
+      compensating: 'Compensating — loop is correcting',
+      decompensated: 'DECOMPENSATED — loop overwhelmed'
+    };
+    statusText.textContent = labels[state.status];
+    if(state.status !== state.prevStatus){
+      ariaStatus.textContent = labels[state.status];
+    }
+    updateDangerScale(state.coreTemp);
+    drawChart();
+  }
+
+  // ---------- narrate beat (throttled, drives the readable cascade + log) ----------
+  function narrateBeat(){
+    if(!state.lastFrame) return;
+    const frame = state.lastFrame;
+    const status = frame.status;
+    const nar = buildNarrative(frame, status);
+    const texts = [nar.stimulus, nar.receptor, nar.control, nar.effector, nar.response];
+
+    texts.forEach((text, i) => {
+      setTimeout(() => {
+        detailEls[i].textContent = text;
+        if(i === 3) effNameEl.textContent = nar.effName;
+        if(i === 1) setBarWidth(barReceptor, Math.min(100, Math.abs(frame.sensedDeviation) / 2 * 100), nar.hot, nar.cold, status);
+        if(i === 3) setBarWidth(barEffector, nar.capacityPct, nar.hot, nar.cold, status);
+        glowStage(i);
+      }, i * STAGGER_STEP_MS);
+    });
+
+    setTimeout(() => {
+      updateAlertBanner(nar, status);
+      maybeLog(nar, status, frame.deviation);
+    }, texts.length * STAGGER_STEP_MS + 60);
+  }
+
+  function glowStage(i){
+    stages[i].classList.remove('glow');
+    void stages[i].offsetWidth; // restart animation
+    stages[i].classList.add('flow-active', 'glow');
+    setTimeout(() => stages[i].classList.remove('flow-active', 'glow'), GLOW_MS);
+  }
+
+  function setBarWidth(barEl, pct, hot, cold, status){
+    barEl.style.width = pct + '%';
+    barEl.style.background = status === 'decompensated' ? 'var(--bad)' : (hot ? 'var(--hot)' : cold ? 'var(--cold)' : 'var(--accent)');
+  }
+
+  function updateAlertBanner(nar, status){
+    if(status === 'decompensated'){
+      alertBanner.classList.add('show');
+      alertBanner.textContent = nar.hot
+        ? '⚠ Decompensated (hot): cooling capacity can’t keep pace with heat load — this is the physiology behind heat exhaustion / heat stroke risk.'
+        : '⚠ Decompensated (cold): heat-generation capacity can’t keep pace with cold exposure — this is the physiology behind hypothermia risk.';
+    } else {
+      alertBanner.classList.remove('show');
+    }
+  }
+
+  // ---------- activity log ----------
+  function maybeLog(nar, status, deviation){
+    const bucket = Math.round(deviation * 10) / 10;
+    state.logBeatCount++;
+    const shouldLog = status !== state.logLastStatus
+      || state.logLastBucket === null
+      || Math.abs(bucket - state.logLastBucket) >= 0.1
+      || state.logBeatCount % 6 === 0;
+    if(!shouldLog) return;
+    state.logLastStatus = status;
+    state.logLastBucket = bucket;
+    appendLogEntry(nar.chain, status);
+  }
+
+  function appendLogEntry(text, status, milestone){
+    if(logEmpty && logEmpty.parentNode) logEmpty.remove();
+    const row = document.createElement('div');
+    row.className = 'log-entry ' + status + (milestone ? ' milestone' : '');
+    const tag = document.createElement('span');
+    tag.className = 'tag';
+    tag.textContent = status;
+    const msg = document.createElement('span');
+    msg.className = 'msg';
+    msg.textContent = text;
+    row.appendChild(tag);
+    row.appendChild(msg);
+    logPanel.appendChild(row);
+    while(logPanel.children.length > MAX_LOG) logPanel.removeChild(logPanel.firstChild);
+    logPanel.scrollTop = logPanel.scrollHeight;
+  }
+
+  function clearLog(){
+    logPanel.innerHTML = '';
+    const empty = document.createElement('div');
+    empty.className = 'log-empty';
+    empty.id = 'logEmpty';
+    empty.textContent = 'Messages will appear here as the loop runs — read back at your own pace.';
+    logPanel.appendChild(empty);
+  }
+  clearLogBtn.addEventListener('click', clearLog);
+
+  // ---------- guided (step-by-step) mode ----------
+  guidedNextBtn.addEventListener('click', guidedNext);
+
+  function guidedNext(){
+    if(state.guided.stage === -1){
+      state.guided.frame = { ...computeFrame(state.coreTemp) };
+      state.guided.frame.status = classifyStatus(state.guided.frame.deviation, state.devHistory, state.coreTemp);
+      state.guided.stage = 0;
+      revealGuidedStage(0);
+    } else if(state.guided.stage < 4){
+      state.guided.stage++;
+      revealGuidedStage(state.guided.stage);
+    } else {
+      applyGuidedFrame(state.guided.frame);
+      state.guided.stage = -1;
+      stages.forEach(s => { s.classList.add('dim'); s.classList.remove('flow-active', 'glow'); });
+      guidedCaption.textContent = 'Cycle complete. Click "Next" to begin the next correction cycle.';
+      guidedNextBtn.textContent = 'Next Cycle →';
+    }
+  }
+
+  function revealGuidedStage(idx){
+    const frame = state.guided.frame;
+    const nar = buildNarrative(frame, frame.status);
+    const texts = [nar.stimulus, nar.receptor, nar.control, nar.effector, nar.response];
+
+    stages.forEach((s, i) => s.classList.toggle('dim', i !== idx));
+    glowStage(idx);
+
+    detailEls[idx].textContent = texts[idx];
+    if(idx === 3) effNameEl.textContent = nar.effName;
+    if(idx === 1) setBarWidth(barReceptor, Math.min(100, Math.abs(frame.sensedDeviation) / 2 * 100), nar.hot, nar.cold, frame.status);
+    if(idx === 3) setBarWidth(barEffector, nar.capacityPct, nar.hot, nar.cold, frame.status);
+
+    guidedCaption.textContent = `Step ${idx + 1} of 5 — ${STAGE_LABELS[idx]}`;
+    guidedNextBtn.textContent = idx < 4 ? 'Next →' : 'Apply & Continue →';
+    appendLogEntry(`${STAGE_LABELS[idx]}: ${texts[idx]}`, frame.status);
+
+    statusBadge.className = 'status-badge ' + frame.status;
+    const labels = { compensated: 'Within normal range', compensating: 'Compensating — loop is correcting', decompensated: 'DECOMPENSATED — loop overwhelmed' };
+    statusText.textContent = labels[frame.status];
+    updateAlertBanner(nar, frame.status);
+  }
+
+  function applyGuidedFrame(frame){
+    const dT = frame.ambientEffect + frame.correction;
+    state.coreTemp = Math.max(CLAMP_MIN, Math.min(CLAMP_MAX, state.coreTemp + dT));
+    state.tick++;
+    state.history.push({ t: state.tick, temp: state.coreTemp });
+    if(state.history.length > MAX_POINTS) state.history.shift();
+    const newDeviation = state.coreTemp - state.setPoint;
+    state.devHistory.push(newDeviation);
+    if(state.devHistory.length > 30) state.devHistory.shift();
+    state.prevStatus = state.status;
+    state.status = classifyStatus(newDeviation, state.devHistory, state.coreTemp);
+    tempBig.textContent = state.coreTemp.toFixed(1);
+    statusBadge.className = 'status-badge ' + state.status;
+    updateDangerScale(state.coreTemp);
+    drawChart();
+    appendLogEntry(`Cycle complete — core temp now ${state.coreTemp.toFixed(2)}°C.`, state.status);
+    checkZoneMilestone(state.coreTemp, state.status);
+  }
+
+  // ---------- chart ----------
+  function drawChart(){
+    const w = canvas.width, h = canvas.height;
+    ctx.clearRect(0, 0, w, h);
+    const padL = 34, padR = 10, padT = 10, padB = 20;
+    const plotW = w - padL - padR, plotH = h - padT - padB;
+
+    // autoscale to the visible trend (with padding) so extreme runs never clip off-chart
+    let yMin = state.setPoint - 1, yMax = state.setPoint + 1;
+    state.history.forEach(p => { if(p.temp < yMin) yMin = p.temp; if(p.temp > yMax) yMax = p.temp; });
+    yMin -= 0.5; yMax += 0.5;
+    if(yMax - yMin < 3){ const mid = (yMax + yMin) / 2; yMin = mid - 1.5; yMax = mid + 1.5; }
+    yMin = Math.max(CLAMP_MIN - 1, yMin);
+    yMax = Math.min(CLAMP_MAX + 1, yMax);
+    const span = yMax - yMin;
+    const step = span <= 4 ? 1 : span <= 10 ? 2 : span <= 20 ? 5 : 10;
+
+    const yToPx = (temp) => padT + plotH - ((temp - yMin) / (yMax - yMin)) * plotH;
+
+    ctx.strokeStyle = '#eef1f5';
+    ctx.fillStyle = '#94a3b8';
+    ctx.font = '10px -apple-system, sans-serif';
+    ctx.textAlign = 'right';
+    const startT = Math.ceil(yMin / step) * step;
+    for(let t = startT; t <= yMax; t += step){
+      const y = yToPx(t);
+      ctx.beginPath(); ctx.moveTo(padL, y); ctx.lineTo(w - padR, y); ctx.stroke();
+      ctx.fillText(Math.round(t) + '°', padL - 4, y + 3);
+    }
+
+    ctx.fillStyle = 'rgba(22,163,74,0.10)';
+    const bandTop = yToPx(state.setPoint + 0.3);
+    const bandBot = yToPx(state.setPoint - 0.3);
+    ctx.fillRect(padL, bandTop, plotW, bandBot - bandTop);
+
+    ctx.strokeStyle = '#94a3b8';
+    ctx.setLineDash([4, 4]);
+    ctx.beginPath();
+    const spY = yToPx(state.setPoint);
+    ctx.moveTo(padL, spY); ctx.lineTo(w - padR, spY);
+    ctx.stroke();
+    ctx.setLineDash([]);
+
+    if(state.history.length > 1){
+      ctx.strokeStyle = '#334155';
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      const n = state.history.length;
+      state.history.forEach((pt, i) => {
+        const x = padL + (i / (MAX_POINTS - 1)) * plotW;
+        const y = yToPx(pt.temp);
+        if(i === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
+      });
+      ctx.stroke();
+
+      const last = state.history[state.history.length - 1];
+      const lastX = padL + ((n - 1) / (MAX_POINTS - 1)) * plotW;
+      const lastY = yToPx(last.temp);
+      ctx.fillStyle = state.status === 'decompensated' ? '#dc2626' : state.status === 'compensating' ? '#d97706' : '#16a34a';
+      ctx.beginPath();
+      ctx.arc(lastX, lastY, 4, 0, Math.PI * 2);
+      ctx.fill();
+    }
+
+    ctx.fillStyle = '#94a3b8';
+    ctx.textAlign = 'left';
+    ctx.fillText('elapsed simulation time →', padL, h - 6);
+  }
+
+  // ---------- student worksheet ----------
+  const printWorksheetBtn = el('printWorksheetBtn');
+  const clearWorksheetBtn = el('clearWorksheetBtn');
+
+  function summarizeWq(wq){
+    const type = wq.dataset.type;
+    if(type === 'mc'){
+      const checked = wq.querySelector('input[type=radio]:checked');
+      return checked ? checked.parentElement.querySelector('span').textContent : '(no answer selected)';
+    }
+    if(type === 'match'){
+      const rows = Array.from(wq.querySelectorAll('.wq-match-row'));
+      const lines = rows.map(r => {
+        const label = r.querySelector('.wq-match-label').textContent;
+        const val = r.querySelector('select').value;
+        return `${label} → ${val || '(no match chosen)'}`;
+      });
+      return lines.join('\n');
+    }
+    if(type === 'short-multi'){
+      const inputs = Array.from(wq.querySelectorAll('.wq-multi-input input[type=text]'));
+      const lines = inputs.map(i => `${i.dataset.part}: ${i.value.trim() || '(blank)'}`);
+      return lines.join('\n');
+    }
+    // plain short answer
+    const ta = wq.querySelector('.wq-input');
+    return ta && ta.value.trim() ? ta.value : '(no answer recorded)';
+  }
+
+  function syncWorksheetForPrint(){
+    document.querySelectorAll('.wq').forEach(wq => {
+      const out = wq.querySelector('.wq-print-text');
+      out.textContent = summarizeWq(wq);
+    });
+  }
+  window.addEventListener('beforeprint', syncWorksheetForPrint);
+  if(printWorksheetBtn){
+    printWorksheetBtn.addEventListener('click', () => { syncWorksheetForPrint(); window.print(); });
+  }
+  if(clearWorksheetBtn){
+    clearWorksheetBtn.addEventListener('click', () => {
+      if(!confirm('Clear all worksheet answers?')) return;
+      document.querySelectorAll('.wq-input').forEach(t => t.value = '');
+      document.querySelectorAll('.wq-multi-input input[type=text]').forEach(t => t.value = '');
+      document.querySelectorAll('.wq-mc input[type=radio]').forEach(r => r.checked = false);
+      document.querySelectorAll('.wq-match select').forEach(s => s.value = '');
+    });
+  }
+
+  // ---------- init ----------
+  function init(){
+    fitCanvas();
+    ambientVal.textContent = state.ambientLoad.toFixed(1);
+    setpointVal.textContent = state.setPoint.toFixed(1) + '°C';
+    sensVal.textContent = state.sensitivity.toFixed(1) + '×';
+    strVal.textContent = state.strength.toFixed(1) + '×';
+    buildDangerTrack();
+    renderLive();
+  }
+  init();
+})();
+</script>
+</body>
+</html>
