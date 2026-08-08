@@ -186,10 +186,6 @@
   .danger-current .zone-desc { color: var(--ink-soft); }
   .danger-scale-labels { display: flex; justify-content: space-between; font-size: 0.62rem; color: var(--ink-soft); margin-top: 4px; }
 
-  footer.debrief { margin-top: 18px; }
-  footer.debrief summary { cursor: pointer; font-weight: 700; font-size: 0.9rem; padding: 4px 0; }
-  footer.debrief ol { margin: 10px 0 0; padding-left: 20px; font-size: 0.88rem; line-height: 1.6; color: var(--ink); }
-
   .sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
 
   /* ---- student worksheet ---- */
@@ -240,12 +236,32 @@
     background: #fbfcfd; font-weight: 400; color: var(--ink); font-family: inherit;
   }
 
+  /* answer checking */
+  .wq-check {
+    margin-top: 9px; font-size: 0.76rem; font-weight: 700; padding: 7px 13px; border-radius: 8px;
+    border: 1px solid var(--border); background: #fbfcfd; cursor: pointer; color: var(--accent);
+  }
+  .wq-check:hover { background: #eef1f5; }
+  .wq-feedback { margin-top: 8px; font-size: 0.85rem; line-height: 1.5; }
+  .wq-fb-good { color: var(--ok); font-weight: 800; }
+  .wq-fb-bad { color: var(--bad); font-weight: 800; }
+  .wq-fb-warn { color: var(--warn); font-weight: 800; }
+  .wq-fb-explain { margin-top: 5px; font-size: 0.82rem; color: var(--ink-soft); }
+  .wq-fb-model {
+    margin-top: 2px; font-size: 0.84rem; background: #fbfcfd; border: 1px solid var(--border);
+    border-radius: 8px; padding: 9px 11px; white-space: pre-line; color: var(--ink);
+  }
+  .wq-fb-model strong { color: var(--ink-soft); font-size: 0.76rem; text-transform: uppercase; letter-spacing: 0.03em; }
+  select.wq-select-good { border-color: var(--ok) !important; background: var(--ok-soft) !important; }
+  select.wq-select-bad { border-color: var(--bad) !important; background: var(--bad-soft) !important; }
+  .wq-model-answer { display: none; }
+
   @media print {
-    .layout, footer.debrief, .no-print, .no-print-controls .ws-actions, header.top .lo-tag { display: none !important; }
+    .layout, .no-print, .no-print-controls .ws-actions, header.top .lo-tag { display: none !important; }
     .ws-actions { display: none !important; }
     body { background: #fff; }
     .worksheet { border: none; padding: 0; margin: 0; }
-    .wq-input, .wq-mc, .wq-match, .wq-multi-input { display: none !important; }
+    .wq-input, .wq-mc, .wq-match, .wq-multi-input, .wq-check, .wq-feedback { display: none !important; }
     .wq-print-text {
       display: block; border: 1px solid #ccc; border-radius: 6px; min-height: 34px; padding: 7px 9px;
       font-size: 11.5pt; white-space: pre-wrap; color: #111;
@@ -445,10 +461,17 @@
         <label>Effector <input type="text" data-part="Effector"></label>
         <label>Response <input type="text" data-part="Response"></label>
       </div>
+      <div class="wq-model-answer">Stimulus: Core temp at set point.
+Receptor: Skin + hypothalamic thermoreceptors, quiet.
+Control Center: Hypothalamus comparing to set point (37.0°C).
+Effector: Standing by.
+Response: Maintaining set point.</div>
+      <button class="wq-check">Check Answer</button>
+      <div class="wq-feedback"></div>
       <div class="wq-print-text"></div>
     </div>
 
-    <div class="wq" data-q="2" data-type="mc">
+    <div class="wq" data-q="2" data-type="mc" data-correct="Compensated">
       <div class="wq-prompt"><strong>2.</strong> Switch to Continuous mode, set the ambient slider to <strong>Warm exercise (+5)</strong>, and let it run for about 15 seconds. What status does the badge settle into?</div>
       <ul class="wq-mc">
         <li><label><input type="radio" name="q2" value="Compensated"><span>Compensated — within normal range</span></label></li>
@@ -456,12 +479,15 @@
         <li><label><input type="radio" name="q2" value="Decompensated"><span>Decompensated — loop overwhelmed</span></label></li>
         <li><label><input type="radio" name="q2" value="Keeps changing"><span>It never settles — keeps cycling between states</span></label></li>
       </ul>
+      <button class="wq-check">Check Answer</button>
+      <div class="wq-feedback"></div>
       <div class="wq-print-text"></div>
     </div>
 
     <h3 class="ws-section">Part 2 — Pushing to Decompensation</h3>
 
-    <div class="wq" data-q="3" data-type="mc">
+    <div class="wq" data-q="3" data-type="mc" data-correct="Fever"
+         data-explain="At +9 ambient load, the badge turns DECOMPENSATED around ~38.0°C — which is still inside the Fever zone (37.5–39°C), well before Heat Exhaustion or Heat Stroke. The loop's status reacts to the trend (is the deviation getting worse?), not to a specific clinical danger threshold.">
       <div class="wq-prompt"><strong>3.</strong> Reset, then run the <strong>Heat wave + exertion (+9)</strong> preset at 3× or 6× speed. Watch the Danger Scale — which zone is core temperature in the moment the status badge turns red (DECOMPENSATED)?</div>
       <ul class="wq-mc">
         <li><label><input type="radio" name="q3" value="Fever"><span>Fever</span></label></li>
@@ -469,12 +495,17 @@
         <li><label><input type="radio" name="q3" value="Heat Stroke"><span>Heat Stroke</span></label></li>
         <li><label><input type="radio" name="q3" value="Critical Hyperthermia"><span>Critical Hyperthermia</span></label></li>
       </ul>
+      <button class="wq-check">Check Answer</button>
+      <div class="wq-feedback"></div>
       <div class="wq-print-text"></div>
     </div>
 
     <div class="wq" data-q="4" data-type="short">
       <div class="wq-prompt"><strong>4.</strong> Keep watching the Activity Log. At what temperature did it announce "Entered Heat Stroke zone"? Did that happen at the same moment the badge turned red, before, or after — and why do you think that is?</div>
       <textarea class="wq-input" rows="3"></textarea>
+      <div class="wq-model-answer">The log announces "Entered Heat Stroke zone" at 40.0°C. That's well AFTER the badge already turned red (~38.0°C, still in the Fever zone). The badge status is based on whether the trend is worsening, so it can flag trouble long before core temperature reaches a clinically dangerous zone.</div>
+      <button class="wq-check">Check Answer</button>
+      <div class="wq-feedback"></div>
       <div class="wq-print-text"></div>
     </div>
 
@@ -482,26 +513,28 @@
       <div class="wq-prompt"><strong>5.</strong> Reset, then try <strong>Cold plunge (-9)</strong> and watch the Danger Scale as core temperature falls. Match each hypothermia stage to its approximate temperature range (check the tool if you're not sure).</div>
       <div class="wq-match">
         <div class="wq-match-row"><span class="wq-match-label">Mild Hypothermia</span>
-          <select data-match="Mild Hypothermia">
+          <select data-match="Mild Hypothermia" data-correct="32–35°C">
             <option value="">— choose a range —</option>
             <option>32–35°C</option><option>28–32°C</option><option>24–28°C</option><option>Below 24°C</option>
           </select></div>
         <div class="wq-match-row"><span class="wq-match-label">Moderate Hypothermia</span>
-          <select data-match="Moderate Hypothermia">
+          <select data-match="Moderate Hypothermia" data-correct="28–32°C">
             <option value="">— choose a range —</option>
             <option>32–35°C</option><option>28–32°C</option><option>24–28°C</option><option>Below 24°C</option>
           </select></div>
         <div class="wq-match-row"><span class="wq-match-label">Severe Hypothermia</span>
-          <select data-match="Severe Hypothermia">
+          <select data-match="Severe Hypothermia" data-correct="24–28°C">
             <option value="">— choose a range —</option>
             <option>32–35°C</option><option>28–32°C</option><option>24–28°C</option><option>Below 24°C</option>
           </select></div>
         <div class="wq-match-row"><span class="wq-match-label">Profound Hypothermia</span>
-          <select data-match="Profound Hypothermia">
+          <select data-match="Profound Hypothermia" data-correct="Below 24°C">
             <option value="">— choose a range —</option>
             <option>32–35°C</option><option>28–32°C</option><option>24–28°C</option><option>Below 24°C</option>
           </select></div>
       </div>
+      <button class="wq-check">Check Answer</button>
+      <div class="wq-feedback"></div>
       <div class="wq-print-text"></div>
     </div>
 
@@ -510,10 +543,14 @@
     <div class="wq" data-q="6" data-type="short">
       <div class="wq-prompt"><strong>6.</strong> Reset to normal physiology, switch to Advanced mode, and apply the <strong>Impaired sweating (dehydration/aging)</strong> preset with the ambient slider at 0. Does the loop decompensate at rest? Now raise the ambient slider slowly — at roughly what value does it decompensate? How does that compare to the heat-wave threshold you found in Question 3 with normal effector capacity?</div>
       <textarea class="wq-input" rows="3"></textarea>
+      <div class="wq-model-answer">No — at rest (ambient = 0) there's no heat load, so core temp stays at set point and the loop never decompensates, even with impaired sweating. Raising the ambient slider, it starts to decompensate once the load reaches roughly +3 to +4 — compared to about +8 to +9 with normal effector capacity. Impaired sweating roughly cuts the safety margin in half.</div>
+      <button class="wq-check">Check Answer</button>
+      <div class="wq-feedback"></div>
       <div class="wq-print-text"></div>
     </div>
 
-    <div class="wq" data-q="7" data-type="mc">
+    <div class="wq" data-q="7" data-type="mc" data-correct="A"
+         data-explain="Verified in the simulator: at +5 ambient load, Impaired Sweating alone is enough to decompensate the loop (it runs away toward the clamp), but Peripheral Neuropathy alone is not (it settles within about 0.04°C of set point). Capacity is a hard ceiling on correction — sensitivity mainly changes how quickly the loop responds, not whether it ultimately can.">
       <div class="wq-prompt"><strong>7.</strong> Compare <strong>Peripheral neuropathy</strong> (sensitivity ↓) against <strong>Impaired sweating</strong> (capacity ↓) at the same ambient load (try +5 for both). Which statement best describes the difference?</div>
       <ul class="wq-mc">
         <li><label><input type="radio" name="q7" value="A"><span>Neuropathy is a detection problem — the receptor under-reports the deviation; impaired sweating is a correction problem — the effector can't produce enough output even once it's told to.</span></label></li>
@@ -521,12 +558,17 @@
         <li><label><input type="radio" name="q7" value="C"><span>Neuropathy affects the control center's set point; impaired sweating affects the stimulus.</span></label></li>
         <li><label><input type="radio" name="q7" value="D"><span>Neither actually changes how or whether the loop decompensates.</span></label></li>
       </ul>
+      <button class="wq-check">Check Answer</button>
+      <div class="wq-feedback"></div>
       <div class="wq-print-text"></div>
     </div>
 
     <div class="wq" data-q="8" data-type="short">
       <div class="wq-prompt"><strong>8.</strong> Run the <strong>Fever</strong> preset. Does the status badge ever turn red? Why or why not — connect your answer to how this activity defines "decompensated."</div>
       <textarea class="wq-input" rows="3"></textarea>
+      <div class="wq-model-answer">No — the badge never turns red. Jumping the set point to 39°C does create a temporary deviation, but the effector still has full capacity (1.0×) available to close that gap, so the loop settles into a new compensated state at 39°C. "Decompensated" in this activity means the loop CAN'T correct the deviation — not that the set point moved.</div>
+      <button class="wq-check">Check Answer</button>
+      <div class="wq-feedback"></div>
       <div class="wq-print-text"></div>
     </div>
 
@@ -536,7 +578,7 @@
       <div class="wq-prompt"><strong>9.</strong> Match each hyperthermia zone to its clinical description (hover the Danger Scale in the tool to check).</div>
       <div class="wq-match">
         <div class="wq-match-row"><span class="wq-match-label">Fever</span>
-          <select data-match="Fever">
+          <select data-match="Fever" data-correct="Set point shifted up (e.g., infection) — the loop is still working">
             <option value="">— choose a description —</option>
             <option>Set point shifted up (e.g., infection) — the loop is still working</option>
             <option>Heavy sweating, dehydration, electrolyte loss; still conscious</option>
@@ -544,7 +586,7 @@
             <option>Severe cellular/protein damage risk — often fatal without rapid cooling</option>
           </select></div>
         <div class="wq-match-row"><span class="wq-match-label">Heat Exhaustion</span>
-          <select data-match="Heat Exhaustion">
+          <select data-match="Heat Exhaustion" data-correct="Heavy sweating, dehydration, electrolyte loss; still conscious">
             <option value="">— choose a description —</option>
             <option>Set point shifted up (e.g., infection) — the loop is still working</option>
             <option>Heavy sweating, dehydration, electrolyte loss; still conscious</option>
@@ -552,7 +594,7 @@
             <option>Severe cellular/protein damage risk — often fatal without rapid cooling</option>
           </select></div>
         <div class="wq-match-row"><span class="wq-match-label">Heat Stroke</span>
-          <select data-match="Heat Stroke">
+          <select data-match="Heat Stroke" data-correct="CNS dysfunction begins (confusion, seizure) — medical emergency">
             <option value="">— choose a description —</option>
             <option>Set point shifted up (e.g., infection) — the loop is still working</option>
             <option>Heavy sweating, dehydration, electrolyte loss; still conscious</option>
@@ -560,7 +602,7 @@
             <option>Severe cellular/protein damage risk — often fatal without rapid cooling</option>
           </select></div>
         <div class="wq-match-row"><span class="wq-match-label">Critical Hyperthermia</span>
-          <select data-match="Critical Hyperthermia">
+          <select data-match="Critical Hyperthermia" data-correct="Severe cellular/protein damage risk — often fatal without rapid cooling">
             <option value="">— choose a description —</option>
             <option>Set point shifted up (e.g., infection) — the loop is still working</option>
             <option>Heavy sweating, dehydration, electrolyte loss; still conscious</option>
@@ -568,23 +610,11 @@
             <option>Severe cellular/protein damage risk — often fatal without rapid cooling</option>
           </select></div>
       </div>
+      <button class="wq-check">Check Answer</button>
+      <div class="wq-feedback"></div>
       <div class="wq-print-text"></div>
     </div>
   </section>
-
-  <footer class="debrief no-print">
-    <details>
-      <summary>Instructor debrief prompts</summary>
-      <ol>
-        <li>Use <strong>Walk the Loop</strong> mode to step through one full correction cycle deliberately. At each step, say out loud what changed and why, before clicking Next.</li>
-        <li>Switch to Continuous mode and watch the Activity Log while you push the ambient slider to an extreme. What's the first word in the log that tells you the loop has stopped keeping up?</li>
-        <li>In Advanced mode, compare lowering Effector Capacity vs. lowering Thermoreceptor Sensitivity at the same ambient load. Both can decompensate the system — which one is a problem with detecting the deviation, and which is a problem with correcting it?</li>
-        <li>Run the Fever preset. Why does the log settle into a quiet, compensated state instead of showing the same escalating pattern as heat stroke? What does that say about whether fever is the loop failing or the loop working differently?</li>
-        <li>Connect this back to the handout: where is the line between this activity (physiology) and pathophysiology? What has to be true about the loop for a state to count as "decompensated"?</li>
-        <li>Using 6× speed and the Cold Plunge / Heat Wave presets, watch the Danger Zones bar and the Activity Log together. Note the exact temperature where the log announces a new zone — how does the loop's own status (compensating vs. decompensated) relate to when a zone becomes clinically dangerous?</li>
-      </ol>
-    </details>
-  </footer>
 
 </div>
 
@@ -1246,9 +1276,57 @@
       document.querySelectorAll('.wq-input').forEach(t => t.value = '');
       document.querySelectorAll('.wq-multi-input input[type=text]').forEach(t => t.value = '');
       document.querySelectorAll('.wq-mc input[type=radio]').forEach(r => r.checked = false);
-      document.querySelectorAll('.wq-match select').forEach(s => s.value = '');
+      document.querySelectorAll('.wq-match select').forEach(s => { s.value = ''; s.classList.remove('wq-select-good', 'wq-select-bad'); });
+      document.querySelectorAll('.wq-feedback').forEach(f => f.innerHTML = '');
     });
   }
+
+  function checkAnswer(wq){
+    const type = wq.dataset.type;
+    const feedback = wq.querySelector('.wq-feedback');
+    if(!feedback) return;
+
+    if(type === 'mc'){
+      const checked = wq.querySelector('input[type=radio]:checked');
+      if(!checked){ feedback.innerHTML = '<span class="wq-fb-warn">Select an answer first.</span>'; return; }
+      const correct = wq.dataset.correct;
+      const isRight = checked.value === correct;
+      const correctInput = wq.querySelector(`input[value="${CSS.escape(correct)}"]`);
+      const correctLabel = correctInput ? correctInput.parentElement.querySelector('span').textContent : correct;
+      let html = isRight
+        ? '<span class="wq-fb-good">✓ Correct.</span>'
+        : `<span class="wq-fb-bad">✗ Not quite — correct answer: ${correctLabel}</span>`;
+      if(wq.dataset.explain) html += `<div class="wq-fb-explain">${wq.dataset.explain}</div>`;
+      feedback.innerHTML = html;
+
+    } else if(type === 'match'){
+      const selects = Array.from(wq.querySelectorAll('.wq-match select'));
+      let correctCount = 0;
+      let anyChosen = false;
+      selects.forEach(sel => {
+        if(sel.value) anyChosen = true;
+        const ok = sel.value && sel.value === sel.dataset.correct;
+        if(ok) correctCount++;
+        sel.classList.toggle('wq-select-good', !!ok);
+        sel.classList.toggle('wq-select-bad', !!sel.value && !ok);
+      });
+      if(!anyChosen){ feedback.innerHTML = '<span class="wq-fb-warn">Make at least one match first.</span>'; return; }
+      const allRight = correctCount === selects.length;
+      feedback.innerHTML = `<span class="${allRight ? 'wq-fb-good' : 'wq-fb-warn'}">${correctCount} of ${selects.length} correct.</span>` +
+        (allRight ? '' : ' Incorrect ones are highlighted in red — adjust and check again.');
+
+    } else {
+      // short / short-multi: no auto-grading, just reveal a model answer to self-check against
+      const model = wq.querySelector('.wq-model-answer');
+      feedback.innerHTML = model
+        ? `<div class="wq-fb-model"><strong>Compare your answer to</strong><br>${model.textContent}</div>`
+        : '';
+    }
+  }
+
+  document.querySelectorAll('.wq-check').forEach(btn => {
+    btn.addEventListener('click', () => checkAnswer(btn.closest('.wq')));
+  });
 
   // ---------- init ----------
   function init(){
