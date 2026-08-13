@@ -1,0 +1,1464 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover" />
+<title>DPTD 733 — ANS Class Activities</title>
+<style>
+:root {
+  --cardinal: #C8102E;   /* Pantone 200 C — primary */
+  --red032:   #EF3340;   /* Pantone Red 032 C — accent */
+  --ltblue:   #6DCFF6;   /* Pantone 635 C — accent */
+  --medblue:  #4599C7;   /* Pantone 7689 C — accent */
+  --card75:   #D24057;   /* Cardinal 75% tint */
+  --card50:   #E47082;   /* Cardinal 50% tint */
+  --dark:     #333333;
+  --midgray:  #666666;
+  --ltgray:   #D9D9D9;
+  --offwhite: #F5F5F5;
+  --white:    #FFFFFF;
+  --success:  #1B5E20;
+  --success-bg: #E8F5E9;
+  --error:    #B3261E;
+  --error-bg: #FCE8E6;
+  --radius:   14px;
+}
+
+* { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+
+html, body {
+  margin: 0; padding: 0;
+  font-family: -apple-system, "Calibri", "Segoe UI", Roboto, Arial, sans-serif;
+  background: var(--offwhite);
+  color: var(--dark);
+  height: 100%;
+  overscroll-behavior: none;
+}
+
+button { font-family: inherit; }
+
+#app { display: flex; flex-direction: column; height: 100vh; }
+
+/* ---------- Header ---------- */
+#topbar {
+  background: var(--cardinal);
+  color: var(--white);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 14px;
+  flex-shrink: 0;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+  z-index: 10;
+}
+#topbar .brand {
+  font-weight: 700;
+  font-size: 15px;
+  letter-spacing: 0.3px;
+  margin-right: 6px;
+  white-space: nowrap;
+}
+#tabs { display: flex; gap: 8px; flex: 1; overflow-x: auto; }
+.tab-btn {
+  border: none;
+  background: rgba(255,255,255,0.15);
+  color: var(--white);
+  border-radius: 999px;
+  padding: 10px 16px;
+  font-size: 14px;
+  font-weight: 600;
+  min-height: 44px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background 0.15s ease;
+}
+.tab-btn.active { background: var(--white); color: var(--cardinal); }
+.tab-btn .lockicon { font-size: 12px; opacity: 0.85; }
+/* ---------- Main content ---------- */
+#content { flex: 1; overflow-y: auto; padding: 18px 16px 60px; }
+.activity-view { display: none; max-width: 900px; margin: 0 auto; }
+.activity-view.visible { display: block; }
+
+/* ---------- Password gate ---------- */
+.gate {
+  background: var(--cardinal);
+  color: var(--white);
+  border-radius: var(--radius);
+  padding: 32px 24px;
+  text-align: center;
+  margin-top: 20px;
+}
+.gate h2 { margin: 0 0 8px; font-size: 24px; }
+.gate p { opacity: 0.95; font-size: 15px; margin: 0 0 22px; }
+.gate input {
+  width: 100%;
+  max-width: 320px;
+  font-size: 22px;
+  text-align: center;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  padding: 14px 10px;
+  border-radius: 10px;
+  border: none;
+  outline: none;
+  margin-bottom: 14px;
+}
+.gate .unlockbtn {
+  display: block;
+  width: 100%;
+  max-width: 320px;
+  margin: 0 auto;
+  background: var(--white);
+  color: var(--cardinal);
+  border: none;
+  border-radius: 10px;
+  font-size: 17px;
+  font-weight: 700;
+  padding: 14px 10px;
+  min-height: 48px;
+  cursor: pointer;
+}
+.gate .gateMsg { min-height: 22px; margin-top: 12px; font-size: 14px; font-weight: 600; }
+.gate .gateMsg.show { color: #FFE082; }
+
+/* ---------- Cards / generic ---------- */
+.card {
+  background: var(--white);
+  border-radius: var(--radius);
+  padding: 18px;
+  margin-bottom: 16px;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.12);
+}
+.section-title { font-size: 20px; font-weight: 700; color: var(--cardinal); margin: 4px 0 12px; }
+.subtle { color: var(--midgray); font-size: 13px; }
+.quote {
+  border-left: 4px solid var(--medblue);
+  background: var(--offwhite);
+  padding: 12px 14px;
+  border-radius: 6px;
+  font-style: italic;
+  margin-bottom: 14px;
+  font-size: 15px;
+}
+
+/* scenario/vignette grid tiles */
+.tile-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 12px; margin-bottom: 10px; }
+.tile {
+  background: var(--white);
+  border: 2px solid var(--ltgray);
+  border-radius: var(--radius);
+  padding: 16px;
+  cursor: pointer;
+  min-height: 84px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  transition: border-color 0.15s ease, transform 0.1s ease;
+}
+.tile:active { transform: scale(0.98); }
+.tile.done { border-color: var(--success); background: var(--success-bg); }
+.tile .tileTitle { font-weight: 700; font-size: 15px; color: var(--dark); }
+.tile .tileStatus { font-size: 12px; color: var(--midgray); margin-top: 4px; }
+.tile.done .tileStatus { color: var(--success); font-weight: 600; }
+
+/* progress dots */
+.progress-dots { display: flex; gap: 6px; margin-bottom: 14px; }
+.dot { width: 12px; height: 12px; border-radius: 50%; background: var(--ltgray); }
+.dot.current { background: var(--medblue); }
+.dot.done { background: var(--success); }
+
+/* option buttons */
+.options { display: flex; flex-direction: column; gap: 10px; margin: 14px 0; }
+.opt-btn {
+  text-align: left;
+  border: 2px solid var(--ltgray);
+  background: var(--white);
+  border-radius: 10px;
+  padding: 13px 14px;
+  font-size: 15px;
+  min-height: 48px;
+  cursor: pointer;
+  color: var(--dark);
+  transition: border-color 0.12s, background 0.12s;
+}
+.opt-btn:active { transform: scale(0.995); }
+.opt-btn.correct { border-color: var(--success); background: var(--success-bg); font-weight: 600; }
+.opt-btn.wrong { border-color: var(--error); background: var(--error-bg); }
+.opt-btn.disabled { pointer-events: none; opacity: 0.55; }
+
+.feedback { border-radius: 10px; padding: 12px 14px; font-size: 14px; margin-top: 6px; display: none; }
+.feedback.show { display: block; }
+.feedback.correct { background: var(--success-bg); color: var(--success); border: 1px solid var(--success); }
+.feedback.wrong { background: var(--error-bg); color: var(--error); border: 1px solid var(--error); }
+
+.next-btn {
+  background: var(--cardinal);
+  color: var(--white);
+  border: none;
+  border-radius: 999px;
+  padding: 12px 22px;
+  font-size: 15px;
+  font-weight: 700;
+  min-height: 46px;
+  cursor: pointer;
+  margin-top: 8px;
+}
+.next-btn:disabled { background: var(--ltgray); color: var(--midgray); cursor: not-allowed; }
+.back-btn {
+  background: none;
+  border: none;
+  color: var(--medblue);
+  font-weight: 600;
+  font-size: 14px;
+  cursor: pointer;
+  padding: 8px 0;
+  margin-bottom: 6px;
+}
+
+/* matching activity */
+.match-wrap { display: flex; gap: 18px; flex-wrap: wrap; }
+.match-col { flex: 1; min-width: 220px; display: flex; flex-direction: column; gap: 10px; }
+.match-item {
+  border: 2px solid var(--ltgray);
+  border-radius: 10px;
+  padding: 12px 14px;
+  font-size: 14px;
+  cursor: pointer;
+  background: var(--white);
+  min-height: 48px;
+  display: flex;
+  align-items: center;
+}
+.match-item.selected { border-color: var(--medblue); background: #EAF6FC; }
+.match-item.locked { border-color: var(--success); background: var(--success-bg); cursor: default; font-weight: 600; }
+.match-item.shake { animation: shake 0.3s; border-color: var(--error); background: var(--error-bg); }
+@keyframes shake { 0%,100%{transform:translateX(0);} 25%{transform:translateX(-4px);} 75%{transform:translateX(4px);} }
+
+/* sort activity (tap-to-place) */
+.sort-tray { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 16px; min-height: 60px; }
+.chip {
+  border: 2px solid var(--ltgray);
+  border-radius: 999px;
+  padding: 10px 16px;
+  font-size: 13.5px;
+  cursor: pointer;
+  background: var(--white);
+  min-height: 44px;
+  display: flex;
+  align-items: center;
+}
+.chip.selected { border-color: var(--medblue); background: #EAF6FC; box-shadow: 0 2px 6px rgba(0,0,0,0.15); transform: translateY(-2px); }
+.chip.shake { animation: shake 0.3s; border-color: var(--error); background: var(--error-bg); }
+.sort-columns { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+.sort-col {
+  border-radius: var(--radius);
+  padding: 12px;
+  min-height: 160px;
+  border: 2px dashed var(--ltgray);
+}
+.sort-col h4 { margin: 0 0 10px; text-align: center; font-size: 14px; text-transform: uppercase; letter-spacing: 0.5px; }
+.sort-col.symp h4 { color: var(--cardinal); }
+.sort-col.para h4 { color: var(--medblue); }
+.sort-col .placed {
+  background: var(--offwhite);
+  border-radius: 8px;
+  padding: 8px 10px;
+  margin-bottom: 8px;
+  font-size: 12.5px;
+}
+.sort-col .placed .r { display: block; font-weight: 700; color: var(--midgray); font-size: 11px; margin-top: 3px; }
+
+/* order-tap activity */
+.order-list { display: flex; flex-direction: column; gap: 10px; margin: 14px 0; }
+.order-item {
+  border: 2px solid var(--ltgray);
+  border-radius: 10px;
+  padding: 13px 14px;
+  font-size: 15px;
+  cursor: pointer;
+  background: var(--white);
+  min-height: 48px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.order-badge {
+  width: 26px; height: 26px; border-radius: 50%;
+  background: var(--ltgray); color: var(--white);
+  display: flex; align-items: center; justify-content: center;
+  font-weight: 700; font-size: 13px; flex-shrink: 0;
+}
+.order-item.picked .order-badge { background: var(--medblue); }
+.order-item.locked { border-color: var(--success); background: var(--success-bg); }
+.order-item.locked .order-badge { background: var(--success); }
+.order-item.shake { animation: shake 0.3s; border-color: var(--error); background: var(--error-bg); }
+
+/* score pill */
+.score-pill {
+  display: inline-block;
+  background: var(--offwhite);
+  border: 1px solid var(--ltgray);
+  border-radius: 999px;
+  padding: 6px 14px;
+  font-size: 12.5px;
+  color: var(--midgray);
+  font-weight: 600;
+  margin-bottom: 14px;
+}
+
+/* closing / celebration banner */
+.celebrate {
+  background: var(--success-bg);
+  border: 1px solid var(--success);
+  color: var(--success);
+  border-radius: var(--radius);
+  padding: 18px;
+  text-align: center;
+  font-weight: 600;
+  margin-top: 10px;
+}
+
+/* disease framework recap */
+.fw-card {
+  background: var(--offwhite);
+  border: 1px solid var(--ltgray);
+  border-radius: var(--radius);
+  padding: 16px;
+  margin-top: 10px;
+}
+.fw-card .fw-title { font-weight: 700; font-size: 15px; color: var(--dark); margin-bottom: 6px; }
+.fw-sort-columns { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 4px; }
+.fw-col h4 { color: var(--cardinal); }
+.fw-col .placed { font-size: 12.5px; }
+
+.discussion-banner {
+  background: var(--dark);
+  color: var(--white);
+  border-radius: var(--radius);
+  padding: 22px;
+  margin-top: 10px;
+}
+.discussion-banner .quote { background: rgba(255,255,255,0.08); border-left-color: var(--red032); color: var(--white); }
+.discussion-banner .note { font-size: 13.5px; opacity: 0.9; margin-top: 10px; }
+
+svg.diagram { width: 100%; height: auto; margin-bottom: 10px; }
+
+/* circuit-building diagram (Activity 1) */
+.circuit-wrap { margin: 4px 0 14px; }
+.circuit-nodes { display: flex; justify-content: space-between; align-items: flex-start; }
+.circuit-node { flex: 0 0 96px; text-align: center; }
+.circuit-node .dot {
+  width: 42px; height: 42px; border-radius: 50%;
+  background: var(--ltgray); color: var(--white);
+  display: flex; align-items: center; justify-content: center;
+  font-weight: 700; font-size: 13px; margin: 0 auto 6px;
+  transition: background 0.25s ease;
+}
+.circuit-node.revealed .dot { background: var(--cardinal); }
+.circuit-node .lbl { font-size: 11.5px; font-weight: 600; color: var(--midgray); line-height: 1.25; min-height: 30px; }
+.circuit-node.revealed .lbl { color: var(--dark); }
+.circuit-edge { flex: 1; display: flex; flex-direction: column; align-items: center; padding-top: 20px; min-width: 40px; }
+.circuit-edge .line { width: 100%; height: 4px; background: var(--ltgray); border-radius: 2px; transition: background 0.25s ease; }
+.circuit-edge.lit .line { background: var(--medblue); }
+.circuit-edge .elbl { font-size: 10.5px; color: var(--midgray); margin-top: 6px; font-weight: 600; text-align: center; min-height: 14px; }
+
+@media (max-width: 480px) {
+  #topbar .brand { display: none; }
+  .sort-columns { grid-template-columns: 1fr; }
+  .fw-sort-columns { grid-template-columns: 1fr; }
+}
+
+</style>
+</head>
+<body>
+<div id="app">
+  <div id="topbar">
+    <div class="brand">DPTD 733 · ANS</div>
+    <div id="tabs"></div>
+  </div>
+  <div id="content">
+    <div id="view-a1" class="activity-view"></div>
+    <div id="view-a2" class="activity-view"></div>
+    <div id="view-a3" class="activity-view"></div>
+  </div>
+</div>
+<script>
+/* ============================================================
+   DPTD 733 — ANS Class Activities — Content Data
+   ============================================================ */
+const APP_DATA = {
+
+  activities: [
+    { id: 1, key: "a1", label: "Wire the Circuit", password: "GANGLION" },
+    { id: 2, key: "a2", label: "Trace the Lesion", password: "STELLATE" },
+    { id: 3, key: "a3", label: "Capstone", password: "VAGUS" },
+  ],
+
+  // ---------------- ACTIVITY 1 ----------------
+  activity1: {
+    scenarios: [
+      {
+        id: "A", title: "Sympathetic → Heart",
+        prompt: "A sympathetic signal is about to speed up the heart. Build the pathway.",
+        diagram: { origin: "Spinal cord (thoracolumbar outflow)", ganglion: "Chain (paravertebral) ganglion", effector: "Heart", edge1: "ACh / nicotinic", edge2: "NE / β1" },
+        steps: [
+          {
+            q: "Where does this preganglionic neuron synapse?",
+            options: ["Paravertebral (chain) ganglion", "Terminal ganglion on the organ wall", "It doesn't synapse — goes straight to the heart"],
+            correct: "Paravertebral (chain) ganglion",
+            fbCorrect: "Right — sympathetic ganglia sit close to the cord, in the chain.",
+            fbWrong: "Sympathetic preganglionic fibers are short and synapse in the chain, close to the spinal cord — not near the organ.",
+          },
+          {
+            q: "Neurotransmitter/receptor at the ganglion?",
+            options: ["ACh / nicotinic", "ACh / muscarinic", "NE / adrenergic"],
+            correct: "ACh / nicotinic",
+            fbCorrect: "Correct — every preganglionic fiber, both divisions, releases ACh onto nicotinic receptors.",
+            fbWrong: "This one's a constant across both divisions: preganglionic neurons always release ACh onto nicotinic receptors.",
+          },
+          {
+            q: "Neurotransmitter/receptor at the heart?",
+            options: ["NE / β1", "ACh / M2", "NE / α1"],
+            correct: "NE / β1",
+            fbCorrect: "Correct — sympathetic postganglionic fibers to the heart release NE onto β1, raising HR and contractility.",
+            fbWrong: "Sympathetic postganglionic fibers release norepinephrine, and the heart's receptor is β1 (not the α1 you'd see on a blood vessel).",
+          },
+        ],
+        closing: null,
+      },
+      {
+        id: "B", title: "Sympathetic → Sweat Gland",
+        prompt: "Same division, different organ — but watch what changes at the last step.",
+        diagram: { origin: "Spinal cord (thoracolumbar outflow)", ganglion: "Chain (paravertebral) ganglion", effector: "Sweat gland", edge1: "ACh / nicotinic", edge2: "ACh / muscarinic" },
+        steps: [
+          {
+            q: "Where does this preganglionic neuron synapse?",
+            options: ["Paravertebral (chain) ganglion", "Terminal ganglion on the organ wall"],
+            correct: "Paravertebral (chain) ganglion",
+            fbCorrect: "Right — still a chain ganglion; sympathetic anatomy doesn't change by organ.",
+            fbWrong: "Still sympathetic — the ganglion is still in the chain, close to the cord.",
+          },
+          {
+            q: "Neurotransmitter/receptor at the ganglion?",
+            options: ["ACh / nicotinic", "NE / adrenergic"],
+            correct: "ACh / nicotinic",
+            fbCorrect: "Correct — this step never changes, regardless of division or organ.",
+            fbWrong: "Every ganglion, sympathetic or parasympathetic, runs on ACh/nicotinic.",
+          },
+          {
+            q: "Neurotransmitter/receptor at the sweat gland?",
+            options: ["NE / adrenergic", "ACh / muscarinic"],
+            correct: "ACh / muscarinic",
+            fbCorrect: "This is the exception to flag: sweat glands are sympathetically innervated but the postganglionic fiber is cholinergic, not adrenergic.",
+            fbWrong: "This is the one exception worth remembering: sympathetic, but the postganglionic transmitter is ACh onto a muscarinic receptor — not NE.",
+          },
+        ],
+        closing: "Note the contrast with Scenario A: same division, same ganglion step, but a different postganglionic transmitter. That's the setup for the discussion prompt at the end.",
+      },
+      {
+        id: "C", title: "Parasympathetic → Heart (via the Vagus)",
+        prompt: "Now flip divisions. Build the parasympathetic pathway to the same organ as Scenario A.",
+        diagram: { origin: "Brainstem (vagus, CN X)", ganglion: "Ganglion on the heart wall", effector: "Heart", edge1: "ACh / nicotinic", edge2: "ACh / M2" },
+        steps: [
+          {
+            q: "Where does this preganglionic neuron synapse?",
+            options: ["Paravertebral (chain) ganglion", "A ganglion on/near the heart wall"],
+            correct: "A ganglion on/near the heart wall",
+            fbCorrect: "Correct — parasympathetic ganglia sit on or inside the target organ, so the preganglionic fiber (in CN X) is long.",
+            fbWrong: "Parasympathetic anatomy is the reverse of sympathetic: the ganglion sits on or inside the organ, not near the cord.",
+          },
+          {
+            q: "Neurotransmitter/receptor at the ganglion?",
+            options: ["ACh / nicotinic", "NE / adrenergic"],
+            correct: "ACh / nicotinic",
+            fbCorrect: "Correct — still the constant rule.",
+            fbWrong: "Same rule as every other ganglion: ACh onto nicotinic receptors.",
+          },
+          {
+            q: "Neurotransmitter/receptor at the heart?",
+            options: ["ACh / M2", "NE / β1"],
+            correct: "ACh / M2",
+            fbCorrect: "Correct — vagal fibers release ACh onto M2 at the SA/AV node, slowing HR and conduction.",
+            fbWrong: "Parasympathetic postganglionic fibers release ACh, and on the heart the receptor is M2 — this is what slows HR, opposite of Scenario A's β1.",
+          },
+        ],
+        closing: "Compare directly to Scenario A: same organ, opposite effect, because the postganglionic transmitter/receptor pair is completely different (NE/β1 vs. ACh/M2).",
+      },
+      {
+        id: "D", title: "Parasympathetic → Bladder (Sacral Outflow)",
+        prompt: "Last one — this pathway doesn't start in the brainstem.",
+        diagram: { origin: "Spinal cord (S2–S4, sacral outflow)", ganglion: "Ganglion near/on the bladder wall", effector: "Bladder (detrusor)", edge1: "ACh / nicotinic", edge2: "ACh / M3" },
+        steps: [
+          {
+            q: "Where does this pathway begin?",
+            options: ["Brainstem (cranial nerve nuclei)", "S2–S4 (sacral spinal cord)"],
+            correct: "S2–S4 (sacral spinal cord)",
+            fbCorrect: "Correct — the pelvic organs are supplied by sacral, not cranial, parasympathetic outflow.",
+            fbWrong: "The vagus stops at the midgut. Everything distal — including the bladder — is sacral outflow (S2–S4).",
+          },
+          {
+            q: "Neurotransmitter/receptor at the ganglion?",
+            options: ["ACh / nicotinic", "NE / adrenergic"],
+            correct: "ACh / nicotinic",
+            fbCorrect: "Correct — constant rule, same as every scenario so far.",
+            fbWrong: "Still ACh/nicotinic at the ganglion — this step never varies.",
+          },
+          {
+            q: "Neurotransmitter/receptor at the detrusor?",
+            options: ["ACh / M3", "NE / β3"],
+            correct: "ACh / M3",
+            fbCorrect: "Correct — parasympathetic fibers contract the detrusor via M3 for voiding. (Sympathetic β3 does the opposite — relaxes it for storage.)",
+            fbWrong: "Voiding is parasympathetic: ACh onto M3 contracts the detrusor. β3/NE is the sympathetic storage signal — the opposite job.",
+          },
+        ],
+        closing: null,
+      },
+    ],
+    closingPrompt: {
+      quote: "Sweating is controlled by the sympathetic division — but which neurotransmitter does it actually use, and why would that matter if a patient is on a medication that blocks muscarinic receptors?",
+      note: "Talk it through as a group, then check with your instructor: sweat glands are the one sympathetic target that's cholinergic (ACh/muscarinic), so anticholinergic drugs (e.g., oxybutynin) can cause anhidrosis and an overheating risk.",
+    },
+  },
+
+  // ---------------- ACTIVITY 2 ----------------
+  activity2: {
+    vignettes: [
+      {
+        id: 1,
+        title: "Vignette 1 — Chain Compression at the Thoracic Inlet",
+        quote: "A mass near the top of the right lung is compressing the sympathetic chain right where it passes under the first rib — the exact spot where the chain forms the stellate ganglion.",
+        questions: [
+          {
+            type: "mcq",
+            q: "What would you expect to find on the right side of the face?",
+            options: ["Ptosis, miosis, and anhidrosis (Horner triad)", "Facial drooping and weakness", "A dilated pupil and excess sweating"],
+            correct: "Ptosis, miosis, and anhidrosis (Horner triad)",
+            fbCorrect: "Right — cutting off sympathetic supply above this level removes tone to Müller's muscle (ptosis), removes the pupil dilator's input (miosis), and removes sudomotor fibers (anhidrosis).",
+            fbWrong: "Think about what's lost, not gained, when this pathway is interrupted — the eyelid, pupil, and sweat glands all depend on sympathetic input reaching them.",
+          },
+          {
+            type: "match",
+            q: "Match each sign to its mechanism",
+            pairs: [
+              ["Ptosis", "Loss of sympathetic supply to Müller's muscle (eyelid)"],
+              ["Miosis", "Loss of α1-driven pupil dilator activity"],
+              ["Anhidrosis", "Loss of sudomotor (sweat gland) fibers"],
+            ],
+          },
+        ],
+        framework: {
+          clues: [
+            { bucket: "etiology", text: "Apical lung (Pancoast) tumor compressing the chain" },
+            { bucket: "etiology", text: "Cervical rib or other thoracic inlet mass" },
+            { bucket: "pathogenesis", text: "Preganglionic sympathetic fibers interrupted before reaching the superior cervical ganglion" },
+            { bucket: "pathogenesis", text: "Sympathetic outflow to the eye, eyelid, and face is cut off on that side" },
+            { bucket: "manifestations", text: "Signs: ptosis, miosis, anhidrosis" },
+            { bucket: "manifestations", text: "Usually no reported symptoms — found on exam" },
+            { bucket: "treatment", text: "Treat the underlying mass (oncologic care, decompression) — disease-modifying" },
+            { bucket: "treatment", text: "Nothing treats the ptosis/miosis/anhidrosis directly" },
+          ],
+        },
+      },
+      {
+        id: 2,
+        title: "Vignette 2 — Why Does This Matter?",
+        quote: "A patient comes to PT for neck and shoulder pain. During your exam, you notice their right eyelid is drooping and their pupils are different sizes — a new finding, not something in their chart.",
+        questions: [
+          {
+            type: "mcq",
+            q: "What do you do?",
+            options: ["Continue with the planned session", "Modify exercises and monitor", "End the session and refer for urgent evaluation"],
+            correct: "End the session and refer for urgent evaluation",
+            fbCorrect: "Right — a new Horner triad is a red flag on its own, regardless of what's causing it.",
+            fbWrong: "A new drooping lid and unequal pupils together are a red flag pattern — this isn't something to treat around.",
+          },
+          {
+            type: "mcq",
+            q: "Why is this urgent, even without knowing the exact cause?",
+            options: [
+              "The sympathetic pathway to the eye is long, three neurons deep, and passes close to the lung apex, carotid artery, and brainstem — a new interruption anywhere along it could mean something is compressing or damaging one of those structures",
+              "Horner syndrome only happens with cancer, so this means the patient has a tumor",
+              "A drooping eyelid by itself is always a medical emergency",
+            ],
+            correct: "The sympathetic pathway to the eye is long, three neurons deep, and passes close to the lung apex, carotid artery, and brainstem — a new interruption anywhere along it could mean something is compressing or damaging one of those structures",
+            fbCorrect: "Exactly — you don't need to know the exact cause to recognize the pattern is dangerous. It's the pathway's length and the territory it runs through that makes any new finding along it worth an urgent referral.",
+            fbWrong: "It's not about naming the cause — it's about what the pathway runs past. A three-neuron route from the brainstem to the eye passes close to the lung apex and the carotid artery, so a new break anywhere along it is worth taking seriously.",
+          },
+        ],
+        framework: {
+          clues: [
+            { bucket: "etiology", text: "New Horner sign with neck/shoulder pain" },
+            { bucket: "etiology", text: "Possible carotid artery dissection" },
+            { bucket: "pathogenesis", text: "Hematoma/false lumen compresses the pericarotid sympathetic plexus" },
+            { bucket: "pathogenesis", text: "Same pathway disrupted as Vignette 1, but from a vascular cause" },
+            { bucket: "manifestations", text: "Same triad as before, but new onset" },
+            { bucket: "manifestations", text: "Comes with head/neck pain and no prior history" },
+            { bucket: "treatment", text: "Needs urgent imaging before any disease-modifying treatment (anticoagulation, intervention)" },
+            { bucket: "treatment", text: "PT's role here is urgent referral — neither disease-modifying nor symptomatic" },
+          ],
+        },
+      },
+      {
+        id: 3,
+        title: "Vignette 3 — T4 Spinal Cord Injury",
+        quote: "A patient with a complete T4 spinal cord injury is being catheterized. You'll find out what happens next in the final activity — for now: which part of the sympathetic outflow is now cut off from the brain's control?",
+        questions: [
+          {
+            type: "mcq",
+            q: "Which spinal levels are isolated from descending control?",
+            options: ["T1–T4 only", "T5–L2", "The entire thoracolumbar outflow (T1–L2)"],
+            correct: "T5–L2",
+            fbCorrect: "Right — everything above the T4 lesion (T1–T4) still has a connection to the brain. T5–L2 is now isolated, which is the setup for what happens in a moment.",
+            fbWrong: "The lesion is at T4, so outflow above that level (T1–T4) still connects to the brain. It's the outflow below the lesion that's cut off.",
+          },
+          {
+            type: "match",
+            q: "Match each part of the outflow to its status",
+            pairs: [
+              ["T1–T4", "Still receives descending (brain) control"],
+              ["T5–L2", "Cut off from descending control — runs on local reflexes alone"],
+              ["Strong stimulus below T5", "Can trigger unchecked reflex firing, with no brake from above"],
+            ],
+          },
+        ],
+        note: "This vignette intentionally doesn't name autonomic dysreflexia yet — that reveal happens in Activity 3.",
+        framework: {
+          clues: [
+            { bucket: "etiology", text: "Traumatic spinal cord injury at T4" },
+            { bucket: "etiology", text: "Severs descending input to segments below the lesion" },
+            { bucket: "pathogenesis", text: "T1–T4 outflow stays connected to the brain" },
+            { bucket: "pathogenesis", text: "T5–L2 outflow is disconnected, runs without top-down control" },
+            { bucket: "manifestations", text: "Chronic orthostatic hypotension, impaired thermoregulation below the lesion" },
+            { bucket: "manifestations", text: "An acute, dangerous version is revealed in Activity 3" },
+            { bucket: "treatment", text: "Disease-modifying isn't possible — the injury itself isn't reversible" },
+            { bucket: "treatment", text: "Management is symptomatic/preventive: bladder/bowel programs, positional strategies, trigger recognition" },
+          ],
+        },
+      },
+    ],
+    explorePathologies: [
+      {
+        name: "Postural Orthostatic Tachycardia Syndrome (POTS)",
+        blurb: "Excessive heart rate increase on standing, without the blood pressure drop seen in orthostatic hypotension — a sympathetic/autonomic regulation problem PT students will see often.",
+        url: "https://rarediseases.org/mondo-disease/postural-orthostatic-tachycardia-syndrome/",
+      },
+      {
+        name: "Diabetic Autonomic Neuropathy",
+        blurb: "Chronic hyperglycemia damages autonomic fibers, causing resting tachycardia, orthostatic intolerance, GI dysmotility, and sudomotor changes.",
+        url: "https://www.ncbi.nlm.nih.gov/books/NBK279175/",
+      },
+      {
+        name: "Multiple System Atrophy (MSA)",
+        blurb: "A progressive neurodegenerative disease combining parkinsonism/ataxia with autonomic failure — orthostatic hypotension, bladder dysfunction, anhidrosis.",
+        url: "https://rarediseases.org/rare-diseases/multiple-system-atrophy/",
+      },
+      {
+        name: "Complex Regional Pain Syndrome (CRPS)",
+        blurb: "Disproportionate limb pain after injury, with autonomic signs — temperature and color changes, sweating abnormalities — that reflect sympathetic dysregulation.",
+        url: "https://www.mayoclinic.org/diseases-conditions/crps-complex-regional-pain-syndrome/symptoms-causes/syc-20371151",
+      },
+      {
+        name: "Raynaud Phenomenon",
+        blurb: "Cold- or emotion-triggered vasospasm from exaggerated sympathetic (α1-mediated) vasoconstriction in the digits.",
+        url: "https://medlineplus.gov/ency/article/000412.htm",
+      },
+    ],
+  },
+
+  // ---------------- ACTIVITY 3 ----------------
+  activity3: {
+    sortOrgans: [
+      { organ: "Heart", symp: "↑HR, ↑contractility", sympR: "β1", para: "↓HR, ↓conduction", paraR: "M2" },
+      { organ: "Bronchi", symp: "Bronchodilation", sympR: "β2", para: "Bronchoconstriction, ↑mucus", paraR: "M3" },
+      { organ: "GI tract", symp: "↓Motility, sphincter contraction", sympR: "α1/β2", para: "↑Peristalsis, sphincter relaxation", paraR: "M3" },
+      { organ: "Bladder", symp: "Detrusor relax + sphincter contract (storage)", sympR: "β3/α1", para: "Detrusor contract + sphincter relax (voiding)", paraR: "M3" },
+      { organ: "Eye (pupil)", symp: "Mydriasis (pupil dilation)", sympR: "α1", para: "Miosis (pupil constriction)", paraR: "M3" },
+    ],
+    drugCards: [
+      {
+        drug: "Metoprolol",
+        moaUrl: "https://www.ncbi.nlm.nih.gov/books/NBK532923/",
+        receptorOptions: ["β1 blocker", "M antagonist", "α1 blocker", "β2 agonist"],
+        correctReceptor: "β1 blocker",
+        effectOptions: [
+          "Blunts HR/contractility response to exercise — use RPE (Borg 11–13), not target HR",
+          "Relaxes detrusor; dry mouth and constipation",
+          "Bronchodilation with possible tremor",
+        ],
+        correctEffect: "Blunts HR/contractility response to exercise — use RPE (Borg 11–13), not target HR",
+      },
+      {
+        drug: "Oxybutynin",
+        moaUrl: "https://www.ncbi.nlm.nih.gov/books/NBK499985/",
+        receptorOptions: ["M antagonist", "β1 blocker", "M agonist", "α1 blocker"],
+        correctReceptor: "M antagonist",
+        effectOptions: [
+          "Relaxes detrusor (treats overactive bladder); dry mouth, constipation, confusion in older adults",
+          "Stimulates detrusor contraction for urinary retention",
+          "Relaxes urethral/prostate smooth muscle",
+        ],
+        correctEffect: "Relaxes detrusor (treats overactive bladder); dry mouth, constipation, confusion in older adults",
+      },
+      {
+        drug: "Tamsulosin",
+        moaUrl: "https://www.ncbi.nlm.nih.gov/books/NBK556066/",
+        receptorOptions: ["α1 blocker", "β1 blocker", "M antagonist", "β3 agonist"],
+        correctReceptor: "α1 blocker",
+        effectOptions: [
+          "Relaxes urethral/prostate smooth muscle; risk of orthostatic hypotension",
+          "Blunts exercise heart rate response",
+          "Bronchodilation",
+        ],
+        correctEffect: "Relaxes urethral/prostate smooth muscle; risk of orthostatic hypotension",
+      },
+      {
+        drug: "Albuterol",
+        moaUrl: "https://www.ncbi.nlm.nih.gov/books/NBK482272/",
+        receptorOptions: ["β2 agonist", "M antagonist", "α1 agonist", "β1 blocker"],
+        correctReceptor: "β2 agonist",
+        effectOptions: [
+          "Bronchodilation; can cause tremor/tachycardia from off-target β1 activity",
+          "Relaxes detrusor",
+          "Constricts blood vessels, raising BP",
+        ],
+        correctEffect: "Bronchodilation; can cause tremor/tachycardia from off-target β1 activity",
+      },
+      {
+        drug: "Bethanechol",
+        moaUrl: "https://www.ncbi.nlm.nih.gov/books/NBK560587/",
+        receptorOptions: ["M agonist", "M antagonist", "β3 agonist", "α1 blocker"],
+        correctReceptor: "M agonist",
+        effectOptions: [
+          "Stimulates detrusor contraction; used for urinary retention",
+          "Relaxes detrusor; used for overactive bladder",
+          "Relaxes urethral smooth muscle",
+        ],
+        correctEffect: "Stimulates detrusor contraction; used for urinary retention",
+      },
+    ],
+    capstone: {
+      quote: "A patient with a T4 spinal cord injury develops a pounding headache and a flushed, sweaty face during a bladder catheterization.",
+      q1: {
+        q: "What's happening?",
+        options: ["Orthostatic hypotension", "Autonomic dysreflexia", "Vasovagal syncope", "Anaphylaxis"],
+        correct: "Autonomic dysreflexia",
+        fbCorrect: "Right — bladder distension is triggering unrestrained thoracolumbar outflow below the T4 lesion.",
+        fbWrong: "Think about what a high SCI does to descending control over the thoracolumbar outflow.",
+      },
+      q2: {
+        q: "What's the likely trigger?",
+        options: ["Bladder distension", "Bowel impaction", "Pressure injury", "Tight clothing"],
+        correct: "Bladder distension",
+        fbCorrect: "Bladder distension/infection causes ~85% of episodes — exactly what's happening here during catheterization. Bowel impaction is the second most common cause.",
+        fbWrong: "Bladder distension/infection causes ~85% of autonomic dysreflexia episodes — think about what's happening to this patient right now.",
+      },
+      mechanism: {
+        q: "Now map it out — tap these physiology steps in the order they actually happen:",
+        steps: [
+          "A strong signal below the injury (bladder distension) travels up the cord",
+          "It reaches the T5–L2 sympathetic outflow, which is cut off from brain control — firing goes unchecked",
+          "Widespread vasoconstriction below the lesion drives blood pressure up sharply",
+          "Baroreceptors detect the spike and try to correct it via the vagus (parasympathetic)",
+          "That correction only reaches above the lesion — bradycardia and flushing above, pale and constricted below",
+        ],
+      },
+      q3: {
+        q: "Given all that, tap these in the order you'd do them:",
+        steps: ["Sit the patient upright", "Find and remove the trigger", "Call for help / monitor vitals"],
+      },
+      closingLine: "This is the same anatomy as Horner syndrome and orthostatic hypotension — just the thoracolumbar outflow doing what it does once descending control is removed.",
+    },
+  },
+};
+
+</script>
+<script>
+/* ============================================================
+   DPTD 733 — ANS Class Activities — App Logic
+   ============================================================ */
+(function () {
+  "use strict";
+
+  const state = {
+    unlocked: { 1: false, 2: false, 3: false },
+    current: 1,
+    score: { 1: { correct: 0, total: 0 }, 2: { correct: 0, total: 0 }, 3: { correct: 0, total: 0 } },
+    a1: { doneScenarios: {}, closingShown: false },
+    a2: { vignetteIndex: 0, vignetteDone: {}, fwSort: {} },
+    a3: { placed: {}, drugMatchDone: false, drugStep: 0, drugDone: {}, capstoneStage: 0, orderPicks: [] },
+  };
+
+  function $(sel, root) { return (root || document).querySelector(sel); }
+  function el(tag, attrs, children) {
+    const e = document.createElement(tag);
+    if (attrs) for (const k in attrs) {
+      if (k === "class") e.className = attrs[k];
+      else if (k === "html") e.innerHTML = attrs[k];
+      else if (k.startsWith("on")) e.addEventListener(k.slice(2), attrs[k]);
+      else e.setAttribute(k, attrs[k]);
+    }
+    (children || []).forEach((c) => { if (c) e.appendChild(typeof c === "string" ? document.createTextNode(c) : c); });
+    return e;
+  }
+  function shuffle(arr) {
+    const a = arr.slice();
+    for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; }
+    return a;
+  }
+
+  // ---------------- Tabs / Gate ----------------
+  function renderTabs() {
+    const tabWrap = $("#tabs");
+    tabWrap.innerHTML = "";
+    APP_DATA.activities.forEach((a) => {
+      const locked = !state.unlocked[a.id];
+      const btn = el("button", {
+        class: "tab-btn" + (state.current === a.id ? " active" : ""),
+        onclick: () => switchTab(a.id),
+      }, [locked ? el("span", { class: "lockicon", html: "&#128274;" }) : null, document.createTextNode(a.id + " · " + a.label)]);
+      tabWrap.appendChild(btn);
+    });
+  }
+
+  function switchTab(id) {
+    state.current = id;
+    renderTabs();
+    document.querySelectorAll(".activity-view").forEach((v) => v.classList.remove("visible"));
+    $("#view-a" + id).classList.add("visible");
+  }
+
+  function tryUnlock(id, inputVal, msgEl) {
+    const activity = APP_DATA.activities.find((a) => a.id === id);
+    const clean = (inputVal || "").trim().toUpperCase();
+    if (clean === activity.password) {
+      state.unlocked[id] = true;
+      renderTabs();
+      renderActivityBody(id);
+    } else {
+      msgEl.textContent = "Ask your instructor for the password.";
+      msgEl.classList.add("show");
+    }
+  }
+
+  function renderGate(id) {
+    const activity = APP_DATA.activities.find((a) => a.id === id);
+    const wrap = el("div", { class: "gate" });
+    wrap.appendChild(el("h2", {}, ["Activity " + id + " is locked"]));
+    wrap.appendChild(el("p", {}, ["Ask your instructor for the password to unlock “" + activity.label + ".”"]));
+    const input = el("input", { type: "text", placeholder: "PASSWORD", autocapitalize: "characters", autocomplete: "off" });
+    const msg = el("div", { class: "gateMsg" });
+    const btn = el("button", { class: "unlockbtn", onclick: () => tryUnlock(id, input.value, msg) }, ["Unlock"]);
+    input.addEventListener("keydown", (e) => { if (e.key === "Enter") tryUnlock(id, input.value, msg); });
+    wrap.appendChild(input);
+    wrap.appendChild(btn);
+    wrap.appendChild(msg);
+    return wrap;
+  }
+
+  function scorePill(id) {
+    const sc = state.score[id];
+    return el("div", { class: "score-pill" }, ["Self-check: " + sc.correct + " / " + sc.total + " correct on first try"]);
+  }
+
+  function bumpScore(id, firstTry, isCorrect) {
+    if (!firstTry) return;
+    state.score[id].total++;
+    if (isCorrect) state.score[id].correct++;
+  }
+
+  // ---------------- Generic MCQ block ----------------
+  // renders a question with options; calls onResolved(correct) once the correct option is picked (retries allowed)
+  function renderMCQ(container, q, activityId, onResolved) {
+    let firstTry = true;
+    let resolved = false;
+    const qBox = el("div", {});
+    qBox.appendChild(el("div", { style: "font-weight:600;font-size:15px;margin-bottom:10px;" }, [q.q]));
+    const optsWrap = el("div", { class: "options" });
+    const fb = el("div", { class: "feedback" });
+    shuffle(q.options).forEach((opt) => {
+      const btn = el("button", { class: "opt-btn" }, [opt]);
+      btn.addEventListener("click", () => {
+        if (resolved) return;
+        const isCorrect = opt === q.correct;
+        bumpScore(activityId, firstTry, isCorrect);
+        if (isCorrect) {
+          resolved = true;
+          btn.classList.add("correct");
+          fb.className = "feedback show correct";
+          fb.textContent = q.fbCorrect;
+          optsWrap.querySelectorAll(".opt-btn").forEach((b) => b.classList.add("disabled"));
+          if (onResolved) onResolved(true);
+        } else {
+          firstTry = false;
+          btn.classList.add("wrong");
+          fb.className = "feedback show wrong";
+          fb.textContent = q.fbWrong;
+          setTimeout(() => btn.classList.remove("wrong"), 500);
+        }
+      });
+      optsWrap.appendChild(btn);
+    });
+    qBox.appendChild(optsWrap);
+    qBox.appendChild(fb);
+    container.appendChild(qBox);
+  }
+
+  // ---------------- ACTIVITY 1 ----------------
+  function renderActivityBody(id) {
+    const view = $("#view-a" + id);
+    view.innerHTML = "";
+    view.appendChild(scorePill(id));
+    if (id === 1) renderA1Grid(view);
+    if (id === 2) renderA2Vignette(view, state.a2.vignetteIndex);
+    if (id === 3) renderA3(view);
+  }
+
+  function renderA1Grid(view) {
+    view.appendChild(el("div", { class: "section-title" }, ["Activity 1 · Wire the Circuit"]));
+    view.appendChild(el("p", { class: "subtle" }, ["Tap a scenario. Build the pathway from CNS origin to effector — choose the right ganglion, neurotransmitter, and receptor at each step."]));
+    const grid = el("div", { class: "tile-grid" });
+    APP_DATA.activity1.scenarios.forEach((sc) => {
+      const done = !!state.a1.doneScenarios[sc.id];
+      const tile = el("div", { class: "tile" + (done ? " done" : ""), onclick: () => renderA1Scenario(view, sc) }, [
+        el("div", { class: "tileTitle" }, [sc.title]),
+        el("div", { class: "tileStatus" }, [done ? "✓ Complete" : "Tap to start"]),
+      ]);
+      grid.appendChild(tile);
+    });
+    view.appendChild(grid);
+
+    const allDone = APP_DATA.activity1.scenarios.every((sc) => state.a1.doneScenarios[sc.id]);
+    if (allDone) {
+      const cp = APP_DATA.activity1.closingPrompt;
+      view.appendChild(el("div", { class: "discussion-banner" }, [
+        el("div", { style: "font-weight:700;font-size:16px;margin-bottom:8px;" }, ["Discussion Prompt"]),
+        el("div", { class: "quote" }, [cp.quote]),
+        el("div", { class: "note" }, [cp.note]),
+      ]));
+    }
+  }
+
+  // builds/updates the CNS→ganglion→effector circuit diagram as scenario steps resolve
+  function renderCircuitDiagram(container, d, stepsDone) {
+    container.innerHTML = "";
+    const ganglionRevealed = stepsDone >= 1;
+    const edge1Lit = stepsDone >= 1;
+    const edge1Label = stepsDone >= 2 ? d.edge1 : "";
+    const effectorRevealed = stepsDone >= 3;
+    const edge2Lit = stepsDone >= 3;
+    const edge2Label = stepsDone >= 3 ? d.edge2 : "";
+
+    function node(label, revealed, tag) {
+      return el("div", { class: "circuit-node" + (revealed ? " revealed" : "") }, [
+        el("div", { class: "dot" }, [revealed ? tag : "?"]),
+        el("div", { class: "lbl" }, [revealed ? label : "?"]),
+      ]);
+    }
+    function edge(lit, label) {
+      return el("div", { class: "circuit-edge" + (lit ? " lit" : "") }, [
+        el("div", { class: "line" }),
+        el("div", { class: "elbl" }, [label || ""]),
+      ]);
+    }
+
+    container.appendChild(el("div", { class: "circuit-nodes" }, [
+      node(d.origin, true, "1"),
+      edge(edge1Lit, edge1Label),
+      node(d.ganglion, ganglionRevealed, "2"),
+      edge(edge2Lit, edge2Label),
+      node(d.effector, effectorRevealed, "3"),
+    ]));
+  }
+
+  function renderA1Scenario(view, sc) {
+    view.innerHTML = "";
+    view.appendChild(scorePill(1));
+    const back = el("button", { class: "back-btn", onclick: () => renderA1Grid(view) }, ["‹ Back to scenarios"]);
+    view.appendChild(back);
+
+    const card = el("div", { class: "card" });
+    card.appendChild(el("div", { class: "section-title" }, [sc.title]));
+    card.appendChild(el("div", { class: "quote" }, [sc.prompt]));
+
+    const diagramBox = el("div", { class: "circuit-wrap" });
+    card.appendChild(diagramBox);
+
+    const dots = el("div", { class: "progress-dots" });
+    sc.steps.forEach(() => dots.appendChild(el("div", { class: "dot" })));
+    card.appendChild(dots);
+
+    const stepBox = el("div", {});
+    card.appendChild(stepBox);
+    view.appendChild(card);
+
+    function showStep(i) {
+      dots.querySelectorAll(".dot").forEach((d, di) => {
+        d.classList.toggle("current", di === i);
+        d.classList.toggle("done", di < i);
+      });
+      renderCircuitDiagram(diagramBox, sc.diagram, Math.min(i, sc.steps.length));
+      stepBox.innerHTML = "";
+      if (i >= sc.steps.length) {
+        stepBox.appendChild(el("div", { class: "celebrate" }, ["✓ Pathway complete!"]));
+        if (sc.closing) stepBox.appendChild(el("div", { class: "quote", style: "margin-top:10px;" }, [sc.closing]));
+        const doneBtn = el("button", { class: "next-btn", onclick: () => { state.a1.doneScenarios[sc.id] = true; renderA1Grid(view); } }, ["Back to scenarios"]);
+        stepBox.appendChild(doneBtn);
+        return;
+      }
+      renderMCQ(stepBox, sc.steps[i], 1, () => {
+        renderCircuitDiagram(diagramBox, sc.diagram, Math.min(i + 1, sc.steps.length));
+        const nextBtn = el("button", { class: "next-btn" }, [i === sc.steps.length - 1 ? "Finish" : "Next step ›"]);
+        nextBtn.addEventListener("click", () => showStep(i + 1));
+        stepBox.appendChild(nextBtn);
+      });
+    }
+    showStep(0);
+  }
+
+  // ---------------- ACTIVITY 2 ----------------
+  function renderA2Vignette(view, idx) {
+    view.innerHTML = "";
+    view.appendChild(scorePill(2));
+    const v = APP_DATA.activity2.vignettes[idx];
+    const total = APP_DATA.activity2.vignettes.length;
+
+    const dots = el("div", { class: "progress-dots" });
+    for (let i = 0; i < total; i++) {
+      dots.appendChild(el("div", { class: "dot" + (i === idx ? " current" : i < idx ? " done" : "") }));
+    }
+    view.appendChild(dots);
+
+    const card = el("div", { class: "card" });
+    card.appendChild(el("div", { class: "section-title" }, [v.title]));
+    card.appendChild(el("div", { class: "quote" }, [v.quote]));
+
+    let remaining = v.questions.length;
+    const qContainer = el("div", {});
+    card.appendChild(qContainer);
+    view.appendChild(card);
+
+    const nextWrap = el("div", {});
+    view.appendChild(nextWrap);
+
+    function checkAllDone() {
+      if (remaining <= 0) {
+        if (v.note) card.appendChild(el("div", { class: "quote", style: "margin-top:6px;" }, [v.note]));
+        if (v.framework) card.appendChild(renderFrameworkSort(v));
+        const isLast = idx === total - 1;
+        const btn = el("button", { class: "next-btn" }, [isLast ? "Finish Activity 2" : "Next vignette ›"]);
+        btn.addEventListener("click", () => {
+          state.a2.vignetteIndex = Math.min(idx + 1, total - 1);
+          if (isLast) {
+            view.innerHTML = "";
+            view.appendChild(scorePill(2));
+            view.appendChild(el("div", { class: "celebrate" }, ["✓ Activity 2 complete — nice work tracing the pathway."]));
+          } else {
+            renderA2Vignette(view, state.a2.vignetteIndex);
+          }
+        });
+        nextWrap.appendChild(btn);
+      }
+    }
+
+    v.questions.forEach((q) => {
+      if (q.type === "mcq") {
+        const box = el("div", { style: "margin-bottom:16px;" });
+        renderMCQ(box, q, 2, () => { remaining--; checkAllDone(); });
+        qContainer.appendChild(box);
+      } else if (q.type === "match") {
+        qContainer.appendChild(renderMatch(q, () => { remaining--; checkAllDone(); }));
+      }
+    });
+
+    if (idx === total - 1) view.appendChild(renderExplorePathologies());
+  }
+
+  function renderExplorePathologies() {
+    const wrap = el("div", { class: "card" });
+    wrap.appendChild(el("div", { style: "font-weight:700;font-size:16px;margin-bottom:6px;" }, ["Explore More: Other ANS-Related Pathologies"]));
+    wrap.appendChild(el("p", { class: "subtle", style: "margin-top:0;" }, ["Horner syndrome and autonomic dysreflexia aren't the only clinical pictures rooted in ANS dysfunction. Tap any of these to open a reliable reference and read more on your own time."]));
+    const grid = el("div", { class: "tile-grid" });
+    APP_DATA.activity2.explorePathologies.forEach((p) => {
+      const link = el("a", { href: p.url, target: "_blank", rel: "noopener", style: "text-decoration:none;" }, [
+        el("div", { class: "tile", style: "cursor:pointer;" }, [
+          el("div", { class: "tileTitle" }, [p.name]),
+          el("div", { class: "tileStatus", style: "color:var(--midgray);margin-top:6px;" }, [p.blurb]),
+          el("div", { class: "tileStatus", style: "color:var(--medblue);font-weight:700;margin-top:8px;" }, ["Read more ›"]),
+        ]),
+      ]);
+      grid.appendChild(link);
+    });
+    wrap.appendChild(grid);
+    return wrap;
+  }
+
+  const FW_BUCKETS = [
+    { key: "etiology", label: "Etiology" },
+    { key: "pathogenesis", label: "Pathogenesis" },
+    { key: "manifestations", label: "Clinical Manifestations" },
+    { key: "treatment", label: "Treatment Implications" },
+  ];
+
+  function renderFrameworkSort(v) {
+    const wrap = el("div", { class: "fw-card" });
+    wrap.appendChild(el("div", { class: "fw-title" }, ["Disease Framework: Sort the Clues"]));
+    wrap.appendChild(el("p", { class: "subtle", style: "margin:0 0 10px;" }, ["Tap a clue below, then tap the category it belongs to."]));
+    const body = el("div", {});
+    wrap.appendChild(body);
+
+    if (!state.a2.fwSort[v.id]) state.a2.fwSort[v.id] = {};
+    const placedMap = state.a2.fwSort[v.id];
+    const allClues = v.framework.clues.map((c, i) => ({ key: v.id + "-" + i, text: c.text, bucket: c.bucket }));
+
+    function draw() {
+      body.innerHTML = "";
+      let remainingClues = allClues.filter((c) => !placedMap[c.key]);
+      remainingClues = shuffle(remainingClues);
+
+      const tray = el("div", { class: "sort-tray" });
+      let selectedKey = null;
+      const chipEls = {};
+      remainingClues.forEach((c) => {
+        const chip = el("div", { class: "chip" }, [c.text]);
+        chip.addEventListener("click", () => {
+          if (selectedKey && chipEls[selectedKey]) chipEls[selectedKey].classList.remove("selected");
+          chip.classList.add("selected");
+          selectedKey = c.key;
+        });
+        chipEls[c.key] = chip;
+        tray.appendChild(chip);
+      });
+      body.appendChild(tray);
+
+      const cols = el("div", { class: "fw-sort-columns" });
+      const colEls = {};
+      FW_BUCKETS.forEach((b) => {
+        const col = el("div", { class: "sort-col fw-col" }, [el("h4", {}, [b.label])]);
+        Object.keys(placedMap).forEach((key) => {
+          const c = placedMap[key];
+          if (c.bucket === b.key) col.appendChild(el("div", { class: "placed" }, [c.text]));
+        });
+        col.addEventListener("click", () => {
+          if (!selectedKey) return;
+          const c = allClues.find((x) => x.key === selectedKey);
+          if (c.bucket === b.key) {
+            placedMap[c.key] = c;
+            selectedKey = null;
+            draw();
+          } else {
+            col.classList.add("shake");
+            chipEls[selectedKey] && chipEls[selectedKey].classList.add("shake");
+            setTimeout(() => {
+              col.classList.remove("shake");
+              chipEls[selectedKey] && chipEls[selectedKey].classList.remove("shake");
+            }, 350);
+          }
+        });
+        colEls[b.key] = col;
+        cols.appendChild(col);
+      });
+      body.appendChild(cols);
+
+      if (remainingClues.length === 0) {
+        body.appendChild(el("div", { class: "celebrate", style: "margin-top:10px;" }, ["✓ Framework sorted!"]));
+      }
+    }
+    draw();
+    return wrap;
+  }
+
+  function renderMatch(q, onComplete) {
+    const wrap = el("div", { style: "margin-bottom:10px;" });
+    wrap.appendChild(el("div", { style: "font-weight:600;font-size:15px;margin-bottom:10px;" }, [q.q + " (tap a sign, then tap its mechanism)"]));
+    const matchWrap = el("div", { class: "match-wrap" });
+    const leftCol = el("div", { class: "match-col" });
+    const rightCol = el("div", { class: "match-col" });
+
+    const signs = q.pairs.map((p) => p[0]);
+    const mechs = shuffle(q.pairs.map((p) => p[1]));
+
+    let selectedSign = null;
+    let lockedCount = 0;
+    const signEls = {}, mechEls = {};
+
+    signs.forEach((s) => {
+      const it = el("div", { class: "match-item" }, [s]);
+      it.addEventListener("click", () => {
+        if (it.classList.contains("locked")) return;
+        Object.values(signEls).forEach((e) => e.classList.remove("selected"));
+        it.classList.add("selected");
+        selectedSign = s;
+      });
+      signEls[s] = it;
+      leftCol.appendChild(it);
+    });
+
+    mechs.forEach((m) => {
+      const it = el("div", { class: "match-item" }, [m]);
+      it.addEventListener("click", () => {
+        if (it.classList.contains("locked") || !selectedSign) return;
+        const correctPair = q.pairs.find((p) => p[0] === selectedSign)[1] === m;
+        if (correctPair) {
+          it.classList.add("locked");
+          it.textContent = "✓ " + selectedSign + " → " + m;
+          signEls[selectedSign].classList.add("locked");
+          signEls[selectedSign].classList.remove("selected");
+          lockedCount++;
+          selectedSign = null;
+          if (lockedCount === signs.length) onComplete();
+        } else {
+          it.classList.add("shake");
+          signEls[selectedSign].classList.add("shake");
+          setTimeout(() => { it.classList.remove("shake"); signEls[selectedSign] && signEls[selectedSign].classList.remove("shake"); }, 350);
+        }
+      });
+      mechEls[m] = it;
+      rightCol.appendChild(it);
+    });
+
+    matchWrap.appendChild(leftCol);
+    matchWrap.appendChild(rightCol);
+    wrap.appendChild(matchWrap);
+    return wrap;
+  }
+
+  // ---------------- ACTIVITY 3 ----------------
+  function renderA3(view) {
+    if (Object.keys(state.a3.placed).length < APP_DATA.activity3.sortOrgans.length * 2) {
+      renderA3SortPart(view);
+    } else if (!state.a3.drugMatchDone) {
+      renderA3DrugMatch(view);
+    } else if (state.a3.drugStep < APP_DATA.activity3.drugCards.length) {
+      renderA3DrugPart(view);
+    } else {
+      renderA3Capstone(view);
+    }
+  }
+
+  function renderA3SortPart(view) {
+    view.innerHTML = "";
+    view.appendChild(scorePill(3));
+    view.appendChild(el("div", { class: "section-title" }, ["Part A · Sort the Effects"]));
+    view.appendChild(el("p", { class: "subtle" }, ["Tap a chip, then tap the column it belongs in. Get the receptor label to appear beneath it."]));
+
+    // build chip list
+    let chips = [];
+    APP_DATA.activity3.sortOrgans.forEach((o, oi) => {
+      chips.push({ key: oi + "-symp", organ: o.organ, text: o.symp, receptor: o.sympR, division: "symp" });
+      chips.push({ key: oi + "-para", organ: o.organ, text: o.para, receptor: o.paraR, division: "para" });
+    });
+    chips = chips.filter((c) => !state.a3.placed[c.key]);
+    chips = shuffle(chips);
+
+    const tray = el("div", { class: "sort-tray" });
+    let selectedChip = null;
+    const chipEls = {};
+    chips.forEach((c) => {
+      const chip = el("div", { class: "chip" }, [c.organ + ": " + c.text]);
+      chip.addEventListener("click", () => {
+        chipEls[selectedChip] && chipEls[selectedChip].el.classList.remove("selected");
+        chip.classList.add("selected");
+        selectedChip = c.key;
+      });
+      chipEls[c.key] = { el: chip, data: c };
+      tray.appendChild(chip);
+    });
+    view.appendChild(tray);
+
+    const cols = el("div", { class: "sort-columns" });
+    const sympCol = el("div", { class: "sort-col symp" }, [el("h4", {}, ["Sympathetic"])]);
+    const paraCol = el("div", { class: "sort-col para" }, [el("h4", {}, ["Parasympathetic"])]);
+
+    function placedRow(c) {
+      return el("div", { class: "placed" }, [c.organ + ": " + c.text, el("span", { class: "r" }, ["Receptor: " + c.receptor])]);
+    }
+    Object.keys(state.a3.placed).forEach((key) => {
+      const c = state.a3.placed[key];
+      (c.division === "symp" ? sympCol : paraCol).appendChild(placedRow(c));
+    });
+
+    function attemptPlace(division) {
+      if (!selectedChip) return;
+      const entry = chipEls[selectedChip];
+      const c = entry.data;
+      if (c.division === division) {
+        state.a3.placed[c.key] = c;
+        selectedChip = null;
+        renderA3SortPart(view);
+      } else {
+        entry.el.classList.add("shake");
+        setTimeout(() => entry.el.classList.remove("shake"), 350);
+      }
+    }
+    sympCol.addEventListener("click", () => attemptPlace("symp"));
+    paraCol.addEventListener("click", () => attemptPlace("para"));
+
+    cols.appendChild(sympCol);
+    cols.appendChild(paraCol);
+    view.appendChild(cols);
+
+    if (chips.length === 0) {
+      view.appendChild(el("div", { class: "celebrate" }, ["✓ Part A complete!"]));
+      const btn = el("button", { class: "next-btn", onclick: () => renderA3(view) }, ["Continue to Part B ›"]);
+      view.appendChild(btn);
+    }
+  }
+
+  function renderA3DrugMatch(view) {
+    view.innerHTML = "";
+    view.appendChild(scorePill(3));
+    view.appendChild(el("div", { class: "section-title" }, ["Part B · Match Drug to Receptor"]));
+    view.appendChild(el("p", { class: "subtle" }, ["Before predicting what each drug does, match it to the receptor it targets."]));
+    const card = el("div", { class: "card" });
+    const pairs = APP_DATA.activity3.drugCards.map((d) => [d.drug, d.correctReceptor]);
+    card.appendChild(renderMatch({ q: "Match each drug to its receptor target", pairs: pairs }, () => {
+      card.appendChild(el("div", { class: "celebrate" }, ["✓ Nice — now let's predict what each one actually does."]));
+      const btn = el("button", { class: "next-btn" }, ["Continue ›"]);
+      btn.addEventListener("click", () => { state.a3.drugMatchDone = true; renderA3(view); });
+      card.appendChild(btn);
+    }));
+    view.appendChild(card);
+  }
+
+  function renderA3DrugPart(view) {
+    view.innerHTML = "";
+    view.appendChild(scorePill(3));
+    view.appendChild(el("div", { class: "section-title" }, ["Part B · Drug Cards (" + (state.a3.drugStep + 1) + " / " + APP_DATA.activity3.drugCards.length + ")"]));
+    const d = APP_DATA.activity3.drugCards[state.a3.drugStep];
+
+    const card = el("div", { class: "card" });
+    card.appendChild(el("div", { style: "font-weight:700;font-size:18px;margin-bottom:2px;" }, [d.drug]));
+    const lookup = el("a", {
+      href: d.moaUrl,
+      target: "_blank",
+      rel: "noopener",
+      style: "display:inline-block;font-size:13px;color:var(--medblue);font-weight:600;text-decoration:none;margin-bottom:12px;",
+    }, ["Look up " + d.drug + "'s mechanism of action (StatPearls) ›"]);
+    card.appendChild(lookup);
+
+    const step1 = el("div", {});
+    card.appendChild(step1);
+    view.appendChild(card);
+
+    let firstTryR = true, firstTryE = true;
+    renderMCQ(step1, {
+      q: "What receptor does " + d.drug + " target?",
+      options: d.receptorOptions,
+      correct: d.correctReceptor,
+      fbCorrect: "Correct receptor target.",
+      fbWrong: "Not quite — think about what this drug is used for clinically.",
+    }, 3, () => {
+      const step2 = el("div", { style: "margin-top:14px;" });
+      card.appendChild(step2);
+      renderMCQ(step2, {
+        q: "What's the predicted effect?",
+        options: d.effectOptions,
+        correct: d.correctEffect,
+        fbCorrect: "Right.",
+        fbWrong: "Reconsider what this receptor does at this target.",
+      }, 3, () => {
+        const nextBtn = el("button", { class: "next-btn" }, [state.a3.drugStep === APP_DATA.activity3.drugCards.length - 1 ? "Continue to Part C ›" : "Next drug ›"]);
+        nextBtn.addEventListener("click", () => { state.a3.drugStep++; renderA3(view); });
+        card.appendChild(nextBtn);
+      });
+    });
+  }
+
+  // renders a "tap these in order" activity; calls onSolved() once the correct order is locked in (retries allowed)
+  function renderOrderTap(container, promptText, steps, onSolved) {
+    container.appendChild(el("div", { style: "font-weight:600;font-size:15px;margin-bottom:10px;" }, [promptText]));
+    const list = el("div", { class: "order-list" });
+    const items = shuffle(steps.map((s, i) => ({ text: s, correctIndex: i })));
+    let picks = [];
+    items.forEach((item) => {
+      const badge = el("div", { class: "order-badge" }, [""]);
+      const row = el("div", { class: "order-item" }, [badge, el("div", {}, [item.text])]);
+      row.addEventListener("click", () => {
+        if (row.classList.contains("locked") || picks.includes(item)) return;
+        picks.push(item);
+        badge.textContent = picks.length;
+        row.classList.add("picked");
+        if (picks.length === items.length) {
+          const isCorrect = picks.every((p, i) => p.correctIndex === i);
+          if (isCorrect) {
+            list.querySelectorAll(".order-item").forEach((r) => r.classList.add("locked"));
+            onSolved();
+          } else {
+            list.querySelectorAll(".order-item").forEach((r) => { r.classList.add("shake"); });
+            setTimeout(() => {
+              list.querySelectorAll(".order-item").forEach((r) => { r.classList.remove("shake", "picked"); });
+              list.querySelectorAll(".order-badge").forEach((b) => { b.textContent = ""; });
+              picks = [];
+            }, 500);
+          }
+        }
+      });
+      list.appendChild(row);
+    });
+    container.appendChild(list);
+  }
+
+  function renderA3Capstone(view) {
+    view.innerHTML = "";
+    view.appendChild(scorePill(3));
+    view.appendChild(el("div", { class: "section-title" }, ["Part C · Resolve the Case"]));
+    const cs = APP_DATA.activity3.capstone;
+
+    const card = el("div", { class: "card" });
+    card.appendChild(el("div", { class: "quote" }, [cs.quote]));
+    view.appendChild(card);
+
+    const stage = state.a3.capstoneStage;
+    const body = el("div", {});
+    view.appendChild(body);
+
+    if (stage === 0) {
+      renderMCQ(body, cs.q1, 3, () => {
+        const btn = el("button", { class: "next-btn" }, ["Next ›"]);
+        btn.addEventListener("click", () => { state.a3.capstoneStage = 1; renderA3Capstone(view); });
+        body.appendChild(btn);
+      });
+    } else if (stage === 1) {
+      renderMCQ(body, cs.q2, 3, () => {
+        const btn = el("button", { class: "next-btn" }, ["Next ›"]);
+        btn.addEventListener("click", () => { state.a3.capstoneStage = 2; renderA3Capstone(view); });
+        body.appendChild(btn);
+      });
+    } else if (stage === 2) {
+      renderOrderTap(body, cs.mechanism.q, cs.mechanism.steps, () => {
+        const note = el("div", { class: "celebrate" }, ["✓ That's the full chain — unchecked outflow below the lesion, only partly corrected above it."]);
+        body.appendChild(note);
+        const btn = el("button", { class: "next-btn" }, ["Next ›"]);
+        btn.addEventListener("click", () => { state.a3.capstoneStage = 3; renderA3Capstone(view); });
+        body.appendChild(btn);
+      });
+    } else if (stage === 3) {
+      renderOrderTap(body, cs.q3.q, cs.q3.steps, () => {
+        const done = el("div", { class: "celebrate" }, [cs.closingLine]);
+        body.appendChild(done);
+        const btn = el("button", { class: "next-btn" }, ["Finish Activity 3"]);
+        btn.addEventListener("click", () => { state.a3.capstoneStage = 4; renderA3Capstone(view); });
+        body.appendChild(btn);
+      });
+    } else {
+      view.innerHTML = "";
+      view.appendChild(scorePill(3));
+      view.appendChild(el("div", { class: "celebrate" }, ["✓ Activity 3 complete. Great work today — see you back with the whole class."]));
+    }
+  }
+
+  // ---------------- Init ----------------
+  function init() {
+    renderTabs();
+    [1, 2, 3].forEach((id) => { $("#view-a" + id).appendChild(renderGate(id)); });
+    switchTab(1);
+  }
+  document.addEventListener("DOMContentLoaded", init);
+})();
+
+</script>
+</body>
+</html>
