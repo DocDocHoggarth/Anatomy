@@ -1,0 +1,2037 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Cardiac Monitoring Trainer</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg-room:#0e1113;
+    --bezel-1:#22262a;
+    --bezel-2:#2c3135;
+    --screen:#031a10;
+    --panel-bg:#15181a;
+    --panel-bg-2:#1b1f22;
+    --text-hi:#e8edee;
+    --text-lo:#93a1a5;
+    --trace:#3dffa0;
+    --trace-glow:rgba(61,255,160,0.55);
+    --amber:#ffb020;
+    --cyan:#5fd0ff;
+    --lilac:#c9a6ff;
+    --safe:#39d98a;
+    --caution:#ffc93c;
+    --stop:#ff3b4e;
+    --focus:#6fd8ff;
+    --grid-minor: rgba(255,255,255,0.05);
+    --grid-major: rgba(255,255,255,0.10);
+    --grid-minor-screen: rgba(57,255,153,0.07);
+    --grid-major-screen: rgba(57,255,153,0.16);
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:var(--bg-room);
+    background-image:
+      radial-gradient(circle at 20% 0%, rgba(255,255,255,0.03), transparent 40%),
+      radial-gradient(circle at 80% 100%, rgba(255,255,255,0.02), transparent 40%);
+    color:var(--text-hi);
+    font-family:'Inter', system-ui, sans-serif;
+    min-height:100vh;
+    padding:20px 14px 40px;
+  }
+  .wrap{max-width:960px; margin:0 auto;}
+
+  header.page-head{margin-bottom:18px;}
+  header.page-head h1{
+    font-family:'JetBrains Mono', monospace;
+    font-size:clamp(20px,4vw,28px);
+    letter-spacing:0.02em;
+    margin:0 0 6px;
+    color:var(--text-hi);
+  }
+  header.page-head p{
+    margin:0;
+    color:var(--text-lo);
+    font-size:14.5px;
+    line-height:1.5;
+    max-width:66ch;
+  }
+
+  /* ---------- View switcher ---------- */
+  .view-switcher{
+    display:flex; gap:8px; margin-top:20px; margin-bottom:4px; flex-wrap:wrap;
+  }
+  .switch-btn{
+    flex:1; min-width:180px;
+    font-family:'JetBrains Mono', monospace;
+    font-size:13px; font-weight:600; letter-spacing:0.02em;
+    padding:12px 16px;
+    border-radius:12px;
+    border:1px solid rgba(255,255,255,0.08);
+    background:var(--panel-bg-2);
+    color:var(--text-lo);
+    cursor:pointer;
+    text-align:center;
+    transition:background .15s ease, border-color .15s ease, color .15s ease;
+  }
+  .switch-btn:hover{ background:#22272a; color:var(--text-hi); }
+  .switch-btn.active{
+    background:rgba(61,255,160,0.12);
+    border-color:rgba(61,255,160,0.55);
+    color:var(--trace);
+  }
+  .switch-btn:focus-visible{ outline:2px solid var(--focus); outline-offset:2px; }
+
+  .view{ display:none; }
+  .view.active{ display:block; }
+  .view-intro{
+    color:var(--text-lo); font-size:13.5px; line-height:1.5; margin:14px 2px 0; max-width:66ch;
+  }
+
+  footer{
+    margin-top:26px;
+    color:var(--text-lo);
+    font-size:12px;
+    line-height:1.6;
+    max-width:70ch;
+  }
+
+
+    *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  /* ---------- Monitor housing ---------- */
+  .monitor{
+    background:linear-gradient(160deg, var(--bezel-2), var(--bezel-1) 60%);
+    border-radius:18px;
+    padding:16px;
+    margin-top:20px;
+    box-shadow:
+      0 20px 40px -18px rgba(0,0,0,0.6),
+      inset 0 1px 0 rgba(255,255,255,0.06),
+      inset 0 -1px 0 rgba(0,0,0,0.4);
+    border:1px solid rgba(255,255,255,0.05);
+    position:relative;
+  }
+  .monitor.alarm-stop{ animation: alarmPulse 1.1s infinite; }
+  .monitor.alarm-caution{ animation: alarmPulseCaution 1.6s infinite; }
+  @keyframes alarmPulse{
+    0%,100%{ box-shadow:0 20px 40px -18px rgba(0,0,0,0.6), inset 0 1px 0 rgba(255,255,255,0.06), inset 0 -1px 0 rgba(0,0,0,0.4), 0 0 0 0 rgba(255,59,78,0.0);}
+    50%{ box-shadow:0 20px 40px -18px rgba(0,0,0,0.6), inset 0 1px 0 rgba(255,255,255,0.06), inset 0 -1px 0 rgba(0,0,0,0.4), 0 0 0 3px rgba(255,59,78,0.45);}
+  }
+  @keyframes alarmPulseCaution{
+    0%,100%{ box-shadow:0 20px 40px -18px rgba(0,0,0,0.6), inset 0 1px 0 rgba(255,255,255,0.06), inset 0 -1px 0 rgba(0,0,0,0.4), 0 0 0 0 rgba(255,201,60,0.0);}
+    50%{ box-shadow:0 20px 40px -18px rgba(0,0,0,0.6), inset 0 1px 0 rgba(255,255,255,0.06), inset 0 -1px 0 rgba(0,0,0,0.4), 0 0 0 3px rgba(255,201,60,0.35);}
+  }
+  @media (prefers-reduced-motion: reduce){
+    .monitor.alarm-stop, .monitor.alarm-caution{ animation:none; }
+  }
+
+  .monitor-top{
+    display:flex;
+    align-items:flex-start;
+    justify-content:space-between;
+    gap:12px;
+    padding:2px 8px 12px;
+    flex-wrap:wrap;
+  }
+  .hr-block{display:flex; align-items:baseline; gap:8px;}
+  .hr-number{
+    font-family:'JetBrains Mono', monospace;
+    font-weight:700;
+    font-size:clamp(34px,7vw,46px);
+    color:var(--amber);
+    line-height:1;
+    letter-spacing:0.01em;
+  }
+  .hr-unit{font-family:'JetBrains Mono', monospace; font-size:12px; color:var(--text-lo);}
+  .rec-dot{
+    width:9px;height:9px;border-radius:50%;
+    background:var(--trace);
+    box-shadow:0 0 8px var(--trace-glow);
+    animation: blink 1.4s infinite;
+    display:inline-block;
+    margin-right:6px;
+  }
+  @media (prefers-reduced-motion: reduce){ .rec-dot{ animation:none; opacity:0.9; } }
+  @keyframes blink{ 0%,45%{opacity:1;} 50%,95%{opacity:0.15;} 100%{opacity:1;} }
+
+  .rhythm-tag{
+    text-align:right;
+  }
+  .rhythm-tag .lead{
+    font-family:'JetBrains Mono', monospace;
+    font-size:11px; color:var(--text-lo);
+    display:flex; align-items:center; justify-content:flex-end;
+  }
+  .rhythm-tag .name{
+    font-family:'JetBrains Mono', monospace;
+    font-size:14px; font-weight:600; color:var(--text-hi);
+    margin-top:2px;
+  }
+
+  /* ---------- Screen / trace ---------- */
+  .screen-frame{
+    position:relative;
+    border-radius:10px;
+    overflow:hidden;
+    background:var(--screen);
+    box-shadow:inset 0 0 0 1px rgba(0,0,0,0.6), inset 0 2px 10px rgba(0,0,0,0.6);
+    height:200px;
+  }
+  .screen-frame canvas{
+    position:absolute; top:0; left:0; width:100%; height:100%; display:block;
+  }
+
+  .badge-row{
+    display:flex; align-items:center; justify-content:space-between;
+    padding:12px 8px 2px;
+    gap:10px; flex-wrap:wrap;
+  }
+  .badge{
+    font-family:'JetBrains Mono', monospace;
+    font-size:12.5px; font-weight:700;
+    letter-spacing:0.04em;
+    padding:6px 12px;
+    border-radius:999px;
+    text-transform:uppercase;
+  }
+  .badge.safe{ background:rgba(57,217,138,0.14); color:var(--safe); border:1px solid rgba(57,217,138,0.4);}
+  .badge.caution{ background:rgba(255,201,60,0.14); color:var(--caution); border:1px solid rgba(255,201,60,0.4);}
+  .badge.stop{ background:rgba(255,59,78,0.14); color:var(--stop); border:1px solid rgba(255,59,78,0.45);}
+  .rate-desc{ font-family:'JetBrains Mono', monospace; font-size:12px; color:var(--text-lo); }
+
+  /* ---------- Rhythm selector ---------- */
+  .selector{ margin-top:24px; }
+  .selector h2{
+    font-family:'JetBrains Mono', monospace;
+    font-size:13px; letter-spacing:0.08em; text-transform:uppercase;
+    color:var(--text-lo); margin:0 0 10px;
+  }
+  .group{ margin-bottom:16px; }
+  .group-label{
+    font-size:11.5px; color:var(--text-lo); text-transform:uppercase;
+    letter-spacing:0.06em; margin-bottom:8px; font-weight:600;
+  }
+  .pill-row{
+    display:flex; flex-wrap:wrap; gap:8px;
+  }
+  .pill{
+    font-family:'Inter', sans-serif;
+    font-size:13.5px;
+    padding:11px 16px;
+    border-radius:10px;
+    border:1px solid rgba(255,255,255,0.09);
+    background:var(--panel-bg-2);
+    color:var(--text-hi);
+    cursor:pointer;
+    transition:background .15s ease, border-color .15s ease, transform .1s ease;
+    text-align:left;
+  }
+  .pill:hover{ background:#22272a; border-color:rgba(255,255,255,0.18); }
+  .pill:active{ transform:scale(0.98); }
+  .pill:focus-visible{ outline:2px solid var(--focus); outline-offset:2px; }
+  .pill.active{
+    background:rgba(61,255,160,0.12);
+    border-color:rgba(61,255,160,0.55);
+    color:var(--trace);
+    font-weight:600;
+  }
+  .pill .dot{
+    display:inline-block; width:7px; height:7px; border-radius:50%;
+    margin-right:7px; vertical-align:middle;
+  }
+  .dot.safe{background:var(--safe);}
+  .dot.caution{background:var(--caution);}
+  .dot.stop{background:var(--stop);}
+
+  /* ---------- Explanation panel ---------- */
+  .explain{
+    margin-top:22px;
+    background:var(--panel-bg);
+    border:1px solid rgba(255,255,255,0.06);
+    border-radius:14px;
+    padding:20px;
+  }
+  .explain-head{
+    display:flex; align-items:center; justify-content:space-between;
+    gap:12px; flex-wrap:wrap; margin-bottom:10px;
+  }
+  .explain-head h3{
+    font-family:'JetBrains Mono', monospace;
+    font-size:17px; margin:0; color:var(--text-hi);
+  }
+  .explain p.mechanism{
+    color:var(--text-hi); opacity:0.92; line-height:1.55; font-size:14.5px; margin:10px 0 14px;
+  }
+  .explain .findings-label, .explain .action-label{
+    font-size:11px; text-transform:uppercase; letter-spacing:0.07em;
+    color:var(--text-lo); font-weight:700; margin-bottom:6px;
+  }
+  .explain ul{ margin:0 0 16px; padding-left:20px; color:var(--text-hi); opacity:0.92;}
+  .explain li{ margin-bottom:5px; font-size:14px; line-height:1.5;}
+  .action-box{
+    border-radius:10px;
+    padding:12px 14px;
+    font-size:14px;
+    line-height:1.5;
+    font-weight:500;
+  }
+  .action-box.safe{ background:rgba(57,217,138,0.08); border:1px solid rgba(57,217,138,0.3); color:#bdf5d9;}
+  .action-box.caution{ background:rgba(255,201,60,0.08); border:1px solid rgba(255,201,60,0.3); color:#ffe9b3;}
+  .action-box.stop{ background:rgba(255,59,78,0.08); border:1px solid rgba(255,59,78,0.35); color:#ffc7cd;}
+
+  @media (max-width:520px){
+    .screen-frame{ height:168px; }
+    .hr-number{ font-size:32px; }
+  }
+
+
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+
+
+  .panel{
+    background:linear-gradient(160deg, var(--bezel-2), var(--bezel-1) 65%);
+    border-radius:16px;
+    padding:16px;
+    margin-top:18px;
+    border:1px solid rgba(255,255,255,0.05);
+    box-shadow: inset 0 1px 0 rgba(255,255,255,0.05), 0 14px 30px -16px rgba(0,0,0,0.55);
+  }
+  .panel h2{
+    font-family:'JetBrains Mono', monospace;
+    font-size:12.5px; letter-spacing:0.07em; text-transform:uppercase;
+    color:var(--text-lo); margin:0 0 12px;
+  }
+
+  /* ---------- Pills (scenario + reused elsewhere) ---------- */
+  .pill-row{ display:flex; flex-wrap:wrap; gap:8px; }
+  .pill{
+    font-family:'Inter', sans-serif; font-size:13.5px;
+    padding:11px 16px; border-radius:10px;
+    border:1px solid rgba(255,255,255,0.09);
+    background:var(--panel-bg-2); color:var(--text-hi);
+    cursor:pointer; text-align:left;
+    transition:background .15s ease, border-color .15s ease, transform .1s ease;
+  }
+  .pill:hover{ background:#22272a; border-color:rgba(255,255,255,0.18); }
+  .pill:active{ transform:scale(0.98); }
+  .pill:focus-visible{ outline:2px solid var(--focus); outline-offset:2px; }
+  .pill.active{
+    background:rgba(61,255,160,0.12); border-color:rgba(61,255,160,0.55);
+    color:var(--trace); font-weight:600;
+  }
+  .pill .dot{ display:inline-block; width:7px; height:7px; border-radius:50%; margin-right:7px; vertical-align:middle; }
+  .dot.safe{background:var(--safe);} .dot.caution{background:var(--caution);} .dot.stop{background:var(--stop);}
+
+  /* ---------- Controls ---------- */
+  .mode-toggle{ display:flex; gap:8px; margin-bottom:14px; flex-wrap:wrap; }
+  .mode-btn{
+    font-family:'Inter',sans-serif; font-size:13.5px; font-weight:600;
+    padding:8px 14px; border-radius:9px; cursor:pointer;
+    border:1px solid rgba(255,255,255,0.1); background:var(--panel-bg-2); color:var(--text-hi);
+  }
+  .mode-btn.active{ background:rgba(61,255,160,0.14); border-color:rgba(61,255,160,0.5); color:var(--trace); }
+  .mode-btn:focus-visible{ outline:2px solid var(--focus); outline-offset:2px; }
+
+  .control-row{ display:flex; align-items:center; gap:10px; flex-wrap:wrap; margin-bottom:10px; }
+  .btn{
+    font-family:'JetBrains Mono', monospace; font-size:12.5px; font-weight:600;
+    padding:11px 15px; border-radius:8px; cursor:pointer; min-height:40px;
+    border:1px solid rgba(255,255,255,0.12); background:var(--panel-bg-2); color:var(--text-hi);
+  }
+  .btn:hover{ background:#22272a; }
+  .btn:disabled{ opacity:0.4; cursor:not-allowed; }
+  .btn.primary{ border-color:rgba(61,255,160,0.5); color:var(--trace); }
+  .btn:focus-visible{ outline:2px solid var(--focus); outline-offset:2px; }
+
+  .stage-info{ font-family:'JetBrains Mono', monospace; font-size:13px; color:var(--text-hi); display:flex; align-items:center; gap:10px; flex-wrap:wrap; }
+  .stage-info .elapsed{ color:var(--text-lo); }
+  .progress-track{ height:8px; border-radius:6px; background:rgba(255,255,255,0.07); overflow:hidden; margin-top:10px; }
+  .progress-fill{ height:100%; background:linear-gradient(90deg, var(--trace), var(--cyan)); width:0%; transition:width 0.2s linear; }
+  .slider-row{ display:flex; align-items:center; gap:12px; margin-top:6px; }
+  input[type=range]{ flex:1; accent-color:var(--trace); }
+  .workload-readout{ font-family:'JetBrains Mono', monospace; font-size:15px; color:var(--text-hi); min-width:150px; text-align:right; }
+  .toggle-row{ display:flex; align-items:center; gap:8px; font-size:13px; color:var(--text-lo); margin-top:10px; flex-wrap:wrap;}
+  .toggle-row input{ accent-color: var(--trace); }
+
+  /* ---------- Monitor (ECG) ---------- */
+  .monitor-inner{ position:relative; }
+  .monitor-inner.alarm-stop{ animation: exAlarmPulse 1.1s infinite; }
+  .monitor-inner.alarm-caution{ animation: exAlarmPulseCaution 1.6s infinite; }
+  @keyframes exAlarmPulse{
+    0%,100%{ box-shadow:0 0 0 0 rgba(255,59,78,0.0);} 50%{ box-shadow:0 0 0 3px rgba(255,59,78,0.45);}
+  }
+  @keyframes exAlarmPulseCaution{
+    0%,100%{ box-shadow:0 0 0 0 rgba(255,201,60,0.0);} 50%{ box-shadow:0 0 0 3px rgba(255,201,60,0.35);}
+  }
+  @media (prefers-reduced-motion: reduce){ .monitor-inner.alarm-stop, .monitor-inner.alarm-caution{ animation:none; } }
+
+  .monitor-top{ display:flex; align-items:flex-start; justify-content:space-between; gap:12px; padding:2px 4px 12px; flex-wrap:wrap; }
+  .hr-block{ display:flex; align-items:baseline; gap:8px; }
+  .hr-number{ font-family:'JetBrains Mono', monospace; font-weight:700; font-size:clamp(30px,6vw,40px); color:var(--amber); line-height:1; }
+  .hr-unit{ font-family:'JetBrains Mono', monospace; font-size:12px; color:var(--text-lo); }
+  .rec-dot{ width:9px;height:9px;border-radius:50%; background:var(--trace); box-shadow:0 0 8px var(--trace-glow); display:inline-block; margin-right:6px; animation: blink 1.4s infinite; }
+  @media (prefers-reduced-motion: reduce){ .rec-dot, .continuous-dot{ animation:none; opacity:0.9; } }
+  @keyframes blink{ 0%,45%{opacity:1;} 50%,95%{opacity:0.15;} 100%{opacity:1;} }
+  .rhythm-tag{ text-align:right; }
+  .rhythm-tag .lead{ font-family:'JetBrains Mono', monospace; font-size:11px; color:var(--text-lo); display:flex; align-items:center; justify-content:flex-end; }
+  .rhythm-tag .name{ font-family:'JetBrains Mono', monospace; font-size:14px; font-weight:600; color:var(--text-hi); margin-top:2px; }
+
+  .screen-frame{ position:relative; border-radius:10px; overflow:hidden; background:var(--screen); box-shadow:inset 0 0 0 1px rgba(0,0,0,0.6), inset 0 2px 10px rgba(0,0,0,0.6); height:180px; }
+  .screen-frame canvas{ position:absolute; top:0; left:0; width:100%; height:100%; display:block; }
+
+  .badge-row{ display:flex; align-items:center; justify-content:space-between; padding:12px 4px 2px; gap:10px; flex-wrap:wrap; }
+  .badge{ font-family:'JetBrains Mono', monospace; font-size:12.5px; font-weight:700; letter-spacing:0.04em; padding:6px 12px; border-radius:999px; text-transform:uppercase; }
+  .badge.safe{ background:rgba(57,217,138,0.14); color:var(--safe); border:1px solid rgba(57,217,138,0.4);}
+  .badge.caution{ background:rgba(255,201,60,0.14); color:var(--caution); border:1px solid rgba(255,201,60,0.4);}
+  .badge.stop{ background:rgba(255,59,78,0.14); color:var(--stop); border:1px solid rgba(255,59,78,0.45);}
+  .rate-desc{ font-family:'JetBrains Mono', monospace; font-size:12px; color:var(--text-lo); }
+
+  /* ---------- Explanation ---------- */
+  .explain-head{ display:flex; align-items:center; justify-content:space-between; gap:12px; flex-wrap:wrap; margin-bottom:6px; }
+  .explain-head h3{ font-family:'JetBrains Mono', monospace; font-size:16px; margin:0; color:var(--text-hi); }
+  .explain p.mechanism{ color:var(--text-hi); opacity:0.92; line-height:1.55; font-size:14px; margin:8px 0 12px; }
+  .explain .findings-label, .explain .status-label{ font-size:11px; text-transform:uppercase; letter-spacing:0.07em; color:var(--text-lo); font-weight:700; margin-bottom:6px; }
+  .explain ul{ margin:0 0 14px; padding-left:20px; color:var(--text-hi); opacity:0.92;}
+  .explain li{ margin-bottom:5px; font-size:13.5px; line-height:1.5;}
+  .status-box{ border-radius:10px; padding:11px 13px; font-size:13.5px; line-height:1.5; font-weight:500; }
+  .status-box.safe{ background:rgba(57,217,138,0.08); border:1px solid rgba(57,217,138,0.3); color:#bdf5d9;}
+  .status-box.caution{ background:rgba(255,201,60,0.08); border:1px solid rgba(255,201,60,0.3); color:#ffe9b3;}
+  .status-box.stop{ background:rgba(255,59,78,0.08); border:1px solid rgba(255,59,78,0.35); color:#ffc7cd;}
+
+  /* ---------- Vitals grid ---------- */
+  .vitals-grid{ display:grid; grid-template-columns:repeat(auto-fit, minmax(150px,1fr)); gap:12px; }
+  .vital-card{ background:var(--panel-bg); border:1px solid rgba(255,255,255,0.06); border-radius:12px; padding:14px 14px 12px; }
+  .vital-card .label{ font-size:11px; text-transform:uppercase; letter-spacing:0.06em; color:var(--text-lo); font-weight:700; margin-bottom:6px; display:flex; align-items:center; justify-content:space-between; }
+  .vital-card .value{ font-family:'JetBrains Mono', monospace; font-weight:700; font-size:28px; line-height:1; }
+  .vital-card .unit{ font-size:12px; color:var(--text-lo); margin-left:4px; font-family:'JetBrains Mono', monospace;}
+  .vital-card .sub{ font-size:11.5px; color:var(--text-lo); margin-top:6px; font-family:'JetBrains Mono', monospace;}
+  .vital-card.bp .value{ color:var(--cyan); }
+  .vital-card.spo2 .value{ color:var(--trace); }
+  .vital-card.rr .value{ color:var(--lilac); }
+  .vital-card.rpe .value{ color:var(--text-hi); }
+  .continuous-dot{ width:6px;height:6px;border-radius:50%; background:var(--trace); display:inline-block; animation:blink 1.4s infinite; }
+  .stepped-tag{ font-size:9.5px; color:var(--text-lo); border:1px solid rgba(255,255,255,0.12); padding:1px 6px; border-radius:6px;}
+  .mini-btn{ font-family:'JetBrains Mono', monospace; font-size:12.5px; font-weight:600; padding:10px 14px; border-radius:6px; cursor:pointer; margin-top:8px; border:1px solid rgba(95,208,255,0.4); background:rgba(95,208,255,0.08); color:var(--cyan); min-height:40px; }
+  .mini-btn:disabled{ opacity:0.35; cursor:not-allowed; }
+  .mini-btn:focus-visible{ outline:2px solid var(--focus); outline-offset:2px; }
+
+  /* ---------- Charts ---------- */
+  .chart-wrap{ margin-top:10px; background:var(--panel-bg); border-radius:12px; border:1px solid rgba(255,255,255,0.06); padding:10px 10px 6px;}
+  .chart-title{ font-family:'JetBrains Mono', monospace; font-size:11px; color:var(--text-lo); margin-bottom:4px; display:flex; gap:14px; flex-wrap:wrap;}
+  .legend-item{ display:inline-flex; align-items:center; gap:5px; }
+  .legend-dot{ width:8px;height:8px;border-radius:50%; display:inline-block;}
+  canvas.chart-canvas{ width:100%; height:130px; display:block; }
+  canvas.preview-canvas{ width:100%; height:170px; display:block; }
+
+  footer{ margin-top:22px; color:var(--text-lo); font-size:12px; line-height:1.6; max-width:70ch; }
+
+  @media (max-width:520px){ .vital-card .value{ font-size:24px; } }
+
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header class="page-head">
+    <h1>Cardiac Monitoring Trainer</h1>
+    <p>Learn to read ECG rhythms, then watch how each one behaves as a patient exercises — vitals, trace, and clinical decision points together.</p>
+  </header>
+
+  <div class="view-switcher">
+    <button class="switch-btn active" id="switchToRhythmBtn" type="button">ECG Rhythm Reference</button>
+    <button class="switch-btn" id="switchToExerciseBtn" type="button">Exercise Challenge</button>
+  </div>
+
+  <div id="view-rhythm" class="view active">
+    <p class="view-intro">A live, sweeping ECG trace like a bedside monitor. Toggle rhythms to see how each one changes the trace — and what it means for a treatment session.</p>
+<div class="monitor" id="rr-monitor">
+    <div class="monitor-top">
+      <div class="hr-block">
+        <span class="rec-dot" aria-hidden="true"></span>
+        <span class="hr-number" id="rr-hrNumber">075</span>
+        <span class="hr-unit">bpm</span>
+      </div>
+      <div class="rhythm-tag">
+        <div class="lead">LEAD II · SIMULATED</div>
+        <div class="name" id="rr-rhythmNameTag">Normal Sinus Rhythm</div>
+      </div>
+    </div>
+
+    <div class="screen-frame">
+      <canvas id="rr-gridCanvas"></canvas>
+      <canvas id="rr-traceCanvas"></canvas>
+    </div>
+
+    <div class="badge-row">
+      <span class="badge safe" id="rr-statusBadge">Continue</span>
+      <span class="rate-desc" id="rr-rateDesc">Regular · 60–100 bpm range</span>
+    </div>
+  </div>
+
+  <div class="selector">
+    <h2>Choose a rhythm</h2>
+
+    <div class="group">
+      <div class="group-label">Normal &amp; rate changes</div>
+      <div class="pill-row" id="rr-group-rate"></div>
+    </div>
+    <div class="group">
+      <div class="group-label">Irregular rhythms</div>
+      <div class="pill-row" id="rr-group-irregular"></div>
+    </div>
+    <div class="group">
+      <div class="group-label">Emergency patterns</div>
+      <div class="pill-row" id="rr-group-emergency"></div>
+    </div>
+    <div class="group">
+      <div class="group-label">Conduction blocks</div>
+      <div class="pill-row" id="rr-group-blocks"></div>
+    </div>
+    <div class="group">
+      <div class="group-label">Device</div>
+      <div class="pill-row" id="rr-group-device"></div>
+    </div>
+  </div>
+
+  <div class="explain" id="rr-explainPanel">
+    <div class="explain-head">
+      <h3 id="rr-explainTitle">Normal Sinus Rhythm</h3>
+    </div>
+    <p class="mechanism" id="rr-explainMechanism"></p>
+    <div class="findings-label">On the trace</div>
+    <ul id="rr-explainFindings"></ul>
+    <div class="action-label">Clinical action</div>
+    <div class="action-box safe" id="rr-explainAction"></div>
+  </div>
+  </div>
+
+  <div id="view-exercise" class="view">
+    <p class="view-intro">Pick a patient, drive their workload up, and watch the ECG rhythm, HR, BP, SpO₂, and RR respond together — including the moment each pathology becomes a stop criterion.</p>
+<!-- ============ Scenario selector ============ -->
+  <div class="panel">
+    <h2>Patient scenario</h2>
+    <div class="pill-row" id="ex-scenarioPills"></div>
+  </div>
+
+  <!-- ============ Workload control ============ -->
+  <div class="panel">
+    <h2>Workload control</h2>
+    <div class="mode-toggle">
+      <button class="mode-btn active" id="ex-modeProtocolBtn" type="button">Protocol (auto-ramp)</button>
+      <button class="mode-btn" id="ex-modeManualBtn" type="button">Manual slider</button>
+    </div>
+
+    <div id="ex-protocolControls">
+      <div class="control-row">
+        <button class="btn primary" id="ex-startBtn" type="button">Start</button>
+        <button class="btn" id="ex-pauseBtn" type="button" disabled>Pause</button>
+        <button class="btn" id="ex-nextStageBtn" type="button" disabled>Next stage →</button>
+        <button class="btn" id="ex-resetBtn" type="button">Reset</button>
+      </div>
+      <div class="stage-info">
+        <span id="ex-stageName">Not started</span>
+        <span class="elapsed" id="ex-stageElapsed">stage 0:00 / 0:00</span>
+        <span class="elapsed" id="ex-sessionElapsed">· session 0:00</span>
+      </div>
+      <div class="progress-track"><div class="progress-fill" id="ex-stageProgress"></div></div>
+      <div class="toggle-row">
+        <label><input type="checkbox" id="ex-autoAdvanceChk" checked> Auto-advance stages</label>
+        <label><input type="checkbox" id="ex-autoBPChk" checked> Auto BP each stage</label>
+        <label><input type="checkbox" id="ex-autoRPEChk" checked> Auto RPE each stage</label>
+      </div>
+    </div>
+
+    <div id="ex-manualControls" style="display:none;">
+      <div class="control-row">
+        <button class="btn primary" id="ex-manualRunBtn" type="button">Start / Resume</button>
+        <button class="btn" id="ex-manualPauseBtn" type="button" disabled>Pause</button>
+        <button class="btn" id="ex-manualResetBtn" type="button">Reset</button>
+      </div>
+      <div class="slider-row">
+        <input type="range" id="ex-workloadSlider" min="0" max="10" step="0.5" value="0">
+        <span class="workload-readout" id="ex-workloadReadout">0.0 / 10 · rest</span>
+      </div>
+      <div class="stage-info" style="margin-top:8px;">
+        <span class="elapsed" id="ex-manualElapsed">session 0:00</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============ Live monitor (ECG) ============ -->
+  <div class="panel">
+    <h2>Live monitor</h2>
+    <div class="monitor-inner" id="ex-monitorInner">
+      <div class="monitor-top">
+        <div class="hr-block">
+          <span class="rec-dot" aria-hidden="true"></span>
+          <span class="hr-number" id="ex-hrNumber">070</span>
+          <span class="hr-unit">bpm</span>
+        </div>
+        <div class="rhythm-tag">
+          <div class="lead">LEAD II · SIMULATED</div>
+          <div class="name" id="ex-rhythmNameTag">Normal response</div>
+        </div>
+      </div>
+      <div class="screen-frame">
+        <canvas id="ex-gridCanvas"></canvas>
+        <canvas id="ex-traceCanvas"></canvas>
+      </div>
+      <div class="badge-row">
+        <span class="badge safe" id="ex-statusBadge">Continue</span>
+        <span class="rate-desc" id="ex-rateDesc">workload 0.0</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============ Explanation ============ -->
+  <div class="panel explain">
+    <div class="explain-head"><h3 id="ex-explainTitle">Normal response</h3></div>
+    <p class="mechanism" id="ex-explainMechanism"></p>
+    <div class="findings-label">On the trace &amp; vitals</div>
+    <ul id="ex-explainFindings"></ul>
+    <div class="status-label">Right now</div>
+    <div class="status-box safe" id="ex-explainStatus"></div>
+  </div>
+
+  <!-- ============ Vitals ============ -->
+  <div class="panel">
+    <h2>Vitals detail</h2>
+    <div class="vitals-grid">
+      <div class="vital-card bp">
+        <div class="label">Blood pressure <span class="stepped-tag">cuff</span></div>
+        <div><span class="value" id="ex-bpValue">118/76</span><span class="unit">mmHg</span></div>
+        <div class="sub" id="ex-bpSub">not yet taken</div>
+        <button class="mini-btn" id="ex-takeBpBtn" type="button">Take BP now</button>
+      </div>
+      <div class="vital-card spo2">
+        <div class="label">SpO₂ <span class="continuous-dot" aria-hidden="true"></span></div>
+        <div><span class="value" id="ex-spo2Value">98</span><span class="unit">%</span></div>
+        <div class="sub">continuous</div>
+      </div>
+      <div class="vital-card rr">
+        <div class="label">Resp. rate <span class="continuous-dot" aria-hidden="true"></span></div>
+        <div><span class="value" id="ex-rrValue">14</span><span class="unit">br/min</span></div>
+        <div class="sub">continuous</div>
+      </div>
+      <div class="vital-card rpe">
+        <div class="label">RPE (Borg 6–20) <span class="stepped-tag">reported</span></div>
+        <div><span class="value" id="ex-rpeValue">6</span></div>
+        <div class="sub" id="ex-rpeSub">no exertion</div>
+        <button class="mini-btn" id="ex-askRpeBtn" type="button">Ask RPE</button>
+      </div>
+      <div class="vital-card">
+        <div class="label">Workload</div>
+        <div><span class="value" id="ex-metsValue" style="font-size:24px;">1.0</span><span class="unit">METs</span></div>
+        <div class="sub" id="ex-workloadSub">rest</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============ Trends ============ -->
+  <div class="panel">
+    <h2>Session trend</h2>
+    <div class="chart-wrap">
+      <div class="chart-title">
+        <span class="legend-item"><span class="legend-dot" style="background:var(--amber);"></span>HR (monitor-derived)</span>
+        <span class="legend-item"><span class="legend-dot" style="background:var(--cyan);"></span>SBP</span>
+        <span class="legend-item"><span class="legend-dot" style="background:var(--cyan); opacity:0.5;"></span>DBP</span>
+      </div>
+      <canvas class="chart-canvas" id="ex-chartHrBp"></canvas>
+    </div>
+    <div class="chart-wrap">
+      <div class="chart-title">
+        <span class="legend-item"><span class="legend-dot" style="background:var(--trace);"></span>SpO₂</span>
+        <span class="legend-item"><span class="legend-dot" style="background:var(--lilac);"></span>RR</span>
+      </div>
+      <canvas class="chart-canvas" id="ex-chartSpo2Rr"></canvas>
+    </div>
+  </div>
+
+  <!-- ============ Response curve preview ============ -->
+  <div class="panel">
+    <h2>Response curve preview <span style="color:var(--text-lo); text-transform:none; font-weight:400;">(current scenario, target values vs. workload, no lag)</span></h2>
+    <div class="chart-wrap">
+      <div class="chart-title">
+        <span class="legend-item"><span class="legend-dot" style="background:var(--amber);"></span>HR</span>
+        <span class="legend-item"><span class="legend-dot" style="background:var(--cyan);"></span>SBP</span>
+        <span class="legend-item"><span class="legend-dot" style="background:var(--cyan); opacity:0.5;"></span>DBP</span>
+        <span class="legend-item"><span class="legend-dot" style="background:var(--trace);"></span>SpO₂</span>
+        <span class="legend-item"><span class="legend-dot" style="background:var(--lilac);"></span>RR</span>
+      </div>
+      <canvas class="preview-canvas" id="ex-previewChart"></canvas>
+    </div>
+  </div>
+  </div>
+
+  <footer>
+    Simplified educational simulation for teaching purposes. Waveforms are synthetically generated to illustrate typical patterns — this is not real patient data, not diagnostic-grade, and should never be used for actual clinical decision-making. Standalone test module. Vitals curves and ECG morphology are synthetic approximations chosen to illustrate typical exercise-response patterns for teaching — not real patient data, not diagnostic-grade.
+  </footer>
+
+</div>
+
+<script>
+  /* ======================= Math helpers ======================= */
+  function gauss(u, mu, sigma, amp){
+    const d = (u - mu) / sigma;
+    return amp * Math.exp(-0.5 * d * d);
+  }
+  function pseudoRandom(seed){
+    const x = Math.sin(seed * 12.9898) * 43758.5453;
+    return x - Math.floor(x);
+  }
+  function baselineNoise(t){
+    return 0.015 * (Math.sin(t*2*Math.PI*0.9) + 0.6*Math.sin(t*2*Math.PI*2.3+1.1)) / 1.6;
+  }
+  function fibrillatoryWobble(t){
+    return 0.07 * (
+      Math.sin(t*2*Math.PI*6.3) +
+      0.7*Math.sin(t*2*Math.PI*9.7+0.4) +
+      0.5*Math.sin(t*2*Math.PI*14+2)
+    ) / 2.2;
+  }
+
+  /* ======================= Waveform shapes ======================= */
+  function normalBeat(u, bi, t, opts){
+    opts = opts || {};
+    const pAmp = opts.pAmp !== undefined ? opts.pAmp : 0.16;
+    const pCenter = opts.pCenter !== undefined ? opts.pCenter : 0.06;
+    const pWidth = opts.pWidth !== undefined ? opts.pWidth : 0.018;
+    const qrsCenter = opts.qrsCenter !== undefined ? opts.qrsCenter : 0.20;
+    const qrsSpread = opts.qrsSpread !== undefined ? opts.qrsSpread : 1;
+    const qAmp = opts.qAmp !== undefined ? opts.qAmp : -0.15;
+    const rAmp = opts.rAmp !== undefined ? opts.rAmp : 1.0;
+    const sAmp = opts.sAmp !== undefined ? opts.sAmp : -0.28;
+    const stOffset = opts.stOffset !== undefined ? opts.stOffset : 0;
+    const tAmp = opts.tAmp !== undefined ? opts.tAmp : 0.32;
+    const tSign = opts.tSign !== undefined ? opts.tSign : 1;
+    const includeP = opts.includeP !== undefined ? opts.includeP : true;
+
+    let y = 0;
+    if (includeP) y += gauss(u, pCenter, pWidth, pAmp);
+    y += gauss(u, qrsCenter - 0.017*qrsSpread, 0.008*qrsSpread, qAmp);
+    y += gauss(u, qrsCenter, 0.011*qrsSpread, rAmp);
+    y += gauss(u, qrsCenter + 0.019*qrsSpread, 0.009*qrsSpread, sAmp);
+    const stCenter = qrsCenter + 0.06, stWidth = 0.035;
+    const tCenter = qrsCenter + 0.16, tWidth = 0.05;
+    if (stOffset) y += gauss(u, stCenter, stWidth, stOffset);
+    y += gauss(u, tCenter, tWidth, tAmp * tSign);
+    return y;
+  }
+
+  function wideBeat(u, bi, t, opts){
+    opts = opts || {};
+    const amp = opts.amp !== undefined ? opts.amp : 1.15;
+    const center = opts.center !== undefined ? opts.center : 0.18;
+    const width = opts.width !== undefined ? opts.width : 0.05;
+    const tAmp = opts.tAmp !== undefined ? opts.tAmp : 0.32;
+    const tSign = opts.tSign !== undefined ? opts.tSign : -1;
+    const includeP = opts.includeP !== undefined ? opts.includeP : false;
+    const pAmp = opts.pAmp !== undefined ? opts.pAmp : 0.16;
+    const pCenter = opts.pCenter !== undefined ? opts.pCenter : 0.02;
+    const spike = opts.spike !== undefined ? opts.spike : false;
+
+    let y = 0;
+    if (includeP) y += gauss(u, pCenter, 0.018, pAmp);
+    if (spike) y += gauss(u, center - 0.035, 0.0035, amp*1.35);
+    y += gauss(u, center, width, amp);
+    y += gauss(u, center + width*1.5, width*0.8, -amp*0.5);
+    const tCenter = center + 0.20, tWidth = 0.06;
+    y += gauss(u, tCenter, tWidth, tAmp * tSign);
+    return y;
+  }
+
+  function pWaveOnly(u, bi, t, opts){
+    opts = opts || {};
+    const pAmp = opts.pAmp !== undefined ? opts.pAmp : 0.16;
+    const pCenter = opts.pCenter !== undefined ? opts.pCenter : 0.09;
+    const pWidth = opts.pWidth !== undefined ? opts.pWidth : 0.02;
+    return gauss(u, pCenter, pWidth, pAmp);
+  }
+
+
+</script>
+
+<script>
+
+(function(){
+  "use strict";
+
+  /* Math + waveform helpers (gauss, normalBeat, wideBeat, pWaveOnly, baselineNoise, fibrillatoryWobble, pseudoRandom) are shared — defined earlier in this page. */
+
+  /* ======================= Engine factory ======================= */
+  function makeEngine(cycleLenFn, waveformFn){
+    return {
+      phase: 0, beatIndex: 0, tTotal: 0,
+      cycleLen: cycleLenFn(0),
+      cycleLenFn: cycleLenFn,
+      waveformFn: waveformFn,
+      sample: function(dt){
+        this.tTotal += dt;
+        this.phase += dt;
+        if (this.phase >= this.cycleLen){
+          this.phase -= this.cycleLen;
+          this.beatIndex++;
+          this.cycleLen = this.cycleLenFn(this.beatIndex);
+        }
+        return this.waveformFn(this.phase, this.beatIndex, this.tTotal);
+      },
+      reset: function(){
+        this.phase = 0; this.beatIndex = 0; this.tTotal = 0;
+        this.cycleLen = this.cycleLenFn(0);
+      },
+      currentBPM: function(){ return 60 / this.cycleLen; }
+    };
+  }
+
+  function wrapEngine(eng, opts){
+    opts = opts || {};
+    return {
+      sample: function(dt){
+        let y = eng.sample(dt) + baselineNoise(eng.tTotal);
+        if (opts.fib) y += fibrillatoryWobble(eng.tTotal);
+        return y;
+      },
+      reset: function(){ eng.reset(); },
+      getHR: opts.getHR || function(){ return Math.round(eng.currentBPM()) + ' bpm'; }
+    };
+  }
+
+  /* ======================= Rhythm registry ======================= */
+  const RHYTHMS = [
+    {
+      id:'nsr', group:'rate', label:'Normal Sinus Rhythm', badge:'safe',
+      rateDesc:'Regular · 60–100 bpm range',
+      mechanism:"The SA node fires normally and every impulse conducts through the atria and ventricles right on schedule.",
+      findings:["Regular P wave before every QRS","Rate 60–100 bpm","Consistent, normal PR interval"],
+      action:"Continue the session — this is the expected baseline rhythm.",
+      build: function(){
+        const cycleLenFn = bi => 60/(72 + 4*Math.sin(bi*0.7));
+        const waveformFn = (u,bi,t) => normalBeat(u,bi,t,{});
+        return wrapEngine(makeEngine(cycleLenFn, waveformFn));
+      }
+    },
+    {
+      id:'stach', group:'rate', label:'Sinus Tachycardia', badge:'caution',
+      rateDesc:'Regular · >100 bpm',
+      mechanism:"The SA node fires faster than normal — usually an appropriate response to exertion, pain, anxiety, fever, or dehydration.",
+      findings:["Rate above 100 bpm, regular","Normal P-QRS-T shape, just closer together"],
+      action:"Expected with exercise — compare against predicted max HR and perceived exertion. Slow down or stop if the rate is out of proportion to workload or symptoms appear.",
+      build: function(){
+        const cycleLenFn = () => 60/136;
+        const waveformFn = (u,bi,t) => normalBeat(u,bi,t,{});
+        return wrapEngine(makeEngine(cycleLenFn, waveformFn));
+      }
+    },
+    {
+      id:'sbrady', group:'rate', label:'Sinus Bradycardia', badge:'caution',
+      rateDesc:'Regular · <60 bpm',
+      mechanism:"The SA node fires slower than normal — common in well-conditioned athletes, but also seen with certain medications or conduction disease.",
+      findings:["Rate below 60 bpm, regular","Normal P-QRS-T shape"],
+      action:"Continue if asymptomatic and appropriate for the patient. Stop and reassess if it's new, symptomatic, or paired with dizziness or low blood pressure.",
+      build: function(){
+        const cycleLenFn = () => 60/44;
+        const waveformFn = (u,bi,t) => normalBeat(u,bi,t,{});
+        return wrapEngine(makeEngine(cycleLenFn, waveformFn));
+      }
+    },
+    {
+      id:'afib', group:'irregular', label:'Atrial Fibrillation', badge:'caution',
+      rateDesc:'Irregularly irregular',
+      mechanism:"Chaotic electrical activity in the atria replaces organized P waves, and the AV node lets impulses through unpredictably.",
+      findings:["No discrete P waves — fine fibrillatory baseline","Irregularly irregular R-R intervals","Rate varies beat to beat"],
+      action:"Many patients exercise safely in AFib. Monitor rate response and symptoms closely; stop for a rapid ventricular response or new symptoms.",
+      build: function(){
+        const cycleLenFn = bi => 0.36 + pseudoRandom(bi)*0.46;
+        const waveformFn = (u,bi,t) => normalBeat(u,bi,t,{includeP:false, pAmp:0});
+        const eng = makeEngine(cycleLenFn, waveformFn);
+        return wrapEngine(eng, {
+          fib:true,
+          getHR: () => Math.round(eng.currentBPM()) + ' bpm · irregular'
+        });
+      }
+    },
+    {
+      id:'pvc-occ', group:'irregular', label:'PVCs — Occasional', badge:'safe',
+      rateDesc:'Sinus rhythm with isolated PVCs',
+      mechanism:"An irritable focus in the ventricle fires early, outside the normal conduction pathway, producing a wide, bizarre QRS with no P wave.",
+      findings:["Early, wide QRS with no preceding P wave","Followed by a compensatory pause","Isolated — surrounded by normal sinus beats"],
+      action:"Continue. Occasional, isolated PVCs are common and usually benign — keep monitoring.",
+      build: function(){
+        const cycleLenFn = bi => {
+          const idx = bi % 8;
+          if (idx === 5) return 0.62;
+          if (idx === 6) return 1.05;
+          return 0.8;
+        };
+        const waveformFn = (u,bi,t) => {
+          const idx = bi % 8;
+          if (idx === 6) return wideBeat(u,bi,t,{amp:1.2, tAmp:0.35, tSign:-1, includeP:false});
+          return normalBeat(u,bi,t,{});
+        };
+        return wrapEngine(makeEngine(cycleLenFn, waveformFn));
+      }
+    },
+    {
+      id:'pvc-freq', group:'irregular', label:'PVCs — Frequent / Couplets', badge:'stop',
+      rateDesc:'Sinus rhythm with paired PVCs',
+      mechanism:"The same irritable ventricular focus is firing often, or back-to-back, raising the risk of a sustained dangerous rhythm.",
+      findings:["Multiple PVCs per minute, or two in a row (a couplet)","Wide, bizarre QRS morphology repeats"],
+      action:"STOP the session and notify the medical team — frequent or paired PVCs are an exercise termination criterion.",
+      build: function(){
+        const cycleLenFn = bi => {
+          const idx = bi % 5;
+          if (idx === 2) return 0.55;
+          if (idx === 3) return 0.42;
+          if (idx === 4) return 1.0;
+          return 0.75;
+        };
+        const waveformFn = (u,bi,t) => {
+          const idx = bi % 5;
+          if (idx === 3 || idx === 4) return wideBeat(u,bi,t,{amp:1.15, tAmp:0.32, tSign:-1, includeP:false});
+          return normalBeat(u,bi,t,{});
+        };
+        return wrapEngine(makeEngine(cycleLenFn, waveformFn));
+      }
+    },
+    {
+      id:'vt', group:'emergency', label:'Ventricular Tachycardia', badge:'stop',
+      rateDesc:'Regular · >150 bpm · wide complex',
+      mechanism:"The ventricles are firing on their own at a rapid, sustained rate, bypassing the normal conduction system entirely.",
+      findings:["Rate above 150 bpm, wide bizarre QRS","No discernible P waves","Regular, sine-wave-like appearance"],
+      action:"STOP immediately — this is a medical emergency. Activate emergency response.",
+      build: function(){
+        const cycleLenFn = () => 60/188;
+        const waveformFn = (u,bi,t) => wideBeat(u,bi,t,{amp:1.25, width:0.055, tAmp:0.25, tSign:-1, includeP:false});
+        return wrapEngine(makeEngine(cycleLenFn, waveformFn));
+      }
+    },
+    {
+      id:'st-dep', group:'emergency', label:'ST Depression', badge:'stop',
+      rateDesc:'Regular · exertional pattern',
+      mechanism:"Reduced blood flow to the heart muscle during demand (like exercise) alters repolarization, pulling the ST segment below baseline.",
+      findings:["ST segment sags below baseline","Often a flattened or inverted T wave"],
+      action:"STOP the session — this is a classic sign of exertional ischemia and an exercise termination criterion.",
+      build: function(){
+        const cycleLenFn = () => 60/98;
+        const waveformFn = (u,bi,t) => normalBeat(u,bi,t,{stOffset:-0.16, tAmp:0.14, tSign:-1});
+        return wrapEngine(makeEngine(cycleLenFn, waveformFn));
+      }
+    },
+    {
+      id:'st-elev', group:'emergency', label:'ST Elevation (STEMI pattern)', badge:'stop',
+      rateDesc:'Regular · injury pattern',
+      mechanism:"A blocked coronary artery causes full-thickness injury to the heart muscle, raising the ST segment above baseline.",
+      findings:["ST segment elevated above baseline","Often a tall, peaked ('hyperacute') T wave"],
+      action:"STOP immediately and call for emergency medical help — this pattern suggests an active heart attack.",
+      build: function(){
+        const cycleLenFn = () => 60/95;
+        const waveformFn = (u,bi,t) => normalBeat(u,bi,t,{stOffset:0.20, tAmp:0.5});
+        return wrapEngine(makeEngine(cycleLenFn, waveformFn));
+      }
+    },
+    {
+      id:'avb1', group:'blocks', label:'1st-Degree AV Block', badge:'safe',
+      rateDesc:'Regular · prolonged PR interval',
+      mechanism:"Every impulse still reaches the ventricles, but conduction through the AV node is delayed.",
+      findings:["PR interval prolonged (>0.20s) but constant","Every P wave still followed by a QRS"],
+      action:"Continue — usually benign on its own. Keep monitoring for progression to a higher-grade block.",
+      build: function(){
+        const cycleLenFn = () => 60/68;
+        const waveformFn = (u,bi,t) => normalBeat(u,bi,t,{qrsCenter:0.30});
+        return wrapEngine(makeEngine(cycleLenFn, waveformFn));
+      }
+    },
+    {
+      id:'avb2-1', group:'blocks', label:'2nd-Degree AV Block — Mobitz I', badge:'caution',
+      rateDesc:'Group beating · regularly irregular',
+      mechanism:"The AV node fatigues with each successive beat, delaying conduction more and more until one impulse fails to get through.",
+      findings:["PR interval lengthens progressively, beat to beat","Then a QRS is dropped — pattern repeats in groups"],
+      action:"Usually well tolerated. Monitor closely and stop if the patient becomes symptomatic or the pattern worsens.",
+      build: function(){
+        const cycleLenFn = () => 0.75;
+        const prCenters = [0.09, 0.05, 0.01];
+        const waveformFn = (u,bi,t) => {
+          const idx = bi % 4;
+          if (idx === 3) return pWaveOnly(u,bi,t,{pCenter:0.09});
+          return normalBeat(u,bi,t,{pCenter:prCenters[idx]});
+        };
+        return wrapEngine(makeEngine(cycleLenFn, waveformFn));
+      }
+    },
+    {
+      id:'avb2-2', group:'blocks', label:'2nd-Degree AV Block — Mobitz II', badge:'stop',
+      rateDesc:'Fixed conduction ratio · sudden drops',
+      mechanism:"Conduction fails suddenly and unpredictably below the AV node, without the warning of a lengthening PR interval.",
+      findings:["Constant PR interval, then a QRS drops without warning","Often a fixed conduction ratio (e.g. 2:1, 3:1)"],
+      action:"STOP and refer — Mobitz II can progress abruptly to complete heart block and often needs a pacemaker.",
+      build: function(){
+        const cycleLenFn = () => 0.7;
+        const waveformFn = (u,bi,t) => {
+          const idx = bi % 3;
+          if (idx === 2) return pWaveOnly(u,bi,t,{});
+          return normalBeat(u,bi,t,{});
+        };
+        return wrapEngine(makeEngine(cycleLenFn, waveformFn));
+      }
+    },
+    {
+      id:'avb3', group:'blocks', label:'3rd-Degree (Complete) AV Block', badge:'stop',
+      rateDesc:'Atrial and ventricular rates fully dissociated',
+      mechanism:"No impulses from the atria reach the ventricles at all. The atria and ventricles beat independently, each on its own escape rhythm.",
+      findings:["P waves and QRS complexes at completely independent rates","Ventricular rate slow and often wide-complex"],
+      action:"STOP — this is an emergency. The patient needs immediate medical evaluation, often for pacing.",
+      build: function(){
+        const engP = makeEngine(() => 0.68, (u,bi,t) => pWaveOnly(u,bi,t,{pAmp:0.16}));
+        const engQ = makeEngine(() => 1.72, (u,bi,t) => wideBeat(u,bi,t,{amp:1.05, tAmp:0.28, tSign:-1, includeP:false}));
+        return {
+          sample: function(dt){
+            return engP.sample(dt) + engQ.sample(dt) + baselineNoise(engP.tTotal);
+          },
+          reset: function(){ engP.reset(); engQ.reset(); },
+          getHR: function(){
+            return 'A ' + Math.round(60/0.68) + ' / V ' + Math.round(60/1.72);
+          }
+        };
+      }
+    },
+    {
+      id:'paced', group:'device', label:'Paced Rhythm', badge:'safe',
+      rateDesc:'Regular · pacer spike before each QRS',
+      mechanism:"A pacemaker delivers a small electrical impulse directly to the heart muscle whenever the intrinsic rhythm doesn't fire on time.",
+      findings:["Sharp, narrow pacer spike immediately before each QRS","Wide QRS morphology from ventricular stimulation"],
+      action:"Continue if this is the patient's known baseline — always confirm their programmed rate range before starting.",
+      build: function(){
+        const cycleLenFn = () => 60/72;
+        const waveformFn = (u,bi,t) => wideBeat(u,bi,t,{amp:1.0, width:0.045, tAmp:0.28, tSign:1, includeP:false, spike:true});
+        return wrapEngine(makeEngine(cycleLenFn, waveformFn));
+      }
+    }
+  ];
+
+  const GROUP_ELS = {
+    rate: document.getElementById('rr-group-rate'),
+    irregular: document.getElementById('rr-group-irregular'),
+    emergency: document.getElementById('rr-group-emergency'),
+    blocks: document.getElementById('rr-group-blocks'),
+    device: document.getElementById('rr-group-device')
+  };
+
+  /* ======================= Canvas / sweep setup ======================= */
+  const screenFrame = document.querySelector('#view-rhythm .screen-frame');
+  const gridCanvas = document.getElementById('rr-gridCanvas');
+  const traceCanvas = document.getElementById('rr-traceCanvas');
+  const gridCtx = gridCanvas.getContext('2d');
+  const traceCtx = traceCanvas.getContext('2d');
+
+  const SWEEP_SECONDS = 4.4;
+  const GAP_PX = 14;
+
+  let dpr = Math.max(1, window.devicePixelRatio || 1);
+  let cssW = 0, cssH = 0, pxW = 0, pxH = 0;
+  let buffer = null;
+  let writeX = 0;
+  let pxPerSecond = 0;
+
+  function resizeCanvases(){
+    dpr = Math.max(1, window.devicePixelRatio || 1);
+    cssW = screenFrame.clientWidth;
+    cssH = screenFrame.clientHeight;
+    pxW = Math.floor(cssW);
+    pxH = Math.floor(cssH);
+
+    [gridCanvas, traceCanvas].forEach(c => {
+      c.width = Math.floor(cssW * dpr);
+      c.height = Math.floor(cssH * dpr);
+      c.style.width = cssW + 'px';
+      c.style.height = cssH + 'px';
+    });
+    gridCtx.setTransform(dpr,0,0,dpr,0,0);
+    traceCtx.setTransform(dpr,0,0,dpr,0,0);
+
+    pxPerSecond = pxW / SWEEP_SECONDS;
+    buffer = new Array(pxW).fill(null);
+    writeX = 0;
+    drawGrid();
+  }
+
+  function drawGrid(){
+    gridCtx.clearRect(0,0,cssW,cssH);
+    const minor = 8, major = 40;
+    gridCtx.strokeStyle = getComputedStyle(document.documentElement).getPropertyValue('--grid-minor-screen').trim();
+    gridCtx.lineWidth = 1;
+    gridCtx.beginPath();
+    for (let x = 0; x <= cssW; x += minor){
+      gridCtx.moveTo(x+0.5, 0); gridCtx.lineTo(x+0.5, cssH);
+    }
+    for (let y = 0; y <= cssH; y += minor){
+      gridCtx.moveTo(0, y+0.5); gridCtx.lineTo(cssW, y+0.5);
+    }
+    gridCtx.stroke();
+
+    gridCtx.strokeStyle = getComputedStyle(document.documentElement).getPropertyValue('--grid-major-screen').trim();
+    gridCtx.beginPath();
+    for (let x = 0; x <= cssW; x += major){
+      gridCtx.moveTo(x+0.5, 0); gridCtx.lineTo(x+0.5, cssH);
+    }
+    for (let y = 0; y <= cssH; y += major){
+      gridCtx.moveTo(0, y+0.5); gridCtx.lineTo(cssW, y+0.5);
+    }
+    gridCtx.stroke();
+  }
+
+  /* ======================= State ======================= */
+  let currentRhythm = RHYTHMS[0];
+  let currentEngine = currentRhythm.build();
+  const midY = () => cssH * 0.55;
+  const ampScale = () => cssH * 0.34;
+
+  function switchRhythm(rhythm){
+    currentRhythm = rhythm;
+    currentEngine = rhythm.build();
+    buffer.fill(null);
+    writeX = 0;
+    updateUI();
+  }
+
+  /* ======================= UI wiring ======================= */
+  function badgeLabel(b){
+    if (b === 'safe') return 'Continue';
+    if (b === 'caution') return 'Caution / Modify';
+    return 'STOP';
+  }
+
+  function buildPills(){
+    RHYTHMS.forEach(r => {
+      const btn = document.createElement('button');
+      btn.className = 'pill';
+      btn.type = 'button';
+      btn.dataset.id = r.id;
+      btn.innerHTML = '<span class="dot ' + r.badge + '"></span>' + r.label;
+      btn.addEventListener('click', () => switchRhythm(r));
+      GROUP_ELS[r.group].appendChild(btn);
+    });
+  }
+
+  function updateUI(){
+    // pills
+    document.querySelectorAll('#view-rhythm .pill').forEach(p => {
+      p.classList.toggle('active', p.dataset.id === currentRhythm.id);
+    });
+
+    document.getElementById('rr-rhythmNameTag').textContent = currentRhythm.label;
+    document.getElementById('rr-rateDesc').textContent = currentRhythm.rateDesc;
+
+    const badgeEl = document.getElementById('rr-statusBadge');
+    badgeEl.className = 'badge ' + currentRhythm.badge;
+    badgeEl.textContent = badgeLabel(currentRhythm.badge);
+
+    document.getElementById('rr-explainTitle').textContent = currentRhythm.label;
+    document.getElementById('rr-explainMechanism').textContent = currentRhythm.mechanism;
+
+    const findingsEl = document.getElementById('rr-explainFindings');
+    findingsEl.innerHTML = '';
+    currentRhythm.findings.forEach(f => {
+      const li = document.createElement('li');
+      li.textContent = f;
+      findingsEl.appendChild(li);
+    });
+
+    const actionEl = document.getElementById('rr-explainAction');
+    actionEl.className = 'action-box ' + currentRhythm.badge;
+    actionEl.textContent = currentRhythm.action;
+
+    const monitor = document.getElementById('rr-monitor');
+    monitor.classList.remove('alarm-stop','alarm-caution');
+    if (currentRhythm.badge === 'stop') monitor.classList.add('alarm-stop');
+    if (currentRhythm.badge === 'caution') monitor.classList.add('alarm-caution');
+  }
+
+  /* ======================= Animation loop ======================= */
+  let lastTs = null;
+  let hrDisplayAccum = 0;
+  let rrModuleActive = false;
+
+  function frame(ts){
+    if (!rrModuleActive) return; // paused while this view is hidden
+    if (lastTs === null) lastTs = ts;
+    let dt = (ts - lastTs) / 1000;
+    lastTs = ts;
+    if (dt > 0.08) dt = 0.08; // clamp for tab-switch jumps
+    if (dt < 0) dt = 0;
+
+    // advance sweep by whole pixel columns for a stable waveform shape
+    const colDt = 1 / pxPerSecond;
+    let remaining = dt;
+    // guard against runaway loops
+    let guard = 0;
+    while (remaining >= colDt && guard < 400){
+      const y = currentEngine.sample(colDt);
+      buffer[writeX] = y;
+      writeX = (writeX + 1) % pxW;
+      remaining -= colDt;
+      guard++;
+    }
+
+    // update HR readout a few times a second
+    hrDisplayAccum += dt;
+    if (hrDisplayAccum > 0.25){
+      hrDisplayAccum = 0;
+      const hrText = currentEngine.getHR();
+      const numMatch = hrText.match(/^\d+/);
+      document.getElementById('rr-hrNumber').textContent = numMatch ? numMatch[0].padStart(3,'0') : hrText;
+    }
+
+    render();
+    requestAnimationFrame(frame);
+  }
+
+  function render(){
+    traceCtx.clearRect(0,0,cssW,cssH);
+    traceCtx.lineWidth = 2;
+    traceCtx.strokeStyle = getComputedStyle(document.documentElement).getPropertyValue('--trace').trim();
+    traceCtx.shadowColor = getComputedStyle(document.documentElement).getPropertyValue('--trace-glow').trim();
+    traceCtx.shadowBlur = 6;
+    traceCtx.lineJoin = 'round';
+    traceCtx.lineCap = 'round';
+
+    const my = midY(), amp = ampScale();
+    let drawing = false;
+
+    traceCtx.beginPath();
+    for (let x = 0; x < pxW; x++){
+      const gapStart = writeX;
+      const gapEnd = (writeX + GAP_PX) % pxW;
+      const inGap = gapStart < gapEnd ? (x >= gapStart && x < gapEnd) : (x >= gapStart || x < gapEnd);
+      const val = buffer[x];
+      if (inGap || val === null || val === undefined){
+        drawing = false;
+        continue;
+      }
+      const yPix = my - val * amp;
+      if (!drawing){
+        traceCtx.moveTo(x, yPix);
+        drawing = true;
+      } else {
+        traceCtx.lineTo(x, yPix);
+      }
+    }
+    traceCtx.stroke();
+
+    // pen indicator
+    traceCtx.shadowBlur = 0;
+    traceCtx.fillStyle = getComputedStyle(document.documentElement).getPropertyValue('--trace').trim();
+    traceCtx.globalAlpha = 0.55;
+    traceCtx.fillRect(writeX, 0, 2, cssH);
+    traceCtx.globalAlpha = 1;
+  }
+
+  /* ======================= Init ======================= */
+  buildPills();
+  updateUI();
+
+  function activate(){
+    if (rrModuleActive) return;
+    rrModuleActive = true;
+    lastTs = null;
+    resizeCanvases(); // container was hidden (0-size) until now — recompute real dimensions
+    requestAnimationFrame(frame);
+  }
+  function deactivate(){
+    rrModuleActive = false;
+  }
+  window.addEventListener('resize', function(){ if (rrModuleActive) resizeCanvases(); });
+  window.__rhythmModule = { activate: activate, deactivate: deactivate };
+
+})();
+
+</script>
+
+<script>
+
+(function(){
+  "use strict";
+
+  /* Math + waveform helpers are shared globally — defined once near the top of this page. */
+
+  /* ======================= Default (normal) response curves ======================= */
+  const PROFILE = {
+    restHR:70, peakHR:161,
+    restSBP:118, peakSBP:178,
+    restDBP:76, peakDBP:70,
+    restSpO2:98, peakSpO2:96,
+    restRR:14, peakRR:32,
+    restRPE:6, peakRPE:19
+  };
+  function defaultHR(w){ return PROFILE.restHR + (PROFILE.peakHR-PROFILE.restHR)*Math.pow(w/10, 1.1); }
+  function defaultSBP(w){ return PROFILE.restSBP + (PROFILE.peakSBP-PROFILE.restSBP)*Math.pow(w/10, 1.0); }
+  function defaultDBP(w){ return PROFILE.restDBP + (PROFILE.peakDBP-PROFILE.restDBP)*Math.pow(w/10, 1.0); }
+  function defaultSpO2(w){ return PROFILE.restSpO2 - (PROFILE.restSpO2-PROFILE.peakSpO2)*Math.pow(w/10, 4); }
+  function defaultRR(w){
+    const bp=6, mid=22;
+    if (w<=bp) return PROFILE.restRR + (mid-PROFILE.restRR)*(w/bp);
+    return mid + (PROFILE.peakRR-mid)*Math.pow((w-bp)/(10-bp), 1.3);
+  }
+  function defaultRPE(w){ return PROFILE.restRPE + (PROFILE.peakRPE-PROFILE.restRPE)*Math.pow(w/10, 1.05); }
+  function metsFor(w){ return 1 + w*1.4; }
+  function borgDescriptor(v){
+    if (v<=6) return 'no exertion'; if (v<=8) return 'extremely light'; if (v<=10) return 'very light';
+    if (v<=12) return 'light'; if (v<=14) return 'somewhat hard'; if (v<=16) return 'hard';
+    if (v<=18) return 'very hard'; return 'maximal exertion';
+  }
+
+  /* ======================= Reusable ECG engine builders ======================= */
+  function makeSinusEngine(getHR, morphologyFn){
+    let phase=0, tTotal=0, beatIndex=0, cycleLen=60/Math.max(30,getHR());
+    return {
+      sample:function(dt){
+        tTotal+=dt; phase+=dt;
+        if (phase>=cycleLen){ phase-=cycleLen; beatIndex++; cycleLen=60/Math.min(220,Math.max(30,getHR())); }
+        return normalBeat(phase, beatIndex, tTotal, morphologyFn()) + baselineNoise(tTotal);
+      },
+      reset:function(){ phase=0; tTotal=0; beatIndex=0; cycleLen=60/Math.max(30,getHR()); },
+      getDisplayHR:function(){ return Math.round(60/cycleLen); }
+    };
+  }
+
+  function buildPvcProgressionEngine(getWorkload, getHR){
+    let phase=0, tTotal=0, beatIndex=0, cycleLen=0.8, isPvcBeat=false, prevWasPvc=false;
+    function decideNext(){
+      const w = getWorkload();
+      const pvcProb = w<6 ? 0.05 : (w<8 ? 0.18 : 0.35);
+      const r = pseudoRandom(beatIndex*3.17+1.5);
+      isPvcBeat = r < pvcProb;
+      const baseHR = Math.max(50, getHR());
+      const baseCycle = 60/baseHR;
+      cycleLen = isPvcBeat ? baseCycle*0.72 : (prevWasPvc ? baseCycle*1.25 : baseCycle);
+      prevWasPvc = isPvcBeat;
+    }
+    decideNext();
+    return {
+      sample:function(dt){
+        tTotal+=dt; phase+=dt;
+        if (phase>=cycleLen){ phase-=cycleLen; beatIndex++; decideNext(); }
+        if (isPvcBeat) return wideBeat(phase,beatIndex,tTotal,{amp:1.15,tAmp:0.32,tSign:-1,includeP:false}) + baselineNoise(tTotal);
+        return normalBeat(phase,beatIndex,tTotal,{}) + baselineNoise(tTotal);
+      },
+      reset:function(){ phase=0; tTotal=0; beatIndex=0; prevWasPvc=false; decideNext(); },
+      getDisplayHR:function(){ return Math.round(60/cycleLen); },
+      isCoupletZone:function(){ return getWorkload()>=8; }
+    };
+  }
+
+  function buildAfibEngine(getWorkload, getHR){
+    let phase=0, tTotal=0, beatIndex=0, cycleLen=0.7;
+    function nextCycle(){
+      const hr = Math.max(45, getHR());
+      const base = 60/hr;
+      cycleLen = base * (0.55 + pseudoRandom(beatIndex*1.7+3)*0.9);
+    }
+    nextCycle();
+    return {
+      sample:function(dt){
+        tTotal+=dt; phase+=dt;
+        if (phase>=cycleLen){ phase-=cycleLen; beatIndex++; nextCycle(); }
+        return normalBeat(phase,beatIndex,tTotal,{includeP:false,pAmp:0}) + baselineNoise(tTotal) + fibrillatoryWobble(tTotal);
+      },
+      reset:function(){ phase=0; tTotal=0; beatIndex=0; nextCycle(); },
+      getDisplayHR:function(){ return Math.round(60/cycleLen); }
+    };
+  }
+
+  function buildVtEngine(getWorkload, getHR){
+    let phase=0, tTotal=0, beatIndex=0, cycleLen=0.8, triggered=false, lastWasPvc=false;
+    function nextCycle(){
+      const w = getWorkload();
+      if (w >= 8.5) triggered = true;
+      if (triggered){
+        cycleLen = 60/188;
+      } else {
+        const pvcProb = w<5?0.03:(w<7?0.1:0.2);
+        const isPvc = pseudoRandom(beatIndex*2.3+7) < pvcProb;
+        const hr = Math.max(55, getHR());
+        cycleLen = isPvc ? (60/hr)*0.7 : 60/hr;
+        lastWasPvc = isPvc;
+      }
+    }
+    nextCycle();
+    return {
+      sample:function(dt){
+        tTotal+=dt; phase+=dt;
+        if (phase>=cycleLen){ phase-=cycleLen; beatIndex++; nextCycle(); }
+        if (triggered) return wideBeat(phase,beatIndex,tTotal,{amp:1.25,width:0.055,tAmp:0.25,tSign:-1,includeP:false}) + baselineNoise(tTotal);
+        if (lastWasPvc) return wideBeat(phase,beatIndex,tTotal,{amp:1.15,tAmp:0.3,tSign:-1,includeP:false}) + baselineNoise(tTotal);
+        return normalBeat(phase,beatIndex,tTotal,{}) + baselineNoise(tTotal);
+      },
+      reset:function(){ phase=0; tTotal=0; beatIndex=0; triggered=false; lastWasPvc=false; nextCycle(); },
+      getDisplayHR:function(){ return Math.round(60/cycleLen); },
+      isTriggered:function(){ return triggered; }
+    };
+  }
+
+  function buildThirdDegreeEngine(getAtrialHR){
+    let pPhase=0, pT=0, pCycle=60/Math.max(50,getAtrialHR());
+    let qPhase=0, qT=0, qCycle=60/36;
+    return {
+      sample:function(dt){
+        pT+=dt; pPhase+=dt;
+        if (pPhase>=pCycle){ pPhase-=pCycle; pCycle=60/Math.max(50,getAtrialHR()); }
+        qT+=dt; qPhase+=dt;
+        if (qPhase>=qCycle){ qPhase-=qCycle; qCycle=60/36; }
+        const pOut = pWaveOnly(pPhase, 0, pT, {});
+        const qOut = wideBeat(qPhase, 0, qT, {amp:1.05, tAmp:0.28, tSign:-1, includeP:false});
+        return pOut + qOut + baselineNoise(pT);
+      },
+      reset:function(){ pPhase=0; pT=0; pCycle=60/Math.max(50,getAtrialHR()); qPhase=0; qT=0; qCycle=60/36; },
+      getDisplayHR:function(){ return Math.round(60/qCycle); }
+    };
+  }
+
+  function buildFixedPacedEngine(){
+    let phase=0, tTotal=0, beatIndex=0, cycleLen=60/70;
+    return {
+      sample:function(dt){
+        tTotal+=dt; phase+=dt;
+        if (phase>=cycleLen){ phase-=cycleLen; beatIndex++; }
+        return wideBeat(phase,beatIndex,tTotal,{amp:1.0,width:0.045,tAmp:0.28,tSign:1,includeP:false,spike:true}) + baselineNoise(tTotal);
+      },
+      reset:function(){ phase=0; tTotal=0; beatIndex=0; },
+      getDisplayHR:function(){ return 70; }
+    };
+  }
+
+  /* ======================= Scenario registry ======================= */
+  function getWorkload(){ return currentWorkload(); }
+  function getPhysioHR(){ return physioHR; }
+
+  const SCENARIOS = [
+    {
+      id:'normal', label:'Normal response', badgeDefault:'safe',
+      vitals:{},
+      buildEcg:function(){ return makeSinusEngine(getPhysioHR, function(){ return {}; }); },
+      status:function(w){ return {level:'safe', note:'Continue — this is the expected response to increasing workload.'}; },
+      mechanism:"The SA node speeds up, contractility and stroke volume rise, and blood pressure climbs appropriately as workload increases.",
+      findings:["HR and SBP rise together with workload","DBP stays flat or drops slightly","SpO2 stays stable throughout"]
+    },
+    {
+      id:'chrono', label:'Chronotropic incompetence (beta-blocker)', badgeDefault:'safe',
+      vitals:{
+        hr:function(w){ return 58 + 25*Math.pow(w/10,1.3); },
+        sbp:function(w){ return PROFILE.restSBP + (150-PROFILE.restSBP)*Math.pow(w/10,1.0); },
+        rpe:function(w){ return Math.min(20, PROFILE.restRPE + 14*Math.pow(w/10,0.85)); }
+      },
+      buildEcg:function(){ return makeSinusEngine(getPhysioHR, function(){ return {}; }); },
+      status:function(w){
+        if (w>=8) return {level:'caution', note:"HR failed to rise appropriately for this workload — chronotropic incompetence. Not itself an emergency, but flag it and lean on RPE and BP instead of HR."};
+        return {level:'safe', note:'Continue — watch RPE and BP here, not just HR.'};
+      },
+      mechanism:"Beta-blockade (or SA node disease) blunts the heart's ability to speed up with demand, even though the rest of the exertional response tries to compensate.",
+      findings:["HR rises far less than expected for the workload","Normal P-QRS-T morphology throughout","RPE climbs faster than HR would suggest — the mismatch is the tell"]
+    },
+    {
+      id:'avb1', label:'1st-degree AV block', badgeDefault:'safe',
+      vitals:{},
+      buildEcg:function(){ return makeSinusEngine(getPhysioHR, function(){ return {qrsCenter:0.30}; }); },
+      status:function(w){ return {level:'safe', note:'Continue — PR is prolonged, but every impulse still conducts through.'}; },
+      mechanism:"Every impulse still reaches the ventricles, but conduction through the AV node is delayed — and that delay doesn't change much with exertion.",
+      findings:["PR interval prolonged (>0.20s) but constant","Every P wave still followed by a QRS","BP, SpO2, RR, and RPE all track the normal curve — the ECG finding is isolated"]
+    },
+    {
+      id:'ischemia', label:'Exertional ischemia (ST depression)', badgeDefault:'safe',
+      vitals:{
+        sbp:function(w){ const base=defaultSBP(Math.min(w,7)); return w<=7?defaultSBP(w):base + (w-7)*2; },
+        dbp:function(w){ return w<7 ? defaultDBP(w) : defaultDBP(7) + (w-7)*1.5; },
+        rr:function(w){ return w<5.5 ? defaultRR(w) : defaultRR(w) + Math.min(4,(w-5.5)*1.5); },
+        rpe:function(w){ return w<5.5 ? defaultRPE(w) : Math.min(20, defaultRPE(w) + Math.min(5,(w-5.5)*1.6)); }
+      },
+      buildEcg:function(){
+        return makeSinusEngine(getPhysioHR, function(){
+          const w = getWorkload();
+          if (w < 5.5) return {};
+          const depth = -0.20 * Math.min(1, (w-5.5)/3.5);
+          const tSign = w>7 ? -1 : 1;
+          const tAmp = w>7 ? 0.15 : 0.32;
+          return {stOffset:depth, tAmp:tAmp, tSign:tSign};
+        });
+      },
+      status:function(w){
+        if (w>=7) return {level:'stop', note:'STOP — significant ST depression under exertion. Classic exercise termination criterion.'};
+        if (w>=5.5) return {level:'caution', note:'Early ST changes appearing — stay alert, be ready to slow down.'};
+        return {level:'safe', note:'Continue — no ischemic changes yet.'};
+      },
+      mechanism:"As demand outpaces coronary blood flow, the heart muscle can't repolarize normally under load, and the ST segment sags below baseline.",
+      findings:["Normal at rest and light effort","ST segment progressively depresses as workload climbs","DBP fails to fall, RR and RPE climb once symptoms start — SpO2 stays normal throughout, since this isn't a lung problem"]
+    },
+    {
+      id:'stemi', label:'Acute ischemic event (ST elevation)', badgeDefault:'safe',
+      vitals:{
+        sbp:function(w){ return w<8 ? defaultSBP(w) : defaultSBP(8) - (w-8)*22; },
+        dbp:function(w){ return w<8 ? defaultDBP(w) : Math.max(40, defaultDBP(8) - (w-8)*15); },
+        spo2:function(w){ return w<8 ? defaultSpO2(w) : defaultSpO2(8) - (w-8)*3; },
+        rr:function(w){ return w<8 ? defaultRR(w) : defaultRR(8) + (w-8)*8; },
+        rpe:function(w){ return w<8 ? defaultRPE(w) : Math.min(20, 19 + (w-8)*0.4); }
+      },
+      buildEcg:function(){
+        return makeSinusEngine(getPhysioHR, function(){
+          const w = getWorkload();
+          if (w < 8) return {};
+          return {stOffset:0.22, tAmp:0.5, tSign:1};
+        });
+      },
+      status:function(w){
+        if (w>=8) return {level:'stop', note:'STOP immediately and call for emergency help — this pattern suggests an acute heart attack in progress.'};
+        return {level:'safe', note:'Continue — normal so far.'};
+      },
+      mechanism:"A sudden coronary occlusion under exertional demand causes abrupt, full-thickness injury — unlike gradual ischemia, this can appear suddenly rather than building up.",
+      findings:["Normal through moderate effort","Sudden ST elevation with a tall, peaked T wave at high exertion","BP crashes, SpO2 drops, RR spikes, and RPE maxes out — all at once, not gradually"]
+    },
+    {
+      id:'pvc-prog', label:'Exercise-induced PVCs', badgeDefault:'safe',
+      vitals:{ rpe:function(w){ return w<8 ? defaultRPE(w) : Math.min(20, defaultRPE(w)+2); } },
+      buildEcg:function(){ return buildPvcProgressionEngine(getWorkload, getPhysioHR); },
+      status:function(w, eng){
+        const couplet = eng && eng.isCoupletZone && eng.isCoupletZone();
+        if (couplet) return {level:'stop', note:'STOP — PVCs are frequent and pairing now. Increasing ectopy with exertion is itself a concerning finding.'};
+        if (w>=6) return {level:'caution', note:'PVCs are becoming more frequent as workload rises — stay alert.'};
+        return {level:'safe', note:'Continue — occasional, isolated PVCs only.'};
+      },
+      mechanism:"An irritable ventricular focus that stays quiet at rest becomes more active as sympathetic drive and myocardial demand increase.",
+      findings:["Rare, isolated PVCs at low workloads","Frequency increases with exertion","Couplets appear at peak effort, with a palpitation-driven RPE bump — BP, SpO2, and RR otherwise stay normal"]
+    },
+    {
+      id:'vt', label:'Exercise-induced ventricular tachycardia', badgeDefault:'safe',
+      vitals:{
+        sbp:function(w){ return sharedVtTriggered ? Math.max(60, defaultSBP(8.5)-50) : defaultSBP(w); },
+        dbp:function(w){ return sharedVtTriggered ? Math.max(35, defaultDBP(8.5)-30) : defaultDBP(w); },
+        spo2:function(w){ return sharedVtTriggered ? Math.max(84, defaultSpO2(8.5)-10) : defaultSpO2(w); },
+        rr:function(w){ return sharedVtTriggered ? 38 : (w>=7 ? defaultRR(w)+3 : defaultRR(w)); },
+        rpe:function(w){ return sharedVtTriggered ? 20 : (w>=7 ? Math.min(20, defaultRPE(w)+2) : defaultRPE(w)); }
+      },
+      buildEcg:function(){ const e = buildVtEngine(getWorkload, getPhysioHR); return e; },
+      status:function(w, eng){
+        const triggered = eng && eng.isTriggered && eng.isTriggered();
+        sharedVtTriggered = !!triggered;
+        if (triggered) return {level:'stop', note:'STOP — sustained VT. Reducing workload will not fix this; activate emergency response now.'};
+        if (w>=7) return {level:'caution', note:'Occasional PVCs appearing at high effort — watch closely.'};
+        return {level:'safe', note:'Continue — normal sinus rhythm so far.'};
+      },
+      mechanism:"The same catecholamine surge that drives normal exertion can, in a vulnerable ventricle, trigger a sustained rapid rhythm that bypasses the heart's normal pacemaker entirely.",
+      findings:["Normal sinus rhythm with occasional PVCs at moderate effort","Sudden onset of sustained wide-complex tachycardia at high workload","BP and SpO2 crash, RR and RPE spike — and none of it resolves just by reducing workload"]
+    },
+    {
+      id:'afib', label:'Atrial fibrillation (rate response)', badgeDefault:'caution',
+      vitals:{
+        dbp:function(w){ return Math.max(50, defaultDBP(w)-8); },
+        rpe:function(w){ return Math.min(20, defaultRPE(w)+3); }
+      },
+      buildEcg:function(){ return buildAfibEngine(getWorkload, getPhysioHR); },
+      status:function(w){
+        if (w>=8) return {level:'stop', note:'STOP — rapid ventricular response to exercise. Reassess before continuing.'};
+        return {level:'caution', note:'Baseline abnormal rhythm — monitor ventricular rate response closely as effort increases.'};
+      },
+      mechanism:"Chaotic atrial activity means the AV node lets impulses through unpredictably, and — like a sinus node — that ventricular response rate climbs with exertion too.",
+      findings:["No discrete P waves — fine fibrillatory baseline","Irregularly irregular R-R intervals throughout","DBP runs lower than expected (lost atrial kick) and RPE runs higher (irregular rhythm is uncomfortable)"]
+    },
+    {
+      id:'avb3', label:'Complete (3rd-degree) AV block', badgeDefault:'caution',
+      vitals:{
+        hr:function(w){ return 36 + Math.min(6, w*0.6); },
+        sbp:function(w){ const capped=Math.min(w,5); return defaultSBP(capped) - Math.max(0,w-5)*3; },
+        dbp:function(w){ return Math.min(96, PROFILE.restDBP + w*2); },
+        spo2:function(w){ return Math.max(90, defaultSpO2(w) - Math.min(5, w*0.5)); },
+        rr:function(w){ return Math.min(42, defaultRR(w) + Math.min(16, w*1.8)); },
+        rpe:function(w){ return Math.min(20, 6 + w*1.4); }
+      },
+      buildEcg:function(){ return buildThirdDegreeEngine(function(){ return defaultHR(getWorkload()); }); },
+      status:function(w){
+        if (w>=2) return {level:'stop', note:'STOP — the ventricles cannot increase rate to meet demand. This needs urgent evaluation, likely pacing.'};
+        return {level:'caution', note:'Known complete block — monitor closely at rest.'};
+      },
+      mechanism:"During exercise the atria still speed up appropriately, but none of that signal reaches the ventricles — so the rate the patient can actually generate stays flat.",
+      findings:["P waves speed up normally with exertion","QRS rate stays slow and fixed, fully dissociated from the P waves","BP fails to rise, RR climbs steeply trying to compensate, and RPE runs high even at modest workloads"]
+    },
+    {
+      id:'paced', label:'Fixed-rate paced rhythm', badgeDefault:'safe',
+      vitals:{
+        hr:function(w){ return 70; },
+        sbp:function(w){ return PROFILE.restSBP + (150-PROFILE.restSBP)*Math.pow(w/10,1.0); },
+        rr:function(w){ return w<=6 ? defaultRR(w) : defaultRR(w) + (w-6)*2.5; },
+        rpe:function(w){ return w<=6 ? defaultRPE(w) : Math.min(20, defaultRPE(w) + (w-6)*1.3); }
+      },
+      buildEcg:function(){ return buildFixedPacedEngine(); },
+      status:function(w){
+        if (w>=6) return {level:'caution', note:"Fixed pacing isn't meeting rising demand — modify intensity and consider referral for device reprogramming."};
+        return {level:'safe', note:'Continue — appropriate for light activity at this fixed paced rate.'};
+      },
+      mechanism:"An older, non-rate-responsive pacemaker fires at one programmed rate no matter what the body is asking for.",
+      findings:["Pacer spike before every QRS, wide QRS morphology","HR stays completely flat across all workloads","Beyond moderate intensity, RR and RPE overshoot — the body compensating for a rate that can't"]
+    }
+  ];
+
+  let sharedVtTriggered = false;
+
+  /* ======================= Simulation state ======================= */
+  let mode = 'protocol';
+  let running = false;
+  let stageIdx = 0;
+  let stageElapsed = 0;
+  let sessionElapsed = 0;
+  let manualWorkload = 0;
+  let activeScenario = SCENARIOS[0];
+  let activeEcgEngine = null; // built by fullReset() once all state below is initialized
+
+  let physioHR = PROFILE.restHR;
+  let actualSpO2 = PROFILE.restSpO2;
+  let actualRR = PROFILE.restRR;
+  let displaySBP = PROFILE.restSBP, displayDBP = PROFILE.restDBP;
+  let displayRPE = PROFILE.restRPE;
+  let displayHR = PROFILE.restHR;
+  let bpState = 'idle', bpReadTimer = 0, bpAutoFiredThisStage = false, rpeAutoFiredThisStage = false;
+
+  const TAU_HR_ON = 22, TAU_HR_OFF = 42, TAU_FAST = 14, BP_READ_SECONDS = 11;
+
+  const STAGES = [
+    {name:'Rest', workload:0.0, duration:45},
+    {name:'Warm-up', workload:1.5, duration:90},
+    {name:'Stage 1', workload:3.0, duration:90},
+    {name:'Stage 2', workload:5.0, duration:90},
+    {name:'Stage 3', workload:7.0, duration:90},
+    {name:'Stage 4 (Peak)', workload:9.5, duration:60},
+    {name:'Recovery', workload:0.0, duration:180}
+  ];
+
+  const history = [];
+  const MAX_HISTORY_SECONDS = 15*60;
+
+  function currentWorkload(){ return mode==='protocol' ? STAGES[stageIdx].workload : manualWorkload; }
+  function lagTo(current, target, tau, dt){ return current + (target-current) * (1-Math.exp(-dt/tau)); }
+  function targetOf(key, w){
+    const fn = activeScenario.vitals && activeScenario.vitals[key];
+    if (fn) return fn(w);
+    if (key==='hr') return defaultHR(w);
+    if (key==='sbp') return defaultSBP(w);
+    if (key==='dbp') return defaultDBP(w);
+    if (key==='spo2') return defaultSpO2(w);
+    if (key==='rr') return defaultRR(w);
+    if (key==='rpe') return defaultRPE(w);
+    return 0;
+  }
+
+  /* ======================= DOM refs ======================= */
+  const el = id => document.getElementById(id);
+  const scenarioPillsEl = el('ex-scenarioPills');
+  const modeProtocolBtn = el('ex-modeProtocolBtn'), modeManualBtn = el('ex-modeManualBtn');
+  const protocolControls = el('ex-protocolControls'), manualControls = el('ex-manualControls');
+  const startBtn = el('ex-startBtn'), pauseBtn = el('ex-pauseBtn'), nextStageBtn = el('ex-nextStageBtn'), resetBtn = el('ex-resetBtn');
+  const stageNameEl = el('ex-stageName'), stageElapsedEl = el('ex-stageElapsed'), sessionElapsedEl = el('ex-sessionElapsed');
+  const stageProgressEl = el('ex-stageProgress');
+  const autoAdvanceChk = el('ex-autoAdvanceChk'), autoBPChk = el('ex-autoBPChk'), autoRPEChk = el('ex-autoRPEChk');
+  const manualRunBtn = el('ex-manualRunBtn'), manualPauseBtn = el('ex-manualPauseBtn'), manualResetBtn = el('ex-manualResetBtn');
+  const workloadSlider = el('ex-workloadSlider'), workloadReadout = el('ex-workloadReadout'), manualElapsedEl = el('ex-manualElapsed');
+
+  const hrNumber = el('ex-hrNumber'), rhythmNameTag = el('ex-rhythmNameTag');
+  const statusBadge = el('ex-statusBadge'), rateDesc = el('ex-rateDesc');
+  const monitorInner = el('ex-monitorInner');
+  const explainTitle = el('ex-explainTitle'), explainMechanism = el('ex-explainMechanism');
+  const explainFindings = el('ex-explainFindings'), explainStatus = el('ex-explainStatus');
+
+  const bpValue = el('ex-bpValue'), bpSub = el('ex-bpSub'), takeBpBtn = el('ex-takeBpBtn');
+  const spo2Value = el('ex-spo2Value'), rrValue = el('ex-rrValue');
+  const rpeValue = el('ex-rpeValue'), rpeSub = el('ex-rpeSub'), askRpeBtn = el('ex-askRpeBtn');
+  const metsValue = el('ex-metsValue'), workloadSub = el('ex-workloadSub');
+
+  /* ======================= Scenario UI ======================= */
+  function buildScenarioPills(){
+    SCENARIOS.forEach(function(s){
+      const btn = document.createElement('button');
+      btn.className = 'pill';
+      btn.type = 'button';
+      btn.dataset.id = s.id;
+      btn.innerHTML = '<span class="dot ' + s.badgeDefault + '"></span>' + s.label;
+      btn.addEventListener('click', function(){ switchScenario(s); });
+      scenarioPillsEl.appendChild(btn);
+    });
+  }
+  function switchScenario(s){
+    activeScenario = s;
+    activeEcgEngine = s.buildEcg();
+    sharedVtTriggered = false;
+    ecgBuffer.fill(null);
+    ecgWriteX = 0;
+    document.querySelectorAll('#ex-scenarioPills .pill').forEach(function(p){
+      p.classList.toggle('active', p.dataset.id === s.id);
+    });
+    rhythmNameTag.textContent = s.label;
+    explainTitle.textContent = s.label;
+    explainMechanism.textContent = s.mechanism;
+    explainFindings.innerHTML = '';
+    s.findings.forEach(function(f){ const li=document.createElement('li'); li.textContent=f; explainFindings.appendChild(li); });
+    renderPreviewChart();
+  }
+
+  modeProtocolBtn.addEventListener('click', function(){ setMode('protocol'); });
+  modeManualBtn.addEventListener('click', function(){ setMode('manual'); });
+  function setMode(newMode){
+    mode = newMode;
+    modeProtocolBtn.classList.toggle('active', mode==='protocol');
+    modeManualBtn.classList.toggle('active', mode==='manual');
+    protocolControls.style.display = mode==='protocol' ? '' : 'none';
+    manualControls.style.display = mode==='manual' ? '' : 'none';
+  }
+
+  function fullReset(){
+    running = false;
+    stageIdx = 0; stageElapsed = 0; sessionElapsed = 0; manualWorkload = 0;
+    physioHR = targetOf('hr',0); actualSpO2 = targetOf('spo2',0); actualRR = targetOf('rr',0);
+    displaySBP = targetOf('sbp',0); displayDBP = targetOf('dbp',0); displayRPE = targetOf('rpe',0);
+    bpState='idle'; bpReadTimer=0; bpAutoFiredThisStage=false; rpeAutoFiredThisStage=false;
+    sharedVtTriggered = false;
+    history.length = 0;
+    workloadSlider.value = 0;
+    startBtn.disabled=false; pauseBtn.disabled=true; nextStageBtn.disabled=true;
+    manualRunBtn.disabled=false; manualPauseBtn.disabled=true;
+    activeEcgEngine = activeScenario.buildEcg();
+    ecgBuffer.fill(null); ecgWriteX = 0;
+    bpSub.textContent = 'not yet taken';
+    refreshDisplay();
+  }
+
+  startBtn.addEventListener('click', function(){ running=true; startBtn.disabled=true; pauseBtn.disabled=false; nextStageBtn.disabled=false; });
+  pauseBtn.addEventListener('click', function(){ running=false; startBtn.disabled=false; pauseBtn.disabled=true; });
+  nextStageBtn.addEventListener('click', function(){ advanceStage(); });
+  resetBtn.addEventListener('click', fullReset);
+  function advanceStage(){
+    if (stageIdx < STAGES.length-1){
+      stageIdx++; stageElapsed = 0; bpAutoFiredThisStage=false; rpeAutoFiredThisStage=false;
+    } else {
+      running=false; startBtn.disabled=true; pauseBtn.disabled=true; nextStageBtn.disabled=true;
+    }
+  }
+
+  manualRunBtn.addEventListener('click', function(){ running=true; manualRunBtn.disabled=true; manualPauseBtn.disabled=false; });
+  manualPauseBtn.addEventListener('click', function(){ running=false; manualRunBtn.disabled=false; manualPauseBtn.disabled=true; });
+  manualResetBtn.addEventListener('click', fullReset);
+  workloadSlider.addEventListener('input', function(){ manualWorkload = parseFloat(workloadSlider.value); });
+
+  function requestBPReading(){
+    if (bpState==='reading') return;
+    bpState='reading'; bpReadTimer=0; takeBpBtn.disabled=true; bpSub.textContent='reading…';
+  }
+  function completeBPReading(){
+    const w = currentWorkload();
+    const noise = function(){ return (Math.random()-0.5)*3; };
+    displaySBP = Math.round(targetOf('sbp',w) + noise());
+    displayDBP = Math.round(targetOf('dbp',w) + noise());
+    bpState='idle'; takeBpBtn.disabled=false;
+    const label = mode==='protocol' ? STAGES[stageIdx].name : ('workload ' + w.toFixed(1));
+    bpSub.textContent = 'taken at ' + label;
+  }
+  takeBpBtn.addEventListener('click', requestBPReading);
+  function requestRPE(){ const w=currentWorkload(); displayRPE = Math.round(targetOf('rpe',w)); }
+  askRpeBtn.addEventListener('click', requestRPE);
+
+  /* ======================= ECG canvas (sweep with erase gap) ======================= */
+  const gridCanvas = el('ex-gridCanvas'), traceCanvas = el('ex-traceCanvas');
+  const screenFrame = document.querySelector('#view-exercise .screen-frame');
+  const gridCtx = gridCanvas.getContext('2d'), traceCtx = traceCanvas.getContext('2d');
+  const ECG_SWEEP_SECONDS = 4.4, ECG_GAP_PX = 14;
+  let ecgDpr = Math.max(1, window.devicePixelRatio||1);
+  let ecgCssW=0, ecgCssH=0, ecgPxW=0, ecgPxPerSecond=0;
+  let ecgBuffer = [], ecgWriteX = 0;
+
+  function resizeEcgCanvas(){
+    ecgDpr = Math.max(1, window.devicePixelRatio||1);
+    ecgCssW = screenFrame.clientWidth; ecgCssH = screenFrame.clientHeight;
+    ecgPxW = Math.floor(ecgCssW);
+    [gridCanvas, traceCanvas].forEach(function(c){
+      c.width = Math.floor(ecgCssW*ecgDpr); c.height = Math.floor(ecgCssH*ecgDpr);
+      c.style.width = ecgCssW+'px'; c.style.height = ecgCssH+'px';
+    });
+    gridCtx.setTransform(ecgDpr,0,0,ecgDpr,0,0);
+    traceCtx.setTransform(ecgDpr,0,0,ecgDpr,0,0);
+    ecgPxPerSecond = ecgPxW / ECG_SWEEP_SECONDS;
+    ecgBuffer = new Array(ecgPxW).fill(null);
+    ecgWriteX = 0;
+    drawEcgGrid();
+  }
+  function drawEcgGrid(){
+    gridCtx.clearRect(0,0,ecgCssW,ecgCssH);
+    const minor=8, major=40;
+    gridCtx.strokeStyle = getComputedStyle(document.documentElement).getPropertyValue('--grid-minor-screen').trim();
+    gridCtx.lineWidth=1; gridCtx.beginPath();
+    for (let x=0;x<=ecgCssW;x+=minor){ gridCtx.moveTo(x+0.5,0); gridCtx.lineTo(x+0.5,ecgCssH); }
+    for (let y=0;y<=ecgCssH;y+=minor){ gridCtx.moveTo(0,y+0.5); gridCtx.lineTo(ecgCssW,y+0.5); }
+    gridCtx.stroke();
+    gridCtx.strokeStyle = getComputedStyle(document.documentElement).getPropertyValue('--grid-major-screen').trim();
+    gridCtx.beginPath();
+    for (let x=0;x<=ecgCssW;x+=major){ gridCtx.moveTo(x+0.5,0); gridCtx.lineTo(x+0.5,ecgCssH); }
+    for (let y=0;y<=ecgCssH;y+=major){ gridCtx.moveTo(0,y+0.5); gridCtx.lineTo(ecgCssW,y+0.5); }
+    gridCtx.stroke();
+  }
+  function renderEcgTrace(){
+    traceCtx.clearRect(0,0,ecgCssW,ecgCssH);
+    traceCtx.lineWidth=2;
+    traceCtx.strokeStyle = getComputedStyle(document.documentElement).getPropertyValue('--trace').trim();
+    traceCtx.shadowColor = getComputedStyle(document.documentElement).getPropertyValue('--trace-glow').trim();
+    traceCtx.shadowBlur=6; traceCtx.lineJoin='round'; traceCtx.lineCap='round';
+    const my = ecgCssH*0.55, amp = ecgCssH*0.34;
+    let drawing=false;
+    traceCtx.beginPath();
+    for (let x=0;x<ecgPxW;x++){
+      const gapStart=ecgWriteX, gapEnd=(ecgWriteX+ECG_GAP_PX)%ecgPxW;
+      const inGap = gapStart<gapEnd ? (x>=gapStart && x<gapEnd) : (x>=gapStart || x<gapEnd);
+      const val = ecgBuffer[x];
+      if (inGap || val===null || val===undefined){ drawing=false; continue; }
+      const yPix = my - val*amp;
+      if (!drawing){ traceCtx.moveTo(x,yPix); drawing=true; } else { traceCtx.lineTo(x,yPix); }
+    }
+    traceCtx.stroke();
+    traceCtx.shadowBlur=0;
+    traceCtx.fillStyle = getComputedStyle(document.documentElement).getPropertyValue('--trace').trim();
+    traceCtx.globalAlpha=0.55; traceCtx.fillRect(ecgWriteX,0,2,ecgCssH); traceCtx.globalAlpha=1;
+  }
+
+  /* ======================= Session trend + preview charts ======================= */
+  const chartHrBp = el('ex-chartHrBp'), chartSpo2Rr = el('ex-chartSpo2Rr'), previewChart = el('ex-previewChart');
+  let chartDpr = Math.max(1, window.devicePixelRatio||1);
+  function fitCanvas(c){
+    const w=c.clientWidth, h=c.clientHeight;
+    c.width=Math.floor(w*chartDpr); c.height=Math.floor(h*chartDpr);
+    const ctx=c.getContext('2d'); ctx.setTransform(chartDpr,0,0,chartDpr,0,0);
+    return {ctx:ctx, w:w, h:h};
+  }
+  function drawGridLines(ctx,w,h){
+    if (w<=0 || h<=0) return; // nothing to draw on a hidden (zero-size) canvas — also prevents a zero-increment infinite loop below
+    ctx.strokeStyle = getComputedStyle(document.documentElement).getPropertyValue('--grid-minor').trim();
+    ctx.lineWidth=1; ctx.beginPath();
+    const step = h/4;
+    for (let y=0;y<=h;y+=step){ ctx.moveTo(0,y+0.5); ctx.lineTo(w,y+0.5); }
+    ctx.stroke();
+  }
+  function drawSeries(ctx, points, color, w, h, minV, maxV, lineWidth){
+    if (points.length<2) return;
+    ctx.strokeStyle=color; ctx.lineWidth = lineWidth||2; ctx.beginPath();
+    const n = points.length;
+    points.forEach(function(v,i){
+      const x=(i/(n-1))*w;
+      const norm=(v-minV)/Math.max(1e-6,(maxV-minV));
+      const y=h-norm*h;
+      if (i===0) ctx.moveTo(x,y); else ctx.lineTo(x,y);
+    });
+    ctx.stroke();
+  }
+  function renderTrendCharts(){
+    if (history.length<2) return;
+    const hrs=history.map(function(p){return p.hr;}), sbps=history.map(function(p){return p.sbp;}), dbps=history.map(function(p){return p.dbp;});
+    const spo2s=history.map(function(p){return p.spo2;}), rrs=history.map(function(p){return p.rr;});
+    {
+      const r = fitCanvas(chartHrBp);
+      r.ctx.clearRect(0,0,r.w,r.h); drawGridLines(r.ctx,r.w,r.h);
+      const minV = Math.min.apply(null,hrs.concat(sbps,dbps))-10;
+      const maxV = Math.max.apply(null,hrs.concat(sbps,dbps))+10;
+      drawSeries(r.ctx, hrs, getComputedStyle(document.documentElement).getPropertyValue('--amber').trim(), r.w,r.h,minV,maxV);
+      drawSeries(r.ctx, sbps, getComputedStyle(document.documentElement).getPropertyValue('--cyan').trim(), r.w,r.h,minV,maxV);
+      r.ctx.globalAlpha=0.55;
+      drawSeries(r.ctx, dbps, getComputedStyle(document.documentElement).getPropertyValue('--cyan').trim(), r.w,r.h,minV,maxV);
+      r.ctx.globalAlpha=1;
+    }
+    {
+      const r = fitCanvas(chartSpo2Rr);
+      r.ctx.clearRect(0,0,r.w,r.h); drawGridLines(r.ctx,r.w,r.h);
+      drawSeries(r.ctx, spo2s, getComputedStyle(document.documentElement).getPropertyValue('--trace').trim(), r.w,r.h,80,100);
+      drawSeries(r.ctx, rrs, getComputedStyle(document.documentElement).getPropertyValue('--lilac').trim(), r.w,r.h,8,40);
+    }
+  }
+  function renderPreviewChart(){
+    const r = fitCanvas(previewChart);
+    r.ctx.clearRect(0,0,r.w,r.h); drawGridLines(r.ctx,r.w,r.h);
+    const N=60; const hrs=[],sbps=[],dbps=[],spo2s=[],rrs=[];
+    for (let i=0;i<=N;i++){
+      const w10=(i/N)*10;
+      hrs.push(targetOf('hr',w10)); sbps.push(targetOf('sbp',w10)); dbps.push(targetOf('dbp',w10));
+      spo2s.push(targetOf('spo2',w10)); rrs.push(targetOf('rr',w10));
+    }
+    const minV = Math.min.apply(null,hrs.concat(sbps,dbps,spo2s,rrs))-5;
+    const maxV = Math.max.apply(null,hrs.concat(sbps,dbps,spo2s,rrs))+5;
+    const cv = function(n){ return getComputedStyle(document.documentElement).getPropertyValue(n).trim(); };
+    drawSeries(r.ctx, hrs, cv('--amber'), r.w,r.h,minV,maxV,2);
+    drawSeries(r.ctx, sbps, cv('--cyan'), r.w,r.h,minV,maxV,2);
+    r.ctx.globalAlpha=0.5; drawSeries(r.ctx, dbps, cv('--cyan'), r.w,r.h,minV,maxV,2); r.ctx.globalAlpha=1;
+    drawSeries(r.ctx, spo2s, cv('--trace'), r.w,r.h,minV,maxV,2);
+    drawSeries(r.ctx, rrs, cv('--lilac'), r.w,r.h,minV,maxV,2);
+  }
+
+  /* ======================= Display refresh ======================= */
+  function fmtTime(sec){ sec=Math.max(0,Math.round(sec)); const m=Math.floor(sec/60), s=sec%60; return m+':'+String(s).padStart(2,'0'); }
+  function badgeLabel(level){ if (level==='safe') return 'Continue'; if (level==='caution') return 'Caution / Modify'; return 'STOP'; }
+
+  function refreshDisplay(){
+    hrNumber.textContent = String(displayHR).padStart(3,'0');
+    bpValue.textContent = Math.round(displaySBP)+'/'+Math.round(displayDBP);
+    spo2Value.textContent = Math.round(actualSpO2);
+    rrValue.textContent = Math.round(actualRR);
+    rpeValue.textContent = Math.round(displayRPE);
+    rpeSub.textContent = borgDescriptor(displayRPE);
+    const w = currentWorkload();
+    metsValue.textContent = metsFor(w).toFixed(1);
+    const stageLabel = mode==='protocol' ? STAGES[stageIdx].name.toLowerCase() : (w<0.5?'rest':'workload '+w.toFixed(1));
+    workloadSub.textContent = stageLabel;
+    rateDesc.textContent = mode==='protocol' ? STAGES[stageIdx].name + ' · workload ' + w.toFixed(1) : 'workload ' + w.toFixed(1);
+
+    const st = activeScenario.status(w, activeEcgEngine);
+    statusBadge.className = 'badge ' + st.level;
+    statusBadge.textContent = badgeLabel(st.level);
+    explainStatus.className = 'status-box ' + st.level;
+    explainStatus.textContent = st.note;
+    monitorInner.classList.remove('alarm-stop','alarm-caution');
+    if (st.level==='stop') monitorInner.classList.add('alarm-stop');
+    if (st.level==='caution') monitorInner.classList.add('alarm-caution');
+
+    if (mode==='protocol'){
+      const stage = STAGES[stageIdx];
+      stageNameEl.textContent = stage.name;
+      stageElapsedEl.textContent = 'stage '+fmtTime(stageElapsed)+' / '+fmtTime(stage.duration);
+      sessionElapsedEl.textContent = '· session '+fmtTime(sessionElapsed);
+      stageProgressEl.style.width = Math.min(100,(stageElapsed/stage.duration)*100)+'%';
+    } else {
+      workloadReadout.textContent = manualWorkload.toFixed(1)+' / 10 · '+(manualWorkload<0.5?'rest':'workload '+manualWorkload.toFixed(1));
+      manualElapsedEl.textContent = 'session '+fmtTime(sessionElapsed);
+    }
+  }
+
+  /* ======================= Main loop ======================= */
+  let lastTs=null, historyAccum=0, chartAccum=0, hrDisplayAccum=0;
+  let exModuleActive = false;
+
+  function frame(ts){
+    if (!exModuleActive) return; // paused while this view is hidden
+    if (lastTs===null) lastTs=ts;
+    let dt=(ts-lastTs)/1000; lastTs=ts;
+    if (dt>0.1) dt=0.1;
+    if (dt<0) dt=0;
+
+    if (running){
+      sessionElapsed += dt;
+      if (mode==='protocol'){
+        stageElapsed += dt;
+        const stage = STAGES[stageIdx];
+        if (autoBPChk.checked && !bpAutoFiredThisStage && stageElapsed>stage.duration*0.35 && bpState==='idle'){
+          bpAutoFiredThisStage=true; requestBPReading();
+        }
+        if (autoRPEChk.checked && !rpeAutoFiredThisStage && stageElapsed>stage.duration*0.7){
+          rpeAutoFiredThisStage=true; requestRPE();
+        }
+        if (stageElapsed>=stage.duration){
+          if (autoAdvanceChk.checked) advanceStage(); else stageElapsed=stage.duration;
+        }
+      }
+      const w = currentWorkload();
+      const tHR = targetOf('hr', w);
+      physioHR = lagTo(physioHR, tHR, tHR>physioHR?TAU_HR_ON:TAU_HR_OFF, dt);
+      actualSpO2 = lagTo(actualSpO2, targetOf('spo2', w), TAU_FAST, dt);
+      actualRR = lagTo(actualRR, targetOf('rr', w), TAU_FAST, dt);
+
+      if (bpState==='reading'){
+        bpReadTimer += dt;
+        if (bpReadTimer>=BP_READ_SECONDS) completeBPReading();
+      }
+
+      // advance ECG sweep by whole pixel columns
+      const colDt = 1/ecgPxPerSecond;
+      let remaining = dt, guard=0;
+      while (remaining>=colDt && guard<400){
+        const y = activeEcgEngine.sample(colDt);
+        ecgBuffer[ecgWriteX] = y;
+        ecgWriteX = (ecgWriteX+1) % ecgPxW;
+        remaining -= colDt; guard++;
+      }
+
+      hrDisplayAccum += dt;
+      if (hrDisplayAccum>0.25){
+        hrDisplayAccum=0;
+        displayHR = activeEcgEngine.getDisplayHR ? activeEcgEngine.getDisplayHR() : Math.round(physioHR);
+      }
+
+      historyAccum += dt;
+      if (historyAccum>=1){
+        historyAccum=0;
+        history.push({t:sessionElapsed, hr:displayHR, sbp:displaySBP, dbp:displayDBP, spo2:actualSpO2, rr:actualRR});
+        const cutoff = sessionElapsed - MAX_HISTORY_SECONDS;
+        while (history.length && history[0].t<cutoff) history.shift();
+      }
+    } else {
+      renderEcgTrace();
+    }
+
+    if (running) renderEcgTrace();
+
+    chartAccum += dt;
+    if (chartAccum>=0.5){ chartAccum=0; renderTrendCharts(); }
+
+    refreshDisplay();
+    requestAnimationFrame(frame);
+  }
+
+  /* ======================= Init ======================= */
+  buildScenarioPills();
+  document.querySelector('#ex-scenarioPills .pill').classList.add('active');
+  fullReset();
+  renderPreviewChart();
+  explainMechanism.textContent = activeScenario.mechanism;
+  activeScenario.findings.forEach(function(f){ const li=document.createElement('li'); li.textContent=f; explainFindings.appendChild(li); });
+
+  function activate(){
+    if (exModuleActive) return;
+    exModuleActive = true;
+    lastTs = null;
+    resizeEcgCanvas(); // container was hidden (0-size) until now; simulation state (workload/vitals/scenario) is untouched
+    renderTrendCharts();
+    renderPreviewChart();
+    requestAnimationFrame(frame);
+  }
+  function deactivate(){
+    exModuleActive = false;
+  }
+  window.addEventListener('resize', function(){ if (exModuleActive){ resizeEcgCanvas(); renderTrendCharts(); renderPreviewChart(); } });
+  window.__exerciseModule = { activate: activate, deactivate: deactivate };
+
+})();
+
+</script>
+
+<script>
+
+(function(){
+  "use strict";
+  var rhythmBtn = document.getElementById('switchToRhythmBtn');
+  var exerciseBtn = document.getElementById('switchToExerciseBtn');
+  var rhythmView = document.getElementById('view-rhythm');
+  var exerciseView = document.getElementById('view-exercise');
+
+  function showRhythm(){
+    rhythmView.classList.add('active'); exerciseView.classList.remove('active');
+    rhythmBtn.classList.add('active'); exerciseBtn.classList.remove('active');
+    window.__exerciseModule.deactivate();
+    window.__rhythmModule.activate();
+  }
+  function showExercise(){
+    exerciseView.classList.add('active'); rhythmView.classList.remove('active');
+    exerciseBtn.classList.add('active'); rhythmBtn.classList.remove('active');
+    window.__rhythmModule.deactivate();
+    window.__exerciseModule.activate();
+  }
+  rhythmBtn.addEventListener('click', showRhythm);
+  exerciseBtn.addEventListener('click', showExercise);
+
+  // Default view on load
+  showRhythm();
+})();
+
+</script>
+
+</body>
+</html>

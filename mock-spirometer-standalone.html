@@ -1,0 +1,855 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Mock Spirometer — Continuous Severity &amp; Bronchodilator Challenge</title>
+<style>
+  :root{
+    --red:#C8102E; --red2:#EF3340; --lblue:#6DCFF6; --mblue:#4599C7;
+    --red75:#D24057; --red50:#E47082;
+    --black:#000000; --dgray:#333333; --mgray:#666666; --lgray:#D9D9D9; --offwhite:#F5F5F5; --white:#FFFFFF;
+    --green:#1B5E20; --greenbg:#E8F5E9; --redbg:#FDECEA; --amberbg:#FFF8E1; --amber:#8A6D00;
+  }
+  *{box-sizing:border-box;}
+  body{margin:0;font-family:"Calibri","Segoe UI",Arial,sans-serif;background:var(--offwhite);color:var(--dgray);}
+  header{background:var(--red);color:var(--white);padding:18px 28px;}
+  header .eyebrow{font-size:11px;letter-spacing:1px;text-transform:uppercase;opacity:.85;font-weight:600;}
+  header h1{margin:4px 0 0;font-size:24px;font-weight:700;}
+  .instructions{background:var(--offwhite);border-bottom:1px solid var(--lgray);padding:14px 28px;}
+  .instructions p{margin:0 0 4px;font-size:15px;}
+  .instructions .lo{font-size:13px;color:var(--mgray);font-style:italic;}
+  .wrap{max-width:1080px;margin:24px auto;padding:0 20px 40px;}
+  .card{background:var(--white);border-radius:8px;box-shadow:0 1px 4px rgba(0,0,0,.12);padding:24px;margin-bottom:20px;}
+  .card h2{margin:0 0 12px;font-size:19px;color:var(--red);border-bottom:1px solid var(--lgray);padding-bottom:8px;}
+
+  /* ---------- View switcher ---------- */
+  .view-switcher{display:flex;gap:10px;margin:20px 0 0;flex-wrap:wrap;}
+  .switch-btn{
+    flex:1;min-width:220px;font-family:inherit;font-size:14.5px;font-weight:700;
+    padding:13px 16px;border-radius:8px;border:2px solid var(--lgray);background:#fff;color:var(--dgray);
+    cursor:pointer;text-align:center;transition:.15s;
+  }
+  .switch-btn:hover{border-color:var(--mgray);}
+  .switch-btn.active{border-color:var(--red);background:var(--redbg);color:var(--red);}
+  .view{display:none;}
+  .view.active{display:block;}
+
+  /* ---------- Severity sliders ---------- */
+  .slider-block{margin-bottom:18px;}
+  .slider-block:last-child{margin-bottom:0;}
+  .slider-label{display:flex;justify-content:space-between;align-items:baseline;font-size:14.5px;font-weight:700;margin-bottom:4px;}
+  .slider-label .sev{font-size:12.5px;font-weight:700;padding:2px 9px;border-radius:10px;}
+  .sev.none{background:var(--greenbg);color:var(--green);}
+  .sev.mild{background:#FFF3CD;color:#8A6D00;}
+  .sev.moderate{background:#FDE0C4;color:#A15600;}
+  .sev.severe{background:var(--redbg);color:var(--red);}
+  .slider-sub{font-size:12px;color:var(--mgray);margin-bottom:8px;}
+  input[type=range]{width:100%;accent-color:var(--red);height:22px;cursor:pointer;}
+  .slider-scale{display:flex;justify-content:space-between;font-size:10.5px;color:var(--mgray);margin-top:2px;}
+
+  .runbar{display:flex;align-items:center;gap:14px;margin-top:18px;flex-wrap:wrap;}
+  button.primary{background:var(--red);color:#fff;border:none;padding:12px 22px;border-radius:6px;font-size:15px;font-weight:700;cursor:pointer;font-family:inherit;}
+  button.primary:hover{background:var(--red2);}
+  button.primary:disabled{background:var(--lgray);color:var(--mgray);cursor:not-allowed;}
+  button.ghost{background:#fff;color:var(--red);border:2px solid var(--red);padding:10px 18px;border-radius:6px;font-size:14px;font-weight:700;cursor:pointer;font-family:inherit;}
+  button.ghost:hover{background:var(--red);color:#fff;}
+  button.ghost:disabled{border-color:var(--lgray);color:var(--lgray);cursor:not-allowed;background:#fff;}
+  .status{font-size:13px;color:var(--mgray);}
+
+  .views{display:grid;grid-template-columns:1fr 1fr;gap:20px;}
+  @media (max-width:820px){.views{grid-template-columns:1fr;}}
+  .view-graph h3{margin:0 0 6px;font-size:15px;color:var(--dgray);}
+  .view-graph .cap{font-size:12px;color:var(--mgray);margin-bottom:8px;}
+  svg{width:100%;height:auto;background:#FAFAFA;border:1px solid var(--lgray);border-radius:4px;}
+  table{width:100%;border-collapse:collapse;margin-top:8px;font-size:14px;}
+  .table-scroll{overflow-x:auto;-webkit-overflow-scrolling:touch;}
+  th,td{padding:9px 10px;text-align:center;border-bottom:1px solid var(--lgray);}
+  th{background:var(--red);color:#fff;font-size:12px;text-transform:uppercase;letter-spacing:.3px;}
+  td:first-child,th:first-child{text-align:left;}
+  tr.hallmark td{font-weight:700;}
+  .badge{display:inline-block;font-size:11px;padding:2px 7px;border-radius:10px;margin-left:6px;font-weight:700;}
+  .badge.up{background:var(--redbg);color:var(--red);}
+  .badge.down{background:var(--redbg);color:var(--red);}
+  .badge.normal{background:var(--greenbg);color:var(--green);}
+  .mech{background:var(--offwhite);border-left:4px solid var(--red);padding:14px 16px;border-radius:4px;font-size:14.5px;line-height:1.5;}
+  .disclaimer{font-size:11.5px;color:var(--mgray);margin-top:10px;font-style:italic;}
+  footer{text-align:center;font-size:12px;color:var(--mgray);padding:24px 0;}
+
+  .howitworks p{font-size:14.5px;line-height:1.55;margin:10px 0;}
+  .howitworks ul{margin:6px 0 10px;padding-left:22px;font-size:14px;line-height:1.55;}
+  .howitworks li{margin-bottom:4px;}
+  .step-icons{display:flex;align-items:stretch;gap:8px;margin:6px 0 14px;flex-wrap:wrap;}
+  .sicon{flex:1;min-width:150px;background:var(--offwhite);border:1px solid var(--lgray);border-radius:6px;padding:14px 12px;text-align:center;}
+  .sicon-num{width:28px;height:28px;border-radius:50%;background:var(--red);color:#fff;font-weight:700;font-size:14px;
+    display:flex;align-items:center;justify-content:center;margin:0 auto 8px;}
+  .sicon-label{font-weight:700;font-size:14.5px;margin-bottom:4px;}
+  .sicon-sub{font-size:12.5px;color:var(--mgray);line-height:1.4;}
+  .sicon-arrow{display:flex;align-items:center;justify-content:center;font-size:22px;color:var(--lgray);padding:0 2px;}
+  @media (max-width:700px){.sicon-arrow{display:none;}}
+
+  /* ---------- Trial history ---------- */
+  .trial-summary{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:14px;}
+  .trial-chip{flex:1;min-width:160px;background:var(--offwhite);border:1px solid var(--lgray);border-radius:6px;padding:10px 14px;}
+  .trial-chip .k{font-size:11px;text-transform:uppercase;letter-spacing:.4px;color:var(--mgray);font-weight:700;}
+  .trial-chip .v{font-size:16px;font-weight:700;color:var(--dgray);margin-top:2px;}
+  .repro-badge{display:inline-block;font-size:12.5px;font-weight:700;padding:4px 11px;border-radius:12px;margin-top:4px;}
+  .repro-badge.ok{background:var(--greenbg);color:var(--green);}
+  .repro-badge.pending{background:var(--amberbg);color:var(--amber);}
+  .trial-flag{font-size:11.5px;color:var(--amber);}
+  .trial-best{background:var(--greenbg)!important;}
+  .ghost-note{font-size:12px;color:var(--mgray);margin-top:6px;}
+
+  /* ---------- Challenge view ---------- */
+  .patient-readout{background:var(--offwhite);border:1px solid var(--lgray);border-radius:6px;padding:14px 16px;margin-bottom:16px;font-size:14px;}
+  .patient-readout .edit-link{color:var(--red);font-weight:700;cursor:pointer;text-decoration:underline;background:none;border:none;font-size:13px;padding:0;font-family:inherit;}
+  .bd-steps{display:flex;gap:10px;flex-wrap:wrap;margin:16px 0;}
+  .bd-step{flex:1;min-width:160px;background:var(--offwhite);border:2px solid var(--lgray);border-radius:6px;padding:14px;text-align:center;}
+  .bd-step.done{border-color:var(--green);background:var(--greenbg);}
+  .bd-step.current{border-color:var(--red);}
+  .bd-step-num{font-size:11px;font-weight:700;color:var(--mgray);text-transform:uppercase;letter-spacing:.4px;}
+  .bd-step-label{font-size:14px;font-weight:700;margin-top:4px;}
+  .bd-result{background:var(--dgray);color:#fff;border-radius:6px;padding:18px 20px;font-size:15px;line-height:1.6;margin-top:16px;}
+  .bd-result.sig{background:var(--green);}
+  .bd-result strong{font-size:17px;}
+  .bd-compare{display:flex;gap:24px;flex-wrap:wrap;margin-top:10px;}
+  .bd-compare .col{flex:1;min-width:140px;}
+  .bd-compare .lbl{font-size:11px;text-transform:uppercase;color:var(--mgray);letter-spacing:.4px;}
+  .bd-compare .num{font-size:20px;font-weight:700;color:var(--dgray);}
+
+  @media (max-width:700px){ header h1{font-size:20px;} }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="eyebrow">North Central College · Doctor of Physical Therapy</div>
+  <h1>Mock Spirometer: Continuous Severity &amp; Bronchodilator Challenge</h1>
+</header>
+
+<div class="instructions">
+  <p>Dial in airway obstruction and restriction independently — including mixed patterns — run the forced exhalation maneuver, and compare repeated trials. Then head to the Bronchodilator Challenge to test whether an obstruction is reversible.</p>
+  <p class="lo">Standalone study tool — extends LO9 (Respiratory): ventilation mechanics, compliance/elastic recoil, and measures of respiratory function.</p>
+</div>
+
+<div class="wrap">
+
+  <div class="view-switcher">
+    <button class="switch-btn active" id="switchToRefBtn" type="button">Spirometer Reference</button>
+    <button class="switch-btn" id="switchToChallengeBtn" type="button">Bronchodilator Challenge</button>
+  </div>
+
+  <!-- ============================================================ -->
+  <!-- VIEW 1: REFERENCE                                              -->
+  <!-- ============================================================ -->
+  <div id="view-reference" class="view active">
+
+    <div class="card">
+      <h2>1 · How the test works</h2>
+      <div class="howitworks">
+        <div class="step-icons">
+          <div class="sicon"><div class="sicon-num">1</div><div class="sicon-label">Breathe in fully</div><div class="sicon-sub">Inhale maximally, all the way to Total Lung Capacity (TLC)</div></div>
+          <div class="sicon-arrow">→</div>
+          <div class="sicon"><div class="sicon-num">2</div><div class="sicon-label">Blast out</div><div class="sicon-sub">Exhale as hard, fast, and completely as possible into the mouthpiece — no hesitation</div></div>
+          <div class="sicon-arrow">→</div>
+          <div class="sicon"><div class="sicon-num">3</div><div class="sicon-label">Keep going</div><div class="sicon-sub">Continue exhaling until volume stops changing (a true plateau), down to Residual Volume (RV)</div></div>
+        </div>
+        <p>This is called the <strong>forced vital capacity (FVC) maneuver</strong>. Throughout the maneuver, the spirometer continuously measures exhaled volume and flow — that's exactly what's plotted in the Volume–Time Trace and Flow–Volume Loop below.</p>
+        <p><strong>Why technique matters:</strong> spirometry is effort- and technique-dependent. A test is only trustworthy if the patient took a truly maximal breath in, started exhaling immediately with no hesitation, and kept exhaling long enough to reach a genuine plateau. Because of this, a clinician has the patient repeat the maneuver a few times and reports the best acceptable, reproducible effort — that's exactly what Section 5 below lets you practice.</p>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>2 · Set the patient's severity</h2>
+
+      <div class="slider-block">
+        <div class="slider-label">Airway Obstruction <span class="sev none" id="obLabel">Normal</span></div>
+        <div class="slider-sub">↑ airway resistance — bronchoconstriction, inflammation, loss of elastic support (asthma/COPD-type)</div>
+        <input type="range" id="obSlider" min="0" max="10" step="0.5" value="0">
+        <div class="slider-scale"><span>Normal</span><span>Mild</span><span>Moderate</span><span>Severe</span></div>
+      </div>
+
+      <div class="slider-block">
+        <div class="slider-label">Restriction <span class="sev none" id="reLabel">Normal</span></div>
+        <div class="slider-sub">↓ lung / chest-wall compliance — fibrotic or stiffened tissue (fibrosis-type)</div>
+        <input type="range" id="reSlider" min="0" max="10" step="0.5" value="0">
+        <div class="slider-scale"><span>Normal</span><span>Mild</span><span>Moderate</span><span>Severe</span></div>
+      </div>
+
+      <div class="runbar">
+        <button class="primary" id="runBtn">▶ Run Test</button>
+        <button class="ghost" id="clearTrialsBtn">Clear Trial History</button>
+        <span class="status" id="statusText">Ready — press Run Test to simulate a forced exhalation.</span>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>3 · Live spirometer output</h2>
+      <div class="views">
+        <div class="view-graph">
+          <h3>Volume–Time Trace</h3>
+          <div class="cap">Exhaled volume (L) vs. time (s). Dashed line marks 1 second (FEV1). Faded lines are your last 2 trials.</div>
+          <svg id="vtSvg" viewBox="0 0 420 320"></svg>
+        </div>
+        <div class="view-graph">
+          <h3>Flow–Volume Loop</h3>
+          <div class="cap">Expiratory flow (top) and inspiratory flow (bottom) vs. lung volume. Watch the shape of the descending limb.</div>
+          <svg id="fvSvg" viewBox="0 0 420 320"></svg>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>4 · Numbers &amp; predicted values</h2>
+      <div class="table-scroll"><table id="resultsTable">
+        <thead><tr><th>Measure</th><th>Predicted (Normal)</th><th>This Test</th></tr></thead>
+        <tbody id="resultsBody"></tbody>
+      </table></div>
+      <p class="disclaimer">Values are illustrative teaching targets from a continuous severity model — not real patient data or a validated reference equation.</p>
+    </div>
+
+    <div class="card">
+      <h2>5 · Trial history &amp; reproducibility</h2>
+      <div class="trial-summary" id="trialSummary"></div>
+      <div class="table-scroll"><table id="trialTable">
+        <thead><tr><th>Trial</th><th>FVC (L)</th><th>FEV1 (L)</th><th>FEV1/FVC</th><th>Note</th></tr></thead>
+        <tbody id="trialBody"></tbody>
+      </table></div>
+      <p class="ghost-note">Real spirometry reports the best FVC and best FEV1 across at least 3 acceptable attempts — not necessarily from the same blow. Run the test a few times at the same severity settings to see how effort quality affects reproducibility.</p>
+    </div>
+
+    <div class="card">
+      <h2>6 · Why it looks this way</h2>
+      <div class="mech" id="mechText"></div>
+    </div>
+
+  </div>
+
+  <!-- ============================================================ -->
+  <!-- VIEW 2: BRONCHODILATOR CHALLENGE                               -->
+  <!-- ============================================================ -->
+  <div id="view-challenge" class="view">
+
+    <div class="card">
+      <h2>Bronchodilator Reversibility Challenge</h2>
+      <p style="font-size:14.5px;line-height:1.55;margin:0 0 14px;">Give this patient an inhaled bronchodilator (e.g., albuterol) and re-test. A rise in FEV1 of <strong>≥12% and ≥200 mL</strong> counts as significant reversibility — the classic clue that points toward asthma rather than fixed airway damage like COPD. Restriction doesn't respond to a bronchodilator at all, since it isn't an airway-resistance problem.</p>
+
+      <div class="patient-readout" id="patientReadout"></div>
+
+      <div class="slider-block">
+        <div class="slider-label">Reversibility character <span class="sev none" id="revLabel">Fixed</span></div>
+        <div class="slider-sub">How much of this patient's airway obstruction is smooth-muscle bronchospasm (reversible) vs. structural damage (fixed)</div>
+        <input type="range" id="revSlider" min="0" max="10" step="0.5" value="5">
+        <div class="slider-scale"><span>Fixed (COPD-like)</span><span></span><span></span><span>Reversible (asthma-like)</span></div>
+      </div>
+
+      <div class="bd-steps">
+        <div class="bd-step current" id="bdStep1">
+          <div class="bd-step-num">Step 1</div>
+          <div class="bd-step-label">Run Pre-BD Test</div>
+        </div>
+        <div class="bd-step" id="bdStep2">
+          <div class="bd-step-num">Step 2</div>
+          <div class="bd-step-label">Administer Bronchodilator</div>
+        </div>
+        <div class="bd-step" id="bdStep3">
+          <div class="bd-step-num">Step 3</div>
+          <div class="bd-step-label">Run Post-BD Test</div>
+        </div>
+      </div>
+
+      <div class="runbar">
+        <button class="primary" id="bdRunPreBtn">▶ Run Pre-BD Test</button>
+        <button class="primary" id="bdAdministerBtn" disabled>💊 Administer Bronchodilator</button>
+        <button class="primary" id="bdRunPostBtn" disabled>▶ Run Post-BD Test</button>
+        <button class="ghost" id="bdResetBtn">Reset Challenge</button>
+      </div>
+      <p class="status" id="bdStatusText">Set a severity in the Reference view first, then run the pre-bronchodilator test.</p>
+    </div>
+
+    <div class="card">
+      <h2>Live output — pre vs. post</h2>
+      <div class="views">
+        <div class="view-graph">
+          <h3>Volume–Time Trace</h3>
+          <div class="cap">Solid = most recent test. Faded = the other trial (pre or post), for direct comparison.</div>
+          <svg id="bdVtSvg" viewBox="0 0 420 320"></svg>
+        </div>
+        <div class="view-graph">
+          <h3>Flow–Volume Loop</h3>
+          <div class="cap">A rightward/upward shift in the post-BD loop reflects less airway narrowing.</div>
+          <svg id="bdFvSvg" viewBox="0 0 420 320"></svg>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>Result</h2>
+      <div class="bd-compare" id="bdCompare"></div>
+      <div class="bd-result" id="bdResult" style="display:none;"></div>
+    </div>
+
+  </div>
+
+<footer>DPTD 733 · Foundational Movement Science — Cardiovascular &amp; Pulmonary Physiology</footer>
+</div>
+
+<script>
+(function(){
+"use strict";
+
+/* ======================= Continuous severity physiology model ======================= */
+const PRED = { fvc:4.8, fev1:3.98, ratio:83, tlc:6.0, rv:1.2, peakFlow:7.6 };
+
+function TLC(o,r){ const oN=o/10, rN=r/10; return 6.0 + oN*1.6 - rN*2.6; }
+function RV(o,r){ const oN=o/10, rN=r/10; return 1.2 + oN*2.4 - rN*0.3; }
+function FVC(o,r){ return TLC(o,r) - RV(o,r); }
+function ratioPct(o,r){ const oN=o/10, rN=r/10; return 83 - oN*43 + rN*6; }
+function FEV1(o,r){ return FVC(o,r) * ratioPct(o,r)/100; }
+function peakFlowAt(o,r){ const oN=o/10, rN=r/10; return 7.6 - oN*2.6 - rN*0.9; }
+function concavityExp(o){ return 1 + (o/10)*1.8; }
+
+function flowFracAt(xFrac, o){
+  const risePortion = 0.06;
+  const p = concavityExp(o);
+  if (xFrac < risePortion) return xFrac/risePortion;
+  const xp = (xFrac-risePortion)/(1-risePortion);
+  return Math.pow(Math.max(0,1-xp), p);
+}
+
+// Volume-time curve: simulated from the flow shape, then time-rescaled so the
+// analytically-correct FEV1 (from the ratio formula) lands exactly at t = 1.0s.
+// This keeps the drawn curve and the reported numbers perfectly consistent.
+function buildVTCurve(o, r, noiseSeed){
+  const fvc = FVC(o,r);
+  const pf = peakFlowAt(o,r);
+  const targetFEV1 = FEV1(o,r);
+
+  let vol=0, rawT=0; const dt=0.01, maxRawT=60;
+  const rawPts=[[0,0]];
+  while (rawT<maxRawT && vol < fvc*0.9995){
+    const xFrac = vol/fvc;
+    const flow = Math.max(flowFracAt(xFrac,o)*pf, 0.02);
+    vol += flow*dt; rawT += dt;
+    rawPts.push([rawT, Math.min(vol,fvc)]);
+  }
+
+  let rawT_at_target = null;
+  for (let i=1;i<rawPts.length;i++){
+    if (rawPts[i][1] >= targetFEV1){
+      const [t0,v0]=rawPts[i-1], [t1,v1]=rawPts[i];
+      const frac = v1>v0 ? (targetFEV1-v0)/(v1-v0) : 0;
+      rawT_at_target = t0 + frac*(t1-t0);
+      break;
+    }
+  }
+  if (rawT_at_target === null || rawT_at_target <= 0) rawT_at_target = rawPts[rawPts.length-1][0];
+  const timeScale = 1.0 / rawT_at_target;
+
+  // sample down to a manageable point count
+  const pts = [];
+  for (let i=0;i<rawPts.length;i+=4){ pts.push([rawPts[i][0]*timeScale, rawPts[i][1]]); }
+  const last = rawPts[rawPts.length-1];
+  pts.push([last[0]*timeScale, last[1]]);
+
+  return { pts, totalTime: last[0]*timeScale, fvc, fev1: targetFEV1 };
+}
+
+function buildFVCurve(o, r){
+  const fvc = FVC(o,r);
+  const pf = peakFlowAt(o,r);
+  const N = 30;
+  const expPts = [];
+  for (let i=0;i<=N;i++){
+    const xFrac = i/N;
+    expPts.push([xFrac*fvc, flowFracAt(xFrac,o)*pf]);
+  }
+  // simple inspiratory limb (below axis), shape not affected much by intrathoracic obstruction
+  const inspPeak = pf*0.42;
+  const inspPts = [
+    [fvc, 0], [fvc*0.72, -inspPeak*0.75], [fvc*0.42, -inspPeak], [fvc*0.16, -inspPeak*0.68], [0,0]
+  ];
+  return { expPts, inspPts, fvc, peakFlow: pf };
+}
+
+function severityLabel(v){
+  if (v < 1.5) return {text:'Normal', cls:'none'};
+  if (v < 4.5) return {text:'Mild', cls:'mild'};
+  if (v < 7.5) return {text:'Moderate', cls:'moderate'};
+  return {text:'Severe', cls:'severe'};
+}
+
+function pctPred(val, pred){ return Math.round((val/pred)*100); }
+
+function badgeFlag(pctOfPred, kind){
+  // kind: 'volume' (fvc/fev1/tlc) -> down if <80%, up if >120% (tlc/rv only)
+  if (kind==='ratio'){
+    if (pctOfPred < 84) return 'down'; // ratio itself passed as raw %, compare to 70 threshold instead
+  }
+  return null;
+}
+
+function classifyPattern(o,r){
+  if (o < 2 && r < 2) return 'normal';
+  if (o >= 2 && r < 2) return 'obstructive';
+  if (r >= 2 && o < 2) return 'restrictive';
+  return 'mixed';
+}
+
+function mechanismText(o,r){
+  const tlc=TLC(o,r), rv=RV(o,r), fvc=FVC(o,r), fev1=FEV1(o,r), ratio=ratioPct(o,r);
+  const kind = classifyPattern(o,r);
+  const obSev = severityLabel(o).text.toLowerCase();
+  const reSev = severityLabel(r).text.toLowerCase();
+
+  if (kind === 'normal'){
+    return "<strong>Normal:</strong> Airway resistance and lung/chest-wall compliance are both essentially normal, so air moves out quickly and freely. FEV1/FVC lands in the normal range (" + ratio.toFixed(0) + "%) because FEV1 and FVC fall in proportion to each other.";
+  }
+  if (kind === 'obstructive'){
+    return "<strong>Obstructive (" + obSev + "):</strong> Narrowed / more resistant airways slow airflow out of the lungs, so FEV1 drops much more than FVC — the hallmark reduced FEV1/FVC ratio (" + ratio.toFixed(0) + "%). Airways can collapse and trap air before exhalation is complete, so RV (" + rv.toFixed(1) + "L) and TLC (" + tlc.toFixed(1) + "L) rise above predicted (hyperinflation). On the flow-volume loop this shows up as a scooped-out, concave descending limb with reduced peak flow.";
+  }
+  if (kind === 'restrictive'){
+    return "<strong>Restrictive (" + reSev + "):</strong> Reduced lung or chest-wall compliance limits how much the lungs can expand, so both TLC (" + tlc.toFixed(1) + "L) and FVC (" + fvc.toFixed(1) + "L) fall below predicted. Airway resistance itself is normal, so whatever air IS inhaled still moves out quickly — FEV1/FVC stays normal or even a little high (" + ratio.toFixed(0) + "%). On the flow-volume loop this looks like a smaller, narrower version of the normal loop — not scooped — sitting at a lower lung volume.";
+  }
+  // mixed
+  return "<strong>Mixed obstructive-restrictive (" + obSev + " obstruction + " + reSev + " restriction):</strong> Both defects are present at once. Notice that TLC (" + tlc.toFixed(1) + "L) doesn't look as dramatically abnormal as either defect alone would predict — air-trapping (which raises TLC) and stiffness (which lowers TLC) are partially cancelling each other out. FVC, however, is hit by both problems simultaneously and is disproportionately reduced (" + fvc.toFixed(1) + "L). This is why mixed disease can be easy to miss from lung volumes alone — the reduced FEV1/FVC ratio (" + ratio.toFixed(0) + "%) is the more reliable clue that an obstructive component is present.";
+}
+
+/* ======================= State ======================= */
+let obstruction = 0, restriction = 0;
+let trials = []; // {fvc, fev1, ratio, note, vt, fv}
+let running = false;
+
+const bd = { stage:'idle', preO:null, preR:null, postO:null, pre:null, post:null };
+
+/* ======================= DOM refs ======================= */
+const el = id => document.getElementById(id);
+const obSlider = el('obSlider'), reSlider = el('reSlider');
+const obLabel = el('obLabel'), reLabel = el('reLabel');
+const runBtn = el('runBtn'), clearTrialsBtn = el('clearTrialsBtn'), statusText = el('statusText');
+const vtSvg = el('vtSvg'), fvSvg = el('fvSvg');
+const resultsBody = el('resultsBody');
+const trialSummary = el('trialSummary'), trialBody = el('trialBody');
+const mechText = el('mechText');
+
+const switchToRefBtn = el('switchToRefBtn'), switchToChallengeBtn = el('switchToChallengeBtn');
+const viewReference = el('view-reference'), viewChallenge = el('view-challenge');
+
+const patientReadout = el('patientReadout');
+const revSlider = el('revSlider'), revLabel = el('revLabel');
+const bdRunPreBtn = el('bdRunPreBtn'), bdAdministerBtn = el('bdAdministerBtn'), bdRunPostBtn = el('bdRunPostBtn'), bdResetBtn = el('bdResetBtn');
+const bdStatusText = el('bdStatusText');
+const bdStep1 = el('bdStep1'), bdStep2 = el('bdStep2'), bdStep3 = el('bdStep3');
+const bdVtSvg = el('bdVtSvg'), bdFvSvg = el('bdFvSvg');
+const bdCompare = el('bdCompare'), bdResult = el('bdResult');
+
+/* ======================= SVG drawing helpers ======================= */
+function pathFromPoints(pts, xScale, yScale, xOffset, yOffset, flipY){
+  return pts.map((p,i)=>{
+    const x = xOffset + p[0]*xScale;
+    const y = flipY ? (yOffset - p[1]*yScale) : (yOffset + p[1]*yScale);
+    return (i===0?"M":"L") + x.toFixed(1) + "," + y.toFixed(1);
+  }).join(" ");
+}
+
+function estimatePathLength(pts, xScale, yScale){
+  let len = 0;
+  for (let i=1;i<pts.length;i++){
+    const dx = (pts[i][0]-pts[i-1][0])*xScale;
+    const dy = (pts[i][1]-pts[i-1][1])*yScale;
+    len += Math.sqrt(dx*dx+dy*dy);
+  }
+  return Math.max(50, len);
+}
+
+const VT_X0=50, VT_Y0=280, VT_XMAX=340, VT_YTOP=20, VT_TMAX=11.5, VT_VMAX=5.2;
+function vtScales(){ return { xScale: VT_XMAX/VT_TMAX, yScale: (VT_Y0-VT_YTOP)/VT_VMAX }; }
+
+function renderVT(svg, curves, opts){
+  // curves: array of {pts, color, opacity, animate, fev1Marker}
+  opts = opts || {};
+  const {xScale, yScale} = vtScales();
+  let s = `<line x1="${VT_X0}" y1="${VT_Y0}" x2="${VT_X0+VT_XMAX}" y2="${VT_Y0}" stroke="#999" stroke-width="1.5"/>`;
+  s += `<line x1="${VT_X0}" y1="${VT_Y0}" x2="${VT_X0}" y2="${VT_YTOP}" stroke="#999" stroke-width="1.5"/>`;
+  for (let t=1;t<=Math.floor(VT_TMAX);t+=2){
+    const gx = VT_X0+t*xScale;
+    s += `<line x1="${gx}" y1="${VT_Y0}" x2="${gx}" y2="${VT_YTOP}" stroke="#eee"/>`;
+    s += `<text x="${gx}" y="${VT_Y0+16}" font-size="10" fill="#666" text-anchor="middle">${t}</text>`;
+  }
+  for (let v=1;v<=5;v++){
+    const gy = VT_Y0-v*yScale;
+    s += `<line x1="${VT_X0}" y1="${gy}" x2="${VT_X0+VT_XMAX}" y2="${gy}" stroke="#eee"/>`;
+    s += `<text x="${VT_X0-8}" y="${gy+3}" font-size="10" fill="#666" text-anchor="end">${v}</text>`;
+  }
+  s += `<text x="${VT_X0+VT_XMAX/2}" y="308" font-size="11" fill="#333" text-anchor="middle">Time (s)</text>`;
+  s += `<text x="14" y="${(VT_Y0+VT_YTOP)/2}" font-size="11" fill="#333" text-anchor="middle" transform="rotate(-90 14 ${(VT_Y0+VT_YTOP)/2})">Volume (L)</text>`;
+
+  const fev1x = VT_X0 + 1.0*xScale;
+  s += `<line x1="${fev1x}" y1="${VT_Y0}" x2="${fev1x}" y2="${VT_YTOP}" stroke="#999" stroke-dasharray="4,3"/>`;
+  s += `<text x="${fev1x+4}" y="${VT_YTOP+12}" font-size="10" fill="#666">FEV1 @ 1s</text>`;
+
+  let animScripts = [];
+  curves.forEach((c, ci) => {
+    const clipped = c.pts.filter(p => p[0] <= VT_TMAX);
+    if (clipped.length < 2) clipped.push(c.pts[c.pts.length-1] || [0,0]);
+    const path = pathFromPoints(clipped, xScale, yScale, VT_X0, VT_Y0, true);
+    const pid = 'vtp_'+ci+'_'+Math.random().toString(36).slice(2,7);
+    const plen = c.animate ? estimatePathLength(clipped, xScale, yScale) : 0;
+    s += `<path id="${pid}" d="${path}" fill="none" stroke="${c.color}" stroke-width="${c.width||3}" stroke-opacity="${c.opacity!==undefined?c.opacity:1}"`
+       + (c.animate ? ` stroke-dasharray="${plen}" stroke-dashoffset="${plen}"` : '')
+       + ` stroke-linecap="round" stroke-linejoin="round"/>`;
+    if (c.totalTime > VT_TMAX){
+      s += `<text x="${VT_X0+VT_XMAX-4}" y="${VT_YTOP+12}" font-size="9.5" fill="${c.color}" text-anchor="end">still exhaling beyond ${VT_TMAX}s…</text>`;
+    }
+    if (c.animate) animScripts.push({id:pid, len:plen, dur: opts.animDur || 2.0});
+  });
+
+  svg.innerHTML = s;
+  animScripts.forEach(a => {
+    const p = document.getElementById(a.id);
+    if (!p) return;
+    requestAnimationFrame(()=>{ p.style.transition = "stroke-dashoffset "+a.dur+"s ease-out"; p.style.strokeDashoffset = "0"; });
+  });
+}
+
+const FV_X0=40, FV_Y0=170, FV_XMAX=340, FV_YTOP=20, FV_YBOT=300, FV_FLOWMAX=8.2, FV_VOLMAX=5.2;
+function fvScales(){ return { xScale: FV_XMAX/FV_VOLMAX, yScale: (FV_Y0-FV_YTOP)/FV_FLOWMAX }; }
+
+function renderFV(svg, curves, opts){
+  opts = opts || {};
+  const {xScale, yScale} = fvScales();
+  let s = `<line x1="${FV_X0}" y1="${FV_Y0}" x2="${FV_X0+FV_XMAX}" y2="${FV_Y0}" stroke="#999" stroke-width="1.5"/>`;
+  s += `<line x1="${FV_X0}" y1="${FV_YTOP}" x2="${FV_X0}" y2="${FV_YBOT}" stroke="#999" stroke-width="1.5"/>`;
+  s += `<text x="${FV_X0+FV_XMAX/2}" y="${FV_YBOT+16}" font-size="11" fill="#333" text-anchor="middle">Lung Volume  (TLC → RV)</text>`;
+  s += `<text x="12" y="${(FV_YTOP+FV_Y0)/2}" font-size="11" fill="#333" text-anchor="middle" transform="rotate(-90 12 ${(FV_YTOP+FV_Y0)/2})">Expiratory Flow (L/s)</text>`;
+  s += `<text x="${FV_X0+4}" y="${FV_Y0+14}" font-size="10" fill="#666">TLC</text>`;
+  s += `<text x="${FV_X0+40}" y="${FV_YTOP+30}" font-size="10" fill="#999">expiration ↑</text>`;
+  s += `<text x="${FV_X0+40}" y="${FV_YBOT-8}" font-size="10" fill="#999">inspiration ↓</text>`;
+
+  let animScripts = [];
+  curves.forEach((c, ci) => {
+    const expPath = pathFromPoints(c.expPts, xScale, yScale, FV_X0, FV_Y0, true);
+    const inspPath = pathFromPoints(c.inspPts, xScale, yScale, FV_X0, FV_Y0, true);
+    const pid1 = 'fve_'+ci+'_'+Math.random().toString(36).slice(2,7);
+    const pid2 = 'fvi_'+ci+'_'+Math.random().toString(36).slice(2,7);
+    const plen1 = c.animate ? estimatePathLength(c.expPts, xScale, yScale) : 0;
+    const plen2 = c.animate ? estimatePathLength(c.inspPts, xScale, yScale) : 0;
+    s += `<path id="${pid1}" d="${expPath}" fill="none" stroke="${c.color}" stroke-width="${c.width||3}" stroke-opacity="${c.opacity!==undefined?c.opacity:1}"`
+       + (c.animate ? ` stroke-dasharray="${plen1}" stroke-dashoffset="${plen1}"` : '')
+       + ` stroke-linecap="round" stroke-linejoin="round"/>`;
+    s += `<path id="${pid2}" d="${inspPath}" fill="none" stroke="${c.color}" stroke-width="${(c.width||3)*0.7}" stroke-opacity="${(c.opacity!==undefined?c.opacity:1)*0.55}"`
+       + (c.animate ? ` stroke-dasharray="${plen2}" stroke-dashoffset="${plen2}"` : '')
+       + ` stroke-linecap="round" stroke-linejoin="round"/>`;
+    s += `<text x="${FV_X0+xScale*c.fvc-16}" y="${FV_Y0+14}" font-size="10" fill="#666">RV</text>`;
+    if (c.animate){ animScripts.push({id:pid1,len:plen1,dur:opts.animDur1||1.4}); animScripts.push({id:pid2,len:plen2,dur:opts.animDur2||1.0, delay:(opts.animDur1||1.4)*0.9*1000}); }
+  });
+
+  svg.innerHTML = s;
+  animScripts.forEach(a => {
+    const p = document.getElementById(a.id);
+    if (!p) return;
+    if (a.delay){
+      setTimeout(()=>{ p.style.transition = "stroke-dashoffset "+a.dur+"s ease-out"; p.style.strokeDashoffset = "0"; }, a.delay);
+    } else {
+      requestAnimationFrame(()=>{ p.style.transition = "stroke-dashoffset "+a.dur+"s ease-out"; p.style.strokeDashoffset = "0"; });
+    }
+  });
+}
+
+/* ======================= Table / mechanism rendering ======================= */
+function fmtBadge(actual, pred, higherIsBad, thresholdPct){
+  thresholdPct = thresholdPct || 20;
+  const pct = (actual/pred)*100;
+  if (Math.abs(pct-100) < thresholdPct*0.6) return '<span class="badge normal">NORMAL</span>';
+  if (pct < 100) return '<span class="badge down">↓ LOW</span>';
+  return '<span class="badge up">↑ HIGH</span>';
+}
+function fmtRatioBadge(ratio){
+  if (ratio < 70) return '<span class="badge down">↓ LOW</span>';
+  if (ratio > 92) return '<span class="badge up">↑ HIGH</span>';
+  return '<span class="badge normal">NORMAL</span>';
+}
+
+function currentValues(o,r){
+  return { fvc:FVC(o,r), fev1:FEV1(o,r), ratio:ratioPct(o,r), tlc:TLC(o,r), rv:RV(o,r), peakFlow:peakFlowAt(o,r) };
+}
+
+function renderTable(){
+  const v = currentValues(obstruction, restriction);
+  const kind = classifyPattern(obstruction, restriction);
+  const rows = [
+    ["FVC (L)", PRED.fvc.toFixed(1), v.fvc.toFixed(2), fmtBadge(v.fvc, PRED.fvc)],
+    ["FEV1 (L)", PRED.fev1.toFixed(1), v.fev1.toFixed(2), fmtBadge(v.fev1, PRED.fev1)],
+    ["FEV1 / FVC (%)", PRED.ratio+"%", v.ratio.toFixed(0)+"%", fmtRatioBadge(v.ratio)],
+    ["TLC (L)", PRED.tlc.toFixed(1), v.tlc.toFixed(2), fmtBadge(v.tlc, PRED.tlc)],
+    ["RV (L)", PRED.rv.toFixed(1), v.rv.toFixed(2), fmtBadge(v.rv, PRED.rv)],
+  ];
+  resultsBody.innerHTML = rows.map((r,i)=>{
+    const hallmark = (i===2 || i===3);
+    return `<tr class="${hallmark?'hallmark':''}"><td>${r[0]}</td><td>${r[1]}</td><td>${r[2]} ${r[3]}</td></tr>`;
+  }).join('');
+  mechText.innerHTML = mechanismText(obstruction, restriction);
+  return v;
+}
+
+/* ======================= Reference view: run test + trial history ======================= */
+function pickFlaw(){
+  const r = Math.random();
+  if (r < 0.55) return null;
+  if (r < 0.72) return {key:'early-term', label:'⚠ possible early termination', fvcMul:0.86+Math.random()*0.08, fev1Mul:0.97+Math.random()*0.03};
+  if (r < 0.88) return {key:'hesitant-start', label:'⚠ hesitant start', fvcMul:0.98+Math.random()*0.02, fev1Mul:0.85+Math.random()*0.07};
+  return {key:'submax-inhale', label:'⚠ submaximal inhale', fvcMul:0.89+Math.random()*0.06, fev1Mul:0.90+Math.random()*0.05};
+}
+
+function runTrial(){
+  if (running) return;
+  running = true;
+  runBtn.disabled = true;
+  statusText.textContent = "Running forced exhalation maneuver…";
+
+  const baseVT = buildVTCurve(obstruction, restriction);
+  const baseFV = buildFVCurve(obstruction, restriction);
+  const flaw = pickFlaw();
+  const goodNoise = 0.97 + Math.random()*0.06; // small natural variability even on good efforts
+
+  const fvcMul = flaw ? flaw.fvcMul : goodNoise;
+  const fev1Mul = flaw ? flaw.fev1Mul : goodNoise;
+
+  const trialFvc = baseVT.fvc * fvcMul;
+  const trialFev1 = Math.min(baseVT.fev1 * fev1Mul, trialFvc);
+  const trialRatio = (trialFev1/trialFvc)*100;
+
+  // scale the drawn curves to match this trial's actual fvc/fev1 (keeps shape, adjusts magnitude)
+  const vtPts = baseVT.pts.map(p => [p[0], p[1]*fvcMul]);
+  const fvExp = baseFV.expPts.map(p => [p[0]*fvcMul, p[1]]);
+  const fvInsp = baseFV.inspPts.map(p => [p[0]*fvcMul, p[1]]);
+
+  const trial = {
+    n: trials.length+1, fvc: trialFvc, fev1: trialFev1, ratio: trialRatio,
+    note: flaw ? flaw.label : '',
+    vt: {pts:vtPts, totalTime:baseVT.totalTime, fvc:trialFvc},
+    fv: {expPts:fvExp, inspPts:fvInsp, fvc:trialFvc}
+  };
+  trials.push(trial);
+  if (trials.length > 8) trials.shift();
+
+  renderTable();
+
+  const ghosts = trials.slice(-3, -1).map((t,i) => ({
+    pts:t.vt.pts, color:'#999', opacity:0.28+i*0.12, width:2, animate:false, totalTime:t.vt.totalTime
+  }));
+  renderVT(vtSvg, ghosts.concat([{pts:trial.vt.pts, color:'#C8102E', opacity:1, width:3, animate:true, totalTime:trial.vt.totalTime}]));
+
+  const ghostsFV = trials.slice(-3,-1).map((t,i) => ({
+    expPts:t.fv.expPts, inspPts:t.fv.inspPts, fvc:t.fv.fvc, color:'#999', opacity:0.28+i*0.12, width:2, animate:false
+  }));
+  renderFV(fvSvg, ghostsFV.concat([{expPts:trial.fv.expPts, inspPts:trial.fv.inspPts, fvc:trial.fv.fvc, color:'#C8102E', opacity:1, width:3, animate:true}]));
+
+  renderTrialHistory();
+
+  setTimeout(()=>{
+    running = false;
+    runBtn.disabled = false;
+    statusText.textContent = "Test complete — trial " + trial.n + (flaw ? " (" + flaw.label.replace('⚠ ','') + ")" : " (acceptable effort)") + ". Run again to build reproducibility.";
+  }, 2400);
+}
+
+function renderTrialHistory(){
+  if (trials.length === 0){
+    trialSummary.innerHTML = '<div class="trial-chip"><div class="k">Trials run</div><div class="v">0</div></div>';
+    trialBody.innerHTML = '<tr><td colspan="5" style="color:#999;">No trials yet — press Run Test above.</td></tr>';
+    return;
+  }
+  const byFvc = [...trials].sort((a,b)=>b.fvc-a.fvc);
+  const byFev1 = [...trials].sort((a,b)=>b.fev1-a.fev1);
+  const bestFvcTrial = byFvc[0], bestFev1Trial = byFev1[0];
+
+  let repro = null;
+  if (byFvc.length >= 2 && byFev1.length >= 2){
+    const fvcOk = (byFvc[0].fvc - byFvc[1].fvc) <= 0.15;
+    const fev1Ok = (byFev1[0].fev1 - byFev1[1].fev1) <= 0.15;
+    repro = fvcOk && fev1Ok;
+  }
+
+  trialSummary.innerHTML =
+    '<div class="trial-chip"><div class="k">Trials run</div><div class="v">'+trials.length+'</div></div>' +
+    '<div class="trial-chip"><div class="k">Best FVC</div><div class="v">'+bestFvcTrial.fvc.toFixed(2)+' L (trial '+bestFvcTrial.n+')</div></div>' +
+    '<div class="trial-chip"><div class="k">Best FEV1</div><div class="v">'+bestFev1Trial.fev1.toFixed(2)+' L (trial '+bestFev1Trial.n+')</div></div>' +
+    '<div class="trial-chip"><div class="k">Reproducibility</div><div class="v">' +
+      (repro===null ? '<span class="repro-badge pending">Run ≥2 trials</span>' :
+       repro ? '<span class="repro-badge ok">✓ Acceptable</span>' : '<span class="repro-badge pending">Not yet reproducible</span>') +
+    '</div></div>';
+
+  trialBody.innerHTML = trials.map(t => {
+    const isBestFvc = t===bestFvcTrial, isBestFev1 = t===bestFev1Trial;
+    const cls = (isBestFvc||isBestFev1) ? 'trial-best' : '';
+    return '<tr class="'+cls+'"><td>'+t.n+'</td><td>'+t.fvc.toFixed(2)+(isBestFvc?' ★':'')+'</td><td>'+t.fev1.toFixed(2)+(isBestFev1?' ★':'')+'</td><td>'+t.ratio.toFixed(0)+'%</td><td class="trial-flag">'+(t.note||'—')+'</td></tr>';
+  }).join('');
+}
+
+/* ======================= Slider wiring (Reference view) ======================= */
+function updateSeverityLabels(){
+  const so = severityLabel(obstruction), sr = severityLabel(restriction);
+  obLabel.textContent = so.text; obLabel.className = 'sev '+so.cls;
+  reLabel.textContent = sr.text; reLabel.className = 'sev '+sr.cls;
+}
+
+function livePreview(){
+  updateSeverityLabels();
+  renderTable();
+  const vt = buildVTCurve(obstruction, restriction);
+  const fv = buildFVCurve(obstruction, restriction);
+  renderVT(vtSvg, [{pts:vt.pts, color:'#C8102E', opacity:1, width:3, animate:false, totalTime:vt.totalTime}]);
+  renderFV(fvSvg, [{expPts:fv.expPts, inspPts:fv.inspPts, fvc:fv.fvc, color:'#C8102E', opacity:1, width:3, animate:false}]);
+}
+
+obSlider.addEventListener('input', function(){
+  obstruction = parseFloat(obSlider.value);
+  trials = []; renderTrialHistory();
+  statusText.textContent = "Severity changed — new patient. Press Run Test to simulate.";
+  livePreview();
+});
+reSlider.addEventListener('input', function(){
+  restriction = parseFloat(reSlider.value);
+  trials = []; renderTrialHistory();
+  statusText.textContent = "Severity changed — new patient. Press Run Test to simulate.";
+  livePreview();
+});
+runBtn.addEventListener('click', runTrial);
+clearTrialsBtn.addEventListener('click', function(){ trials = []; renderTrialHistory(); statusText.textContent = "Trial history cleared."; });
+
+/* ======================= Bronchodilator Challenge ======================= */
+function revSeverityLabel(v){
+  if (v < 3) return {text:'Fixed', cls:'severe'};
+  if (v < 7) return {text:'Partially reversible', cls:'mild'};
+  return {text:'Reversible', cls:'none'};
+}
+
+function updatePatientReadout(){
+  const so = severityLabel(obstruction), sr = severityLabel(restriction);
+  patientReadout.innerHTML = 'Testing current patient: <strong>Airway Obstruction — ' + so.text + '</strong> (' + obstruction.toFixed(1) + '/10), ' +
+    '<strong>Restriction — ' + sr.text + '</strong> (' + restriction.toFixed(1) + '/10). ' +
+    '<button class="edit-link" id="editPatientLink" type="button">← adjust in Spirometer Reference</button>';
+  const link = document.getElementById('editPatientLink');
+  if (link) link.addEventListener('click', function(){ showReference(); });
+}
+
+function updateBdSteps(){
+  [bdStep1,bdStep2,bdStep3].forEach(s=>s.classList.remove('current','done'));
+  if (bd.stage==='idle'){ bdStep1.classList.add('current'); }
+  else if (bd.stage==='pre-done'){ bdStep1.classList.add('done'); bdStep2.classList.add('current'); }
+  else if (bd.stage==='administered'){ bdStep1.classList.add('done'); bdStep2.classList.add('done'); bdStep3.classList.add('current'); }
+  else if (bd.stage==='post-done'){ bdStep1.classList.add('done'); bdStep2.classList.add('done'); bdStep3.classList.add('done'); }
+
+  bdRunPreBtn.disabled = bd.stage !== 'idle';
+  bdAdministerBtn.disabled = bd.stage !== 'pre-done';
+  bdRunPostBtn.disabled = bd.stage !== 'administered';
+}
+
+function renderBdGraphs(){
+  const curvesVT = [];
+  const curvesFV = [];
+  if (bd.pre){
+    curvesVT.push({pts:bd.pre.vt.pts, color:'#4599C7', opacity: bd.post?0.4:1, width: bd.post?2:3, animate:false, totalTime:bd.pre.vt.totalTime});
+    curvesFV.push({expPts:bd.pre.fv.expPts, inspPts:bd.pre.fv.inspPts, fvc:bd.pre.fv.fvc, color:'#4599C7', opacity: bd.post?0.4:1, width: bd.post?2:3, animate:false});
+  }
+  if (bd.post){
+    curvesVT.push({pts:bd.post.vt.pts, color:'#1B5E20', opacity:1, width:3, animate:true, totalTime:bd.post.vt.totalTime});
+    curvesFV.push({expPts:bd.post.fv.expPts, inspPts:bd.post.fv.inspPts, fvc:bd.post.fv.fvc, color:'#1B5E20', opacity:1, width:3, animate:true});
+  }
+  renderVT(bdVtSvg, curvesVT);
+  renderFV(bdFvSvg, curvesFV);
+}
+
+function makeTestResult(o,r){
+  const vt = buildVTCurve(o,r);
+  const fv = buildFVCurve(o,r);
+  return { o, r, fvc:vt.fvc, fev1:vt.fev1, ratio:(vt.fev1/vt.fvc)*100, vt:{pts:vt.pts, totalTime:vt.totalTime, fvc:vt.fvc}, fv:{expPts:fv.expPts, inspPts:fv.inspPts, fvc:fv.fvc} };
+}
+
+bdRunPreBtn.addEventListener('click', function(){
+  bd.preO = obstruction; bd.preR = restriction;
+  bd.pre = makeTestResult(bd.preO, bd.preR);
+  bd.stage = 'pre-done';
+  updateBdSteps();
+  renderBdGraphs();
+  bdStatusText.textContent = "Pre-BD FEV1: " + bd.pre.fev1.toFixed(2) + " L. Now administer the bronchodilator.";
+  bdCompare.innerHTML = '<div class="col"><div class="lbl">Pre-BD FEV1</div><div class="num">'+bd.pre.fev1.toFixed(2)+' L</div></div>';
+  bdResult.style.display = 'none';
+});
+
+bdAdministerBtn.addEventListener('click', function(){
+  const reversibility = parseFloat(revSlider.value);
+  bd.postO = bd.preO * (1 - (reversibility/10)*0.8);
+  bd.stage = 'administered';
+  updateBdSteps();
+  bdStatusText.textContent = "Bronchodilator given. Obstruction severity " + bd.preO.toFixed(1) + " → " + bd.postO.toFixed(1) + " (restriction is unaffected). Run the post-BD test.";
+});
+
+bdRunPostBtn.addEventListener('click', function(){
+  bd.post = makeTestResult(bd.postO, bd.preR);
+  bd.stage = 'post-done';
+  updateBdSteps();
+  renderBdGraphs();
+
+  const absChange = bd.post.fev1 - bd.pre.fev1;
+  const pctChange = (absChange/bd.pre.fev1)*100;
+  const significant = pctChange >= 12 && absChange >= 0.2;
+
+  bdCompare.innerHTML =
+    '<div class="col"><div class="lbl">Pre-BD FEV1</div><div class="num">'+bd.pre.fev1.toFixed(2)+' L</div></div>' +
+    '<div class="col"><div class="lbl">Post-BD FEV1</div><div class="num">'+bd.post.fev1.toFixed(2)+' L</div></div>' +
+    '<div class="col"><div class="lbl">Absolute change</div><div class="num">'+(absChange>=0?'+':'')+absChange.toFixed(2)+' L</div></div>' +
+    '<div class="col"><div class="lbl">% change</div><div class="num">'+(pctChange>=0?'+':'')+pctChange.toFixed(0)+'%</div></div>';
+
+  bdResult.style.display = 'block';
+  bdResult.className = 'bd-result' + (significant ? ' sig' : '');
+  if (bd.preO < 1.5){
+    bdResult.innerHTML = '<strong>No baseline obstruction to reverse.</strong> This patient had little or no airway obstruction to begin with, so the bronchodilator has nothing meaningful to act on. Try dialing up Airway Obstruction in the Reference view first.';
+  } else if (significant){
+    bdResult.innerHTML = '<strong>Significant reversibility.</strong> FEV1 rose ' + pctChange.toFixed(0) + '% (' + absChange.toFixed(2) + ' L), clearing the ≥12% and ≥200 mL thresholds. This asthma-like pattern suggests the obstruction is largely bronchospasm — reversible smooth-muscle narrowing — rather than fixed structural damage.';
+  } else {
+    bdResult.innerHTML = '<strong>Not significant reversibility.</strong> FEV1 changed ' + (pctChange>=0?'+':'') + pctChange.toFixed(0) + '% (' + absChange.toFixed(2) + ' L), short of the ≥12% / ≥200 mL bar. This fixed, COPD-like pattern suggests structural airway damage that a bronchodilator cannot reverse' + (bd.preR>=2 ? ' — and remember, restriction never responds to a bronchodilator at all, since it is not an airway-resistance problem.' : '.');
+  }
+
+  bdStatusText.textContent = "Challenge complete.";
+});
+
+bdResetBtn.addEventListener('click', function(){
+  bd.stage='idle'; bd.pre=null; bd.post=null; bd.preO=null; bd.preR=null; bd.postO=null;
+  updateBdSteps();
+  bdVtSvg.innerHTML=''; bdFvSvg.innerHTML='';
+  bdCompare.innerHTML=''; bdResult.style.display='none';
+  bdStatusText.textContent = "Set a severity in the Reference view first, then run the pre-bronchodilator test.";
+});
+
+revSlider.addEventListener('input', function(){
+  const s = revSeverityLabel(parseFloat(revSlider.value));
+  revLabel.textContent = s.text; revLabel.className = 'sev '+s.cls;
+});
+
+/* ======================= View switcher ======================= */
+function showReference(){
+  viewReference.classList.add('active'); viewChallenge.classList.remove('active');
+  switchToRefBtn.classList.add('active'); switchToChallengeBtn.classList.remove('active');
+}
+function showChallenge(){
+  viewChallenge.classList.add('active'); viewReference.classList.remove('active');
+  switchToChallengeBtn.classList.add('active'); switchToRefBtn.classList.remove('active');
+  updatePatientReadout();
+}
+switchToRefBtn.addEventListener('click', showReference);
+switchToChallengeBtn.addEventListener('click', showChallenge);
+
+/* ======================= Init ======================= */
+updateSeverityLabels();
+renderTrialHistory();
+livePreview();
+updateBdSteps();
+const initRev = revSeverityLabel(parseFloat(revSlider.value));
+revLabel.textContent = initRev.text; revLabel.className = 'sev '+initRev.cls;
+
+})();
+</script>
+</body>
+</html>
