@@ -1,0 +1,1658 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<title>Endocrine Lab · DPTD 733</title>
+<style>
+:root{
+  --ink:#14181f;
+  --muted:#5b6472;
+  --paper:#f6f7f9;
+  --surface:#ffffff;
+  --line:#dfe3e9;
+  --cardinal:#9e1b32;
+  --teal:#0f6e63;
+  --teal-wash:#e7f2f0;
+  --amber:#b45309;
+  --amber-wash:#fdf3e6;
+  --radius:10px;
+  --tap:44px;
+}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{
+  margin:0;
+  background:var(--paper);
+  color:var(--ink);
+  font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",system-ui,sans-serif;
+  font-size:17px;
+  line-height:1.5;
+  -webkit-font-smoothing:antialiased;
+}
+.wrap{max-width:720px;margin:0 auto;padding:0 18px 96px}
+
+/* ---------- masthead ---------- */
+header.mast{
+  padding:28px 0 20px;
+  border-bottom:2px solid var(--cardinal);
+  margin-bottom:22px;
+}
+.eyebrow{
+  font-family:ui-monospace,SFMono-Regular,Menlo,monospace;
+  font-size:11px;letter-spacing:.13em;text-transform:uppercase;
+  color:var(--cardinal);margin:0 0 8px;
+}
+h1{
+  font-family:ui-serif,"New York",Georgia,serif;
+  font-size:30px;line-height:1.15;font-weight:600;margin:0 0 10px;
+  letter-spacing:-.01em;
+}
+.lede{margin:0;color:var(--muted);font-size:15.5px}
+
+/* ---------- progress rail ---------- */
+.rail{
+  position:sticky;top:0;z-index:20;
+  background:rgba(246,247,249,.94);
+  -webkit-backdrop-filter:saturate(180%) blur(12px);
+  backdrop-filter:saturate(180%) blur(12px);
+  border-bottom:1px solid var(--line);
+  margin:0 -18px 22px;padding:9px 18px;
+  display:flex;align-items:center;gap:10px;
+}
+.pips{display:flex;gap:5px;flex:1;flex-wrap:wrap}
+.pip{width:9px;height:9px;border-radius:50%;background:var(--line);transition:background .2s}
+@media(prefers-reduced-motion:reduce){.pip{transition:none}}
+.pip.done{background:var(--teal)}
+.pip.miss{background:var(--amber)}
+.railtext{
+  font-family:ui-monospace,SFMono-Regular,Menlo,monospace;
+  font-size:11px;color:var(--muted);white-space:nowrap;
+}
+
+/* ---------- sections + cards ---------- */
+h2.sec{
+  font-family:ui-serif,"New York",Georgia,serif;
+  font-size:21px;font-weight:600;margin:34px 0 4px;
+}
+.sec-note{margin:0 0 16px;color:var(--muted);font-size:14.5px}
+.card{
+  background:var(--surface);
+  border:1px solid var(--line);
+  border-radius:var(--radius);
+  padding:16px 16px 14px;
+  margin:0 0 14px;
+}
+.card.settled{border-color:var(--teal)}
+.card.flagged{border-color:var(--amber)}
+.card h3{
+  font-size:13px;font-weight:600;margin:0 0 12px;
+  letter-spacing:.06em;text-transform:uppercase;color:var(--cardinal);
+  font-family:ui-monospace,SFMono-Regular,Menlo,monospace;
+}
+.stem{margin:0 0 14px;font-size:16.5px;line-height:1.75}
+
+/* ---------- cloze slots ---------- */
+.slot{
+  display:inline-block;min-width:104px;min-height:34px;
+  padding:2px 10px;margin:0 2px;
+  font-family:inherit;
+  border:0;border-radius:0;
+  border-bottom:2px solid var(--ink);
+  text-align:center;vertical-align:baseline;
+  color:var(--muted);font-size:15px;
+  background:transparent;cursor:pointer;
+  -webkit-tap-highlight-color:transparent;
+}
+.slot:focus-visible{outline:3px solid var(--cardinal);outline-offset:3px}
+.slot:disabled,.opt:disabled,.chip:disabled{opacity:1;color:inherit;-webkit-text-fill-color:currentColor}
+.slot.filled{color:var(--ink);font-weight:500;border-bottom-color:var(--cardinal)}
+.slot.active{background:#fdeef1;border-bottom-color:var(--cardinal)}
+.slot.right{border-bottom-color:var(--teal);background:var(--teal-wash)}
+.slot.wrong{border-bottom-color:var(--amber);background:var(--amber-wash)}
+.slot .corr{display:block;font-size:12px;color:var(--teal);font-weight:600}
+
+/* ---------- chips ---------- */
+.bank{display:flex;flex-wrap:wrap;gap:8px;margin:0 0 14px}
+.chip{
+  min-height:var(--tap);
+  padding:0 15px;
+  display:inline-flex;align-items:center;
+  border:1px solid var(--line);border-radius:999px;
+  background:var(--surface);color:var(--ink);
+  font:inherit;font-size:15px;cursor:pointer;
+  -webkit-tap-highlight-color:transparent;
+}
+.chip:focus-visible{outline:3px solid var(--cardinal);outline-offset:2px}
+.chip.used{opacity:.3;pointer-events:none}
+.chip.picked{background:var(--ink);color:#fff;border-color:var(--ink)}
+
+/* ---------- options ---------- */
+.opts{display:flex;flex-direction:column;gap:8px;margin:0 0 14px}
+.opt{
+  min-height:var(--tap);
+  display:flex;align-items:center;gap:11px;
+  padding:10px 14px;
+  border:1px solid var(--line);border-radius:var(--radius);
+  background:var(--surface);color:var(--ink);
+  font:inherit;font-size:15.5px;text-align:left;line-height:1.4;
+  cursor:pointer;-webkit-tap-highlight-color:transparent;
+}
+.opt:focus-visible{outline:3px solid var(--cardinal);outline-offset:2px}
+.opt .key{
+  flex:none;width:24px;height:24px;border-radius:50%;
+  border:1px solid var(--line);
+  display:grid;place-items:center;
+  font-family:ui-monospace,SFMono-Regular,Menlo,monospace;
+  font-size:11px;color:var(--muted);
+}
+.opt.picked{border-color:var(--ink)}
+.opt.picked .key{background:var(--ink);color:#fff;border-color:var(--ink)}
+.opt.right{border-color:var(--teal);background:var(--teal-wash)}
+.opt.right .key{background:var(--teal);color:#fff;border-color:var(--teal)}
+.opt.wrong{border-color:var(--amber);background:var(--amber-wash)}
+.opt.wrong .key{background:var(--amber);color:#fff;border-color:var(--amber)}
+.tier2{
+  margin-top:4px;padding-top:14px;border-top:1px dashed var(--line);
+}
+.tier2 .why{
+  font-size:13px;font-weight:600;color:var(--cardinal);margin:0 0 10px;
+  font-family:ui-monospace,SFMono-Regular,Menlo,monospace;
+  letter-spacing:.04em;text-transform:uppercase;
+}
+
+/* ---------- table talk + actions ---------- */
+.talk{
+  display:block;
+  margin:0 0 13px;padding:11px 13px;
+  background:var(--paper);border-radius:8px;
+  font-size:14.5px;color:var(--muted);
+}
+.talk b{color:var(--ink);font-weight:600}
+.actions{display:flex;gap:9px;flex-wrap:wrap}
+.btn{
+  min-height:var(--tap);padding:0 17px;
+  border-radius:999px;border:1px solid var(--ink);
+  background:var(--ink);color:#fff;
+  font:inherit;font-size:15px;font-weight:500;cursor:pointer;
+  display:inline-flex;align-items:center;
+  -webkit-tap-highlight-color:transparent;
+}
+.btn.ghost{background:transparent;color:var(--ink)}
+.btn:disabled{opacity:.32;cursor:default}
+.btn:focus-visible{outline:3px solid var(--cardinal);outline-offset:2px}
+
+/* ---------- feedback ---------- */
+.fb{margin:14px 0 0;padding:13px 15px;border-radius:8px;font-size:15px;line-height:1.55}
+.fb.ok{background:var(--teal-wash);border-left:3px solid var(--teal)}
+.fb.no{background:var(--amber-wash);border-left:3px solid var(--amber)}
+.fb .verdict{
+  display:block;font-weight:600;margin-bottom:5px;
+  font-family:ui-monospace,SFMono-Regular,Menlo,monospace;
+  font-size:12px;letter-spacing:.06em;text-transform:uppercase;
+}
+.fb.ok .verdict{color:var(--teal)}
+.fb.no .verdict{color:var(--amber)}
+.calib{
+  display:block;margin-top:9px;padding-top:9px;
+  border-top:1px solid rgba(0,0,0,.08);
+  font-size:13.5px;font-style:italic;
+}
+.step{
+  margin:0 0 12px;padding:13px 15px;
+  border-left:3px solid var(--line);
+  border-radius:0 8px 8px 0;background:var(--paper);
+}
+.step.pick{background:transparent;border-left-color:var(--cardinal);padding-left:15px}
+.step .num{
+  display:block;font-family:ui-monospace,SFMono-Regular,Menlo,monospace;
+  font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;
+  color:var(--muted);margin-bottom:6px;
+}
+.step .num.given{color:var(--cardinal)}
+.step p{margin:0;font-size:15.5px;line-height:1.6}
+.step .stem{margin:0 0 12px}
+.step .opts{margin-bottom:0}
+.stepfb{
+  margin:11px 0 0;padding:10px 13px;border-radius:7px;font-size:14.5px;line-height:1.5;
+}
+.stepfb.ok{background:var(--teal-wash);color:var(--ink)}
+.stepfb.no{background:var(--amber-wash);color:var(--ink)}
+.stepfb b{font-weight:600}
+details.res{margin:13px 0 0;border-top:1px solid var(--line);padding-top:11px}
+details.res summary{
+  cursor:pointer;list-style:none;
+  font-family:ui-monospace,SFMono-Regular,Menlo,monospace;
+  font-size:11px;letter-spacing:.08em;text-transform:uppercase;
+  color:var(--cardinal);min-height:32px;display:flex;align-items:center;gap:7px;
+  -webkit-tap-highlight-color:transparent;
+}
+details.res summary::-webkit-details-marker{display:none}
+details.res summary::before{content:"+";font-size:14px;line-height:1}
+details.res[open] summary::before{content:"\2013"}
+details.res summary:focus-visible{outline:3px solid var(--cardinal);outline-offset:2px}
+details.res ul{margin:9px 0 0;padding-left:19px}
+details.res li{margin-bottom:9px;font-size:14.5px;line-height:1.45}
+details.res a{color:var(--ink);text-decoration:underline;text-underline-offset:2px}
+details.res a:focus-visible{outline:3px solid var(--cardinal);outline-offset:2px}
+details.res .src{display:block;color:var(--muted);font-size:13px;margin-top:1px}
+.beyond{
+  display:inline-block;margin-left:8px;vertical-align:2px;
+  font-family:ui-monospace,SFMono-Regular,Menlo,monospace;
+  font-size:9.5px;letter-spacing:.07em;text-transform:uppercase;
+  color:#5b4a1f;background:#fbf3dd;border:1px solid #e6d5a8;
+  padding:2px 7px;border-radius:4px;white-space:nowrap;
+}
+.legend{
+  margin:0 0 22px;padding:11px 14px;
+  background:#fbf3dd;border:1px solid #e6d5a8;border-radius:8px;
+  font-size:14.5px;line-height:1.5;color:var(--ink);
+}
+.legend .beyond{margin:0 4px 0 0;vertical-align:1px}
+p.beyondnote{
+  margin:9px 0 0;padding:10px 13px;border-radius:7px;
+  background:#fbf3dd;border-left:3px solid #d9c179;font-size:14.5px;line-height:1.55;
+}
+.guides{margin:0 0 14px;padding-left:22px}
+.guides li{margin-bottom:7px;font-size:15.5px;line-height:1.5}
+.givens{margin:0 0 14px;padding:13px 15px;background:var(--paper);border-radius:8px}
+.givens .lbl{
+  display:block;font-family:ui-monospace,SFMono-Regular,Menlo,monospace;
+  font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;
+  color:var(--cardinal);margin-bottom:8px;
+}
+.givens ul{margin:0;padding-left:20px}
+.givens li{margin-bottom:6px;font-size:15px;line-height:1.5}
+.givens li:last-child{margin-bottom:0}
+.model{margin:13px 0 0;padding:14px 16px;background:var(--paper);border-radius:8px;font-size:15px}
+.model .lbl{
+  display:block;font-family:ui-monospace,SFMono-Regular,Menlo,monospace;
+  font-size:11px;letter-spacing:.1em;text-transform:uppercase;
+  color:var(--cardinal);margin-bottom:7px;
+}
+.model p{margin:0 0 9px}
+.model p:last-child{margin:0}
+
+/* ---------- review ---------- */
+.review{
+  border:2px solid var(--ink);border-radius:var(--radius);
+  padding:18px;margin-top:34px;background:var(--surface);
+}
+.review h2{font-family:ui-serif,"New York",Georgia,serif;font-size:20px;margin:0 0 6px}
+.review .sub{margin:0 0 14px;color:var(--muted);font-size:14.5px}
+.review ul{margin:0;padding-left:20px}
+.review li{margin-bottom:8px;font-size:15px}
+.review li span.note{color:var(--muted);font-size:13.5px;display:block;margin-top:2px}
+.tag{
+  display:inline-block;font-family:ui-monospace,SFMono-Regular,Menlo,monospace;
+  font-size:10px;letter-spacing:.08em;text-transform:uppercase;
+  padding:2px 7px;border-radius:4px;margin-right:7px;vertical-align:1px;
+}
+.tag.miss{background:var(--amber-wash);color:var(--amber)}
+.tag.unsure{background:#eef0f4;color:var(--muted)}
+footer{margin-top:30px;color:var(--muted);font-size:13px;text-align:center}
+
+/* ---------- Part 2 additions ---------- */
+.sortbank{gap:7px;margin-bottom:10px}
+.sortbank .chip{min-height:38px;padding:0 12px;font-size:14.5px;gap:5px}
+.chip .multi{
+  font-family:ui-monospace,SFMono-Regular,Menlo,monospace;
+  font-size:10px;color:var(--cardinal);background:#fdeef1;
+  padding:1px 5px;border-radius:4px;
+}
+.chip.picked .multi{background:rgba(255,255,255,.2);color:#fff}
+.sortprog{
+  margin:0 0 12px;font-family:ui-monospace,SFMono-Regular,Menlo,monospace;
+  font-size:11px;letter-spacing:.06em;color:var(--muted);
+}
+.bins{display:flex;flex-direction:column;gap:8px;margin-bottom:14px}
+.bin{
+  display:block;width:100%;text-align:left;
+  min-height:56px;padding:9px 12px;
+  border:1px dashed var(--line);border-radius:var(--radius);
+  background:var(--surface);font:inherit;cursor:pointer;
+  -webkit-tap-highlight-color:transparent;
+}
+.bin:focus-visible{outline:3px solid var(--cardinal);outline-offset:2px}
+.bin:disabled{cursor:default}
+.binname{
+  display:block;font-size:12px;font-weight:600;color:var(--cardinal);
+  font-family:ui-monospace,SFMono-Regular,Menlo,monospace;
+  letter-spacing:.05em;text-transform:uppercase;margin-bottom:5px;
+}
+.binbody{display:flex;flex-wrap:wrap;gap:5px}
+.tok{
+  display:inline-block;padding:4px 10px;border-radius:999px;
+  background:var(--paper);border:1px solid var(--line);
+  font-size:14px;color:var(--ink);
+}
+.tok.tokright{background:var(--teal-wash);border-color:var(--teal)}
+.tok.tokwrong{background:var(--amber-wash);border-color:var(--amber)}
+.tok.tokmissing{
+  background:transparent;border-style:dashed;color:var(--muted);
+}
+.tok.tokmissing::before{content:"missing: ";font-size:11px;letter-spacing:.04em}
+.pairrow{margin-bottom:14px}
+.pairlbl{
+  margin:0 0 8px;font-family:ui-monospace,SFMono-Regular,Menlo,monospace;
+  font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--cardinal);
+}
+</style>
+<style>
+/* ---------- landing + shell ---------- */
+[hidden]{display:none !important}
+.cards{display:flex;flex-direction:column;gap:13px;margin-top:6px}
+.partcard{
+  display:block;width:100%;text-align:left;
+  background:var(--surface);border:1px solid var(--line);
+  border-radius:var(--radius);padding:18px 17px 15px;
+  font:inherit;cursor:pointer;-webkit-tap-highlight-color:transparent;
+}
+.partcard:focus-visible{outline:3px solid var(--cardinal);outline-offset:2px}
+.partnum{
+  display:block;font-family:ui-monospace,SFMono-Regular,Menlo,monospace;
+  font-size:11px;letter-spacing:.13em;text-transform:uppercase;color:var(--cardinal);
+  margin-bottom:6px;
+}
+.parttitle{
+  display:block;font-family:ui-serif,"New York",Georgia,serif;
+  font-size:21px;line-height:1.2;font-weight:600;margin-bottom:7px;
+}
+.partblurb{display:block;color:var(--muted);font-size:15px;line-height:1.5;margin-bottom:14px}
+.track{display:block;height:4px;background:var(--line);border-radius:2px;overflow:hidden}
+.bar{display:block;height:100%;width:0;background:var(--teal);transition:width .3s}
+@media(prefers-reduced-motion:reduce){.bar{transition:none}}
+.partmeta{
+  display:block;margin-top:8px;
+  font-family:ui-monospace,SFMono-Regular,Menlo,monospace;
+  font-size:11px;color:var(--muted);
+}
+.parthead{margin-bottom:20px}
+.parthead h1{font-size:25px;margin:0 0 10px}
+.parthead .eyebrow{margin-bottom:7px}
+#backbar{
+  position:sticky;top:0;z-index:25;margin:0 -18px;
+  background:rgba(246,247,249,.94);
+  -webkit-backdrop-filter:saturate(180%) blur(12px);
+  backdrop-filter:saturate(180%) blur(12px);
+  border-bottom:1px solid var(--line);padding:6px 12px;
+}
+#backbar button{
+  min-height:38px;padding:0 10px;border:0;background:none;font:inherit;
+  font-size:14.5px;color:var(--cardinal);cursor:pointer;
+  display:inline-flex;align-items:center;gap:6px;
+  -webkit-tap-highlight-color:transparent;
+}
+#backbar button:focus-visible{outline:3px solid var(--cardinal);outline-offset:2px}
+.rail{top:47px}
+.partdone{margin-top:26px;padding-top:18px;border-top:1px solid var(--line)}
+</style>
+</head>
+<body>
+
+<div id="backbar" hidden>
+  <button type="button" onclick="show(null)">&larr; Lab menu <span id="backlabel"></span></button>
+</div>
+
+<div class="wrap">
+
+<section id="landing">
+  <header class="mast">
+    <p class="eyebrow">DPTD 733 · Foundational Movement Science III</p>
+    <h1>Endocrine System Lab</h1>
+    <p class="lede">Two parts, worked at your table alongside Visible Body. Pick up where you left off —
+    your progress shows on each card. Nothing here is submitted or graded.</p>
+  </header>
+
+  <div id="parts-nav"></div>
+</section>
+
+<div class="rail" id="rail" hidden>
+  <div class="pips" id="pips" aria-hidden="true"></div>
+  <div class="railtext" id="railtext"></div>
+</div>
+
+<div id="parts"></div>
+
+<section class="review" id="review" hidden>
+  <h2>Your review list</h2>
+  <p class="sub">Everything you missed or weren't sure about in this part. It disappears when you close the page, so photograph it before you go.</p>
+  <ul id="reviewlist"></ul>
+</section>
+
+<footer>Guess first. Correct second. That order is the point.</footer>
+</div>
+
+<script>
+const LEGEND_HTML = '<p class="legend"><span class="beyond">Beyond the handout</span> marks items that go past your Endocrine System Guided Learning handout. The reasoning is supplied as you go and the sources are linked, so you are not expected to have read ahead — but if it is not badged, it is fair game and it is in the handout.</p>';
+
+/* ============================================================
+   CONTENT
+   ============================================================ */
+const GLANDS = ["Hypothalamus","Anterior pituitary","Posterior pituitary","Thyroid",
+                "Parathyroid","Adrenal cortex","Adrenal medulla","Pancreas (islets)",
+                "Testes","Ovaries","Thymus","Pineal"];
+
+const PART1 = [
+{
+  section:"Locate each gland",
+  note:"Find the structure in Visible Body first, then complete the statement. Tap a term, then tap the slot it belongs in. Tap a filled slot to clear it.",
+  items:[
+  {id:"hypo", type:"cloze", label:"Hypothalamus",
+   talk:"Search “hypothalamus” in Visible Body and rotate to a midsagittal view before anyone taps a term.",
+   parts:["The hypothalamus sits at the base of the brain, ",0," to the thalamus and directly ",1,
+          " to the pituitary, which it reaches through a stalk called the ",2,"."],
+   answers:["inferior","superior","infundibulum"],
+   bank:["inferior","superior","infundibulum","posterior","isthmus","sella turcica"],
+   model:"The hypothalamus is inferior to the thalamus and superior to the pituitary, connected by the infundibulum. That stalk matters: hypothalamic axons run through it to the posterior pituitary, so a stalk lesion cuts off ADH and oxytocin release."},
+
+  {id:"pit", type:"cloze", label:"Pituitary gland",
+   talk:"Stay in the midsagittal view and hide the brain tissue, so the gland and its bony seat are both visible.",
+   parts:["The pituitary sits in the ",0,", a bony depression in the ",1," bone. Its ",2,
+          " lobe is an outgrowth of hypothalamic neurons, while its ",3,
+          " lobe is controlled by hormones arriving through a portal blood system."],
+   answers:["sella turcica","sphenoid","posterior","anterior"],
+   bank:["sella turcica","sphenoid","posterior","anterior","ethmoid","occipital","infundibulum"],
+   model:"The pituitary sits in the sella turcica of the sphenoid bone. The posterior lobe is neural tissue — an extension of hypothalamic neurons — so its release is fast and neurally triggered. The anterior lobe is glandular and hormonally driven through the portal system, which adds a step and allows amplification."},
+
+  {id:"thy", type:"cloze", label:"Thyroid gland",
+   talk:"Rotate to an anterior view of the neck and trace the isthmus across the midline.",
+   parts:["The thyroid wraps around the ",0," in the anterior neck, ",1,
+          " to the larynx. Its two lobes are joined across the midline by the ",2,"."],
+   answers:["trachea","inferior","isthmus"],
+   bank:["trachea","inferior","isthmus","esophagus","superior","infundibulum"],
+   model:"The thyroid wraps the trachea, inferior to the larynx, with the isthmus crossing the midline. Its superficial position is why an enlarged thyroid is visible and palpable, and why you may notice one during a cervical screen."},
+
+  {id:"para", type:"cloze", label:"Parathyroid glands",
+   beyond:true,
+   talk:"Rotate the thyroid to a posterior view — these are invisible from the front.",
+   parts:["There are usually ",0," parathyroid glands, sitting on the ",1,
+          " surface of the thyroid. Their position makes them vulnerable during ",2,"."],
+   answers:["four","posterior","thyroidectomy"],
+   bank:["four","posterior","thyroidectomy","two","anterior","tracheostomy"],
+   model:"Usually four glands on the posterior thyroid. Because they are small, variable in position, and sit directly on the surgical field, they can be removed or devascularized during thyroidectomy — which is why post-thyroidectomy hypocalcemia is a recognized complication."},
+
+  {id:"thym", type:"cloze", label:"Thymus",
+   talk:"Fade the rib cage and sternum so you can see the thymus sitting in place.",
+   parts:["The thymus lies in the anterior mediastinum, ",0," to the sternum and ",1,
+          " to the heart and great vessels. After puberty it shrinks and is replaced by fat, a process called ",2,"."],
+   answers:[["deep","posterior"],"anterior","involution"],
+   bank:["deep","posterior","anterior","involution","superficial","hypertrophy"],
+   model:"Either <b>deep</b> or <b>posterior</b> works for the first blank \u2014 both describe the same relationship to the sternum, and both are accepted here. The thymus is then anterior to the heart and great vessels. Thymic involution after puberty means the organ modeled here is largely fatty tissue by later adulthood."},
+
+  {id:"panc", type:"cloze", label:"Pancreas",
+   talk:"Hide the stomach, then follow the pancreas from the duodenum to the spleen.",
+   parts:["The pancreas lies ",0," to the stomach, running from the curve of the ",1,
+          " to the ",2,". Its endocrine cells are clustered in the ",3,", roughly 1% of the organ."],
+   answers:["posterior","duodenum","spleen","pancreatic islets"],
+   bank:["posterior","duodenum","spleen","pancreatic islets","anterior","gallbladder","liver","acini"],
+   model:"The pancreas is retroperitoneal and posterior to the stomach, running from the duodenal curve to the spleen. Only about 1% of it — the islets — is endocrine; the other 99% is exocrine tissue making digestive enzymes."},
+
+  {id:"adr", type:"cloze", label:"Suprarenal (adrenal) glands",
+   talk:"Use the cross-section tool on an adrenal gland until the two layers are distinct.",
+   parts:["The adrenal glands sit ",0," to each kidney. The outer ",1,
+          " produces cortisol and aldosterone, while the inner ",2," releases epinephrine and norepinephrine."],
+   answers:["superior","cortex","medulla"],
+   bank:["superior","cortex","medulla","inferior","capsule","hilum"],
+   model:"Adrenals sit superior to each kidney, cortex outside and medulla inside. The two layers are different tissue types with different control systems, which is why one responds in seconds and the other over minutes to hours."},
+
+  {id:"tes", type:"cloze", label:"Gonads — testes",
+   talk:"Find them in the reproductive system view. Why external? Have an answer before you check.",
+   parts:["The testes are housed in the ",0,", ",1,
+          " to the abdominal cavity, which keeps them ",2," than core body temperature."],
+   answers:["scrotum","external","cooler"],
+   bank:["scrotum","external","cooler","inguinal canal","internal","warmer"],
+   model:"The testes sit in the scrotum, external to the abdomen, holding them a few degrees cooler than core temperature — a requirement for spermatogenesis. They are dual-function: endocrine (testosterone, inhibin) and gamete-producing."},
+
+  {id:"ova", type:"cloze", label:"Gonads — ovaries",
+   talk:"Locate them relative to the uterus, not just “in the pelvis.”",
+   parts:["The ovaries sit in the ",0," on either side of the ",1,
+          ", close to the ",2," pelvic wall."],
+   answers:["lower abdomen","uterus","lateral"],
+   bank:["lower abdomen","uterus","lateral","upper abdomen","bladder","medial"],
+   model:"The ovaries lie in the lower abdomen either side of the uterus, near the lateral pelvic wall. Like the testes they are dual-function — producing estrogen, progesterone, inhibin, and relaxin as well as gametes."},
+
+  {id:"pin", type:"cloze", label:"Pineal gland",
+   talk:"Back to midsagittal. The pineal is small — zoom in behind the third ventricle.",
+   parts:["The pineal gland sits in the ",0,", ",1,
+          " to the third ventricle, on the midline between the two ",2,"."],
+   answers:["epithalamus","posterior","hemispheres"],
+   bank:["epithalamus","posterior","hemispheres","hypothalamus","anterior","lobes"],
+   model:"The pineal gland sits in the epithalamus, posterior to the third ventricle, on the midline. Its melatonin output tracks light exposure, which is the link to sleep, circadian rhythm, and the pain and recovery consequences that follow from both."}
+  ]
+},
+{
+  section:"Work it out",
+  note:"These build on what you just located. Each one gives you what you need as you go \u2014 read each step, decide as a group, then move on. You are not expected to know the answer before you start.",
+  items:[
+  {id:"chiasm", type:"chain", label:"The growing adenoma",
+   beyond:true,
+   talk:"Get Visible Body to a midsagittal view of the brain before you start step 1.",
+   steps:[
+     {kind:"look", text:"In Visible Body, search “pituitary gland” and rotate to a midsagittal view. Hide the surrounding brain tissue until you can see what sits directly above the gland."},
+     {kind:"pick",
+      stem:"What structure sits immediately superior to the pituitary?",
+      options:["The optic chiasm","The pons","The thalamus","The fourth ventricle"],
+      correct:0,
+      right:"That proximity is the whole reason this scenario exists.",
+      wrong:"Look again just above the sella turcica \u2014 the crossing point of the two optic nerves sits right on top of the gland."},
+     {kind:"given", text:"<b>Here is what you need next.</b> At the optic chiasm, the fibers from the <b>nasal</b> (inner) half of each retina cross to the opposite side. The other fibers pass straight through without crossing. Because the eye's lens flips the image, the nasal retina receives light coming from the <b>temporal</b> (outer) half of the visual field."},
+     {kind:"pick",
+      stem:"A pituitary tumor grows upward and presses on the chiasm from below. Which fibers does it compress first?",
+      options:["The crossing nasal fibers, sitting in the middle of the chiasm",
+               "The non-crossing fibers, running along the outer edges",
+               "The optic tracts, behind the chiasm",
+               "The optic nerves, in front of the chiasm"],
+      correct:0,
+      right:"Pressure from below hits the middle of the chiasm, which is exactly where the fibers cross.",
+      wrong:"The tumor pushes up into the center of the chiasm. Which fibers are sitting in the center?"},
+     {kind:"pick", final:true,
+      stem:"Those crossing nasal fibers carry the temporal visual fields. So what does the patient lose?",
+      options:["The outer half of the visual field in both eyes",
+               "The inner half of the visual field in both eyes",
+               "All vision in one eye",
+               "A blind spot in the center of vision"],
+      correct:0,
+      right:"You reasoned that out from the anatomy rather than memorizing it.",
+      wrong:"Trace it back one step: the compressed fibers come from the nasal retina, and the nasal retina sees the outer field."}
+   ],
+   resources:[
+     {label:"Neuroanatomy, Optic Chiasm (StatPearls)",
+      url:"https://www.ncbi.nlm.nih.gov/books/NBK542287/",
+      note:"Confirms the chiasm sits about 10 mm above the pituitary. Read the first two paragraphs."},
+     {label:"Neuroanatomy, Bitemporal Hemianopsia (StatPearls)",
+      url:"https://www.ncbi.nlm.nih.gov/books/NBK545213/",
+      note:"Walks the nasal-fiber decussation through to the field defect."}
+   ],
+   model:"<p>This pattern has a name \u2014 <b>bitemporal hemianopsia</b> \u2014 and it is the classic presenting sign of a pituitary adenoma. You did not need the term to work it out; you needed the chiasm sitting on top of the gland.</p><p>Why it reaches you: patients describe it as bumping into door frames on both sides, missing cars merging from either side, or being startled by someone appearing beside them. If you see that during gait or a driving-readiness conversation, it is a referral, not a balance problem to train around.</p>"},
+
+  {id:"cortmed", type:"chain", label:"Why the medulla wins the race",
+   beyond:true,
+   talk:"Use the cross-section tool so cortex and medulla are visibly different tissue.",
+   steps:[
+     {kind:"look", text:"With an adrenal gland cross-sectioned in Visible Body, identify the outer cortex and the inner medulla as two distinct layers."},
+     {kind:"given", text:"<b>Two facts to work from.</b> The <b>medulla</b> develops from neural tissue and is directly innervated by sympathetic nerve fibers \u2014 it is essentially a sympathetic ganglion that secretes into blood instead of onto a synapse. The <b>cortex</b> has no such innervation; it builds steroid hormones on demand after ACTH reaches it through the bloodstream."},
+     {kind:"pick",
+      stem:"Which delivery route is faster \u2014 an action potential down a nerve, or a hormone traveling in the bloodstream?",
+      options:["The nerve impulse, by a wide margin","The hormone, by a wide margin","They are about the same","It depends on the hormone"],
+      correct:0,
+      right:"Milliseconds versus a full circulation time plus synthesis.",
+      wrong:"Compare the units: nerve conduction is measured in milliseconds, circulation and hormone synthesis in minutes."},
+     {kind:"pick", final:true,
+      stem:"A patient is startled during a session. Which adrenal region has already released its hormones within seconds?",
+      options:["The medulla, releasing epinephrine and norepinephrine",
+               "The cortex, releasing cortisol",
+               "Both at the same time",
+               "Neither \u2014 both take several minutes"],
+      correct:0,
+      right:"Direct innervation is what buys those seconds.",
+      wrong:"Go back to the two facts: only one of these regions has a nerve wired straight into it."}
+   ],
+   resources:[
+     {label:"Physiology, Adrenal Gland (StatPearls)",
+      url:"https://www.ncbi.nlm.nih.gov/books/NBK537260/",
+      note:"Cortex steroids versus medullary catecholamines, and what controls each."},
+     {label:"Anatomy, Abdomen and Pelvis: Adrenal Glands (StatPearls)",
+      url:"https://www.ncbi.nlm.nih.gov/books/NBK482264/",
+      note:"The structural side \u2014 cortical zones and the medulla they surround."},
+     {label:"Alila Medical Media: Anatomy and Physiology of the Adrenal Glands",
+      url:"",
+      note:"Linked in your Guided Learning handout, Adrenal Glands section."}
+   ],
+   model:"<p>The medulla is neurally wired, so catecholamines are out in seconds. The cortex depends on ACTH arriving through blood and then synthesizing steroids, so cortisol builds over minutes to hours.</p><p>In the clinic you see both timescales in one session: the immediate heart rate and tremor when a patient is frightened by a transfer, and the slower, longer cortisol response that shapes how they feel for the rest of the day and how well they recover from it.</p>"},
+
+  {id:"islet", type:"chain", label:"Inside the islets",
+   beyond:true,
+   talk:"Search “pancreatic islet” in Visible Body. One of you should be able to say what “endocrine” means here before you start.",
+   steps:[
+     {kind:"given", text:"<b>What you need.</b> The pancreatic islets hold several cell types. <b>Beta</b> cells secrete <b>insulin</b>. <b>Alpha</b> cells secrete <b>glucagon</b>. Around them, the other 99% of the pancreas is exocrine tissue made of <b>acinar</b> cells, which release digestive enzymes into ducts."},
+     {kind:"pick",
+      stem:"A patient's blood glucose is climbing after a meal. Which islet cell should be releasing its hormone?",
+      options:["Beta cells","Alpha cells","Acinar cells","Delta cells"],
+      correct:0,
+      right:"Insulin moves glucose out of the blood and into cells.",
+      wrong:"Which of these secretes the hormone that lowers blood glucose?"},
+     {kind:"pick", final:true,
+      stem:"Your 7:30 a.m. patient took insulin and skipped breakfast. Which cell type is the body now relying on to protect them?",
+      options:["Alpha cells, releasing glucagon","Beta cells, releasing more insulin",
+               "Acinar cells, releasing enzymes","None \u2014 the pancreas is not involved"],
+      correct:0,
+      right:"Glucagon is the counter-regulation, and it can be outrun by injected insulin.",
+      wrong:"Blood glucose is falling. Which cell releases the hormone that raises it again?"}
+   ],
+   resources:[
+     {label:"Physiology, Pancreas (StatPearls)",
+      url:"https://www.ncbi.nlm.nih.gov/books/NBK459261/",
+      note:"Islet cell types and the hormone each one secretes."},
+     {label:"Physiology, Glucagon (StatPearls)",
+      url:"https://www.ncbi.nlm.nih.gov/books/NBK537082/",
+      note:"The counter-regulatory side, including what happens as glucose falls."},
+     {label:"Armando Hasudungan: Pancreas Clinical Anatomy and Physiology",
+      url:"",
+      note:"Linked in your Guided Learning handout, Pancreas section."}
+   ],
+   model:"<p>Beta cells lower blood glucose with insulin; alpha cells raise it with glucagon. The pairing is antagonistic, and it is the clearest example of two hormones holding one variable steady from opposite directions.</p><p>The reason it matters to you: injected insulin does not respond to feedback. If a patient doses and then skips a meal or exercises harder than planned, glucagon is left doing the work alone and can lose. That is why hypoglycemia during a morning session is a real clinical event and not a textbook footnote.</p>"},
+
+  {id:"surg", type:"discuss", label:"After the thyroidectomy",
+   beyond:true,
+   stem:"Your patient is three weeks post-thyroidectomy. She reports tingling around her mouth and in her fingertips, plus occasional hand cramping.",
+   given:["The parathyroid glands sit directly on the posterior surface of the thyroid.",
+          "PTH raises blood calcium \u2014 it drives bone resorption, renal calcium reabsorption, and vitamin D activation.",
+          "Low blood calcium makes nerve and muscle membranes <b>more</b> excitable, not less."],
+   guides:["Given where the parathyroids sit, what could a thyroidectomy have done to them?",
+           "If PTH output drops, which direction does blood calcium go?",
+           "Using the third fact, why would that produce tingling and cramping rather than weakness?",
+           "Is this something you treat, or something you call about?"],
+   resources:[
+     {label:"Hypoparathyroidism (StatPearls)",
+      url:"https://www.ncbi.nlm.nih.gov/books/NBK441899/",
+      note:"Low PTH \u2192 hypocalcemia \u2192 increased neuromuscular irritability. Skim the introduction."},
+     {label:"Thyroidectomy (StatPearls)",
+      url:"https://www.ncbi.nlm.nih.gov/books/NBK563279/",
+      note:"See the complications section: up to a third of total thyroidectomies have transient hypocalcemia."}
+   ],
+   model:"<p>The parathyroids can be removed or lose their blood supply during thyroidectomy. Less PTH means less bone resorption, less renal reabsorption, and less vitamin D activation \u2014 so serum calcium falls.</p><p>Hypocalcemia raises neuromuscular excitability, which is why the symptoms are perioral and fingertip paresthesia and cramping, progressing to carpopedal spasm if it worsens. The clinical takeaway: cramping and tingling three weeks after neck surgery is not a stretching problem. Call the surgical team.</p>"},
+
+  {id:"invol", type:"discuss", label:"The seventy-year-old thymus",
+   stem:"The thymus you just found in Visible Body is modeled on a healthy young adult. Your next patient is 70 and recovering from abdominal surgery.",
+   given:["The thymus is where T-lymphocytes mature and learn to distinguish self from non-self.",
+          "After puberty the thymus undergoes involution \u2014 it shrinks and is progressively replaced by fat.",
+          "T cells are central to adaptive immunity, including the response to infection and to vaccines."],
+   guides:["How would the same structure look in a 70-year-old?",
+           "If the organ is mostly fat, what happens to the supply of newly matured T cells?",
+           "What does that predict about infection risk and healing time after surgery?",
+           "Name one thing you would actually do differently with this patient."],
+   resources:[
+     {label:"Anatomy, Head and Neck: Thymus (StatPearls)",
+      url:"https://www.ncbi.nlm.nih.gov/books/NBK539748/",
+      note:"Describes involution \u2014 parenchyma progressively replaced by adipose tissue."},
+     {label:"Anatomy, Head and Neck: Blood Thymus Barrier (StatPearls)",
+      url:"https://www.ncbi.nlm.nih.gov/books/NBK546601/",
+      note:"Short, and states plainly that T cell output falls after puberty."},
+     {label:"EuroGCT: Inside the Thymus",
+      url:"",
+      note:"Linked in your Guided Learning handout, Thymus section."}
+   ],
+   model:"<p>By 70 the thymus is largely adipose tissue. Fewer newly matured naive T cells contributes to reduced adaptive immune capacity in older adults \u2014 one strand of what is often called immunosenescence.</p><p>Practically: slower recovery from infection, weaker vaccine response, and a genuinely lower threshold for hand hygiene, wound inspection, and rescheduling when you are unwell. This is the least glamorous item in the lab and the one most likely to change what you do on a Monday.</p>"}
+  ]
+}
+];
+
+const PART2 = [
+{
+ section:"2.1 · Fill the glands",
+ note:"Closed book. Tap a hormone, then tap the gland that releases it. Three hormones belong in more than one place \u2014 those chips stay available until you have placed them everywhere they belong. Tap a placed chip to take it back.",
+ items:[
+  {id:"sort", type:"sort", label:"Every hormone, every gland",
+   talk:"Argue it out before anyone taps Check. Do not open the guided learning handout yet.",
+   bins:GLANDS,
+   hormones:[
+     {name:"TRH", homes:["Hypothalamus"]},
+     {name:"CRH", homes:["Hypothalamus"]},
+     {name:"GnRH", homes:["Hypothalamus"]},
+     {name:"GHRH", homes:["Hypothalamus"]},
+     {name:"Somatostatin", homes:["Hypothalamus"]},
+     {name:"GH", homes:["Anterior pituitary"]},
+     {name:"TSH", homes:["Anterior pituitary"]},
+     {name:"ACTH", homes:["Anterior pituitary"]},
+     {name:"FSH", homes:["Anterior pituitary"]},
+     {name:"LH", homes:["Anterior pituitary"]},
+     {name:"Prolactin", homes:["Anterior pituitary"]},
+     {name:"Oxytocin", homes:["Hypothalamus","Posterior pituitary"]},
+     {name:"ADH", homes:["Hypothalamus","Posterior pituitary"]},
+     {name:"T3 and T4", homes:["Thyroid"]},
+     {name:"Calcitonin", homes:["Thyroid"]},
+     {name:"PTH", homes:["Parathyroid"]},
+     {name:"Cortisol", homes:["Adrenal cortex"]},
+     {name:"Aldosterone", homes:["Adrenal cortex"]},
+     {name:"Adrenal androgens", homes:["Adrenal cortex"]},
+     {name:"Epinephrine", homes:["Adrenal medulla"]},
+     {name:"Norepinephrine", homes:["Adrenal medulla"]},
+     {name:"Insulin", homes:["Pancreas (islets)"]},
+     {name:"Glucagon", homes:["Pancreas (islets)"]},
+     {name:"Testosterone", homes:["Testes"]},
+     {name:"Inhibin", homes:["Testes","Ovaries"]},
+     {name:"Estrogen", homes:["Ovaries"]},
+     {name:"Progesterone", homes:["Ovaries"]},
+     {name:"Relaxin", homes:["Ovaries"]},
+     {name:"Thymosins", homes:["Thymus"]},
+     {name:"Melatonin", homes:["Pineal"]}
+   ],
+   model:"<p>Two patterns are worth naming. <b>Oxytocin and ADH</b> are made in hypothalamic neurons and only stored and released by the posterior pituitary \u2014 which is why the posterior lobe is not really a gland at all, and why its release is neural and fast. <b>Inhibin</b> comes from both gonads: Sertoli cells in the testes, granulosa cells in the ovaries.</p><p>The other thing to notice: the hypothalamus releases mostly <i>releasing</i> hormones that act on the anterior pituitary, which in turn acts on a downstream gland. Anything ending in \u2018-releasing hormone\u2019 is hypothalamic by definition.</p><p class=\"beyondnote\"><span class=\"beyond\">Beyond the handout</span> <b>Three places this sort is simpler than the body.</b> The adrenal cortex also makes small amounts of testosterone and estrogens \u2014 that is what the \u2018adrenal androgens\u2019 chip stands for, so those two chips key to the gonads here. Somatostatin is keyed to the hypothalamus, matching your guided learning handout, but delta cells in the pancreatic islets and the GI tract produce it too. If you argued for one of those, you were not wrong \u2014 you were ahead of the key.</p>",
+   resources:[
+     {label:"Physiology, Endocrine Hormones (StatPearls)",
+      url:"https://www.ncbi.nlm.nih.gov/books/NBK538498/",
+      note:"Gland-by-gland list of what each one secretes."},
+     {label:"Your Guided Learning handout, Appendix",
+      url:"",
+      note:"The glands and hormones table \u2014 check yourself against it after you tap Check."}
+   ]}
+ ]
+},
+{
+ section:"2.2 · What each hormone does",
+ note:"For each hormone: name the gland it comes from, then its primary action. Six of them add a third question about what you would actually see in the clinic.",
+ items:[
+  {id:"h_cortisol", type:"hormone", label:"Cortisol", gland:"Adrenal cortex",
+   beyond:true,
+   action:"Raises blood glucose, breaks down protein for fuel, and damps inflammation",
+   actionDistractors:["Lowers blood glucose by driving it into cells for storage",
+                      "Raises blood calcium by increasing bone resorption",
+                      "Retains sodium and water to defend blood pressure"],
+   clinical:"Sustained excess produces proximal muscle wasting, thin skin, and fragility fractures",
+   clinicalDistractors:["Sustained excess produces cold intolerance and slowed reflexes",
+                        "Deficiency produces tingling around the mouth and hand cramping",
+                        "Excess produces excessive urine output and constant thirst"],
+   note:"That protein catabolism is why long-term steroid users lose proximal strength first \u2014 sit-to-stand before grip."},
+
+  {id:"h_aldo", type:"hormone", label:"Aldosterone", gland:"Adrenal cortex",
+   beyond:true,
+   action:"Retains sodium and water while excreting potassium, raising blood pressure",
+   actionDistractors:["Directly constricts arterioles within seconds of a stressor",
+                      "Increases calcium absorption from the intestine",
+                      "Drives glucose into skeletal muscle after a meal"],
+   clinical:"Deficiency shows up as dizziness on standing and poor tolerance of upright exercise",
+   clinicalDistractors:["Deficiency shows up as carpopedal spasm during exercise",
+                        "Excess shows up as weight loss and heat intolerance",
+                        "Excess shows up as delayed wound healing"],
+   note:"This is the slow, long-term blood pressure control system \u2014 not the fast one."},
+
+  {id:"h_cat", type:"hormone", label:"Epinephrine and norepinephrine", gland:"Adrenal medulla",
+   action:"Raise heart rate and blood pressure and mobilize fuel, within seconds",
+   actionDistractors:["Raise blood pressure gradually over hours by retaining sodium",
+                      "Suppress the immune response over a period of days",
+                      "Increase bone resorption to free up calcium"],
+   note:"Direct sympathetic innervation is what makes this the fastest endocrine response in the body."},
+
+  {id:"h_gh", type:"hormone", label:"Growth hormone (GH)", gland:"Anterior pituitary",
+   action:"Stimulates growth of bone and muscle and mobilizes fat as fuel",
+   actionDistractors:["Stimulates the thyroid to release T3 and T4",
+                      "Triggers ovulation partway through the menstrual cycle",
+                      "Concentrates urine by returning water to the bloodstream"],
+   clinical:"Its decline with age contributes to lost muscle mass and increased fat deposition",
+   clinicalDistractors:["Its decline with age contributes to rising blood calcium",
+                        "Excess in adults produces cold intolerance and weight gain",
+                        "Deficiency in adults produces hypoglycemia after meals"],
+   note:"Relevant every time you set load and progression for an older adult."},
+
+  {id:"h_thy", type:"hormone", label:"Thyroid hormones (T3 and T4)", gland:"Thyroid",
+   beyond:true,
+   action:"Set the resting metabolic rate of nearly every cell in the body",
+   actionDistractors:["Lower blood calcium by inhibiting osteoclasts",
+                      "Stimulate the adrenal cortex to release cortisol",
+                      "Prepare the endometrium to support a pregnancy"],
+   clinical:"Deficiency produces fatigue, cold intolerance, myalgia, and slowed reflex relaxation",
+   clinicalDistractors:["Deficiency produces tremor, heat intolerance, and a racing pulse",
+                        "Excess produces perioral tingling and muscle cramping",
+                        "Excess produces central weight gain and thin skin"],
+   note:"Hypothyroid myalgia is a common mimic of a musculoskeletal problem. Keep it on your list when rehab stalls."},
+
+  {id:"h_calc", type:"hormone", label:"Calcitonin", gland:"Thyroid",
+   action:"Lowers blood calcium by inhibiting osteoclast activity",
+   actionDistractors:["Raises blood calcium by stimulating osteoclast activity",
+                      "Raises blood calcium by activating vitamin D in the kidney",
+                      "Has no effect on calcium; it regulates sodium instead"],
+   note:"Physiologically real, clinically weak in adults \u2014 losing it after thyroidectomy causes no calcium problem."},
+
+  {id:"h_pth", type:"hormone", label:"Parathyroid hormone (PTH)", gland:"Parathyroid",
+   action:"Raises blood calcium through bone resorption, renal reabsorption, and vitamin D activation",
+   actionDistractors:["Lowers blood calcium by driving it into bone",
+                      "Raises blood glucose by stimulating the liver",
+                      "Retains sodium while excreting potassium"],
+   clinical:"Chronic excess weakens bone and raises fracture risk during weight-bearing work",
+   clinicalDistractors:["Chronic excess produces central adiposity and thin skin",
+                        "Deficiency produces heat intolerance and tremor",
+                        "Deficiency produces excessive thirst and urine output"],
+   note:"The mirror image of the post-thyroidectomy case in Part 1 \u2014 too much rather than too little."},
+
+  {id:"h_ins", type:"hormone", label:"Insulin", gland:"Pancreas (islets)",
+   beyond:true,
+   action:"Moves glucose out of the blood and into cells for use or storage",
+   actionDistractors:["Releases stored glucose from the liver into the blood",
+                      "Breaks down muscle protein to supply amino acids",
+                      "Increases calcium absorption from the intestine"],
+   clinical:"Too much relative to intake or activity produces shakiness, sweating, and confusion mid-session",
+   clinicalDistractors:["Too much produces excessive thirst and blurred vision",
+                        "Deficiency produces perioral tingling and cramping",
+                        "Deficiency produces bradycardia and cold intolerance"],
+   note:"Injected insulin does not respond to feedback. That is the whole risk in a morning session."},
+
+  {id:"h_test", type:"hormone", label:"Testosterone", gland:"Testes",
+   action:"Builds skeletal muscle and bone and drives male secondary sex characteristics",
+   actionDistractors:["Regulates the menstrual cycle and protects bone density in women",
+                      "Softens the pelvic ligaments in preparation for childbirth",
+                      "Suppresses FSH release from the anterior pituitary"],
+   note:"Small amounts also come from the adrenal cortex, which is why the sort has adrenal androgens as a separate chip."},
+
+  {id:"h_est", type:"hormone", label:"Estrogen", gland:"Ovaries",
+   action:"Drives female reproductive development, regulates the cycle, and protects bone density",
+   actionDistractors:["Prepares the endometrium after ovulation and maintains pregnancy",
+                      "Loosens the pelvic ligaments during pregnancy",
+                      "Raises blood calcium by stimulating osteoclasts"],
+   clinical:"Its fall at menopause accelerates bone loss and raises fracture risk",
+   clinicalDistractors:["Its fall at menopause raises blood glucose and slows wound healing",
+                        "Excess produces proximal muscle wasting",
+                        "Excess produces cold intolerance and fatigue"],
+   note:"This is the hormonal reason loading and impact matter so much in postmenopausal programming."},
+
+  {id:"h_prog", type:"hormone", label:"Progesterone", gland:"Ovaries",
+   action:"Prepares and maintains the endometrium after ovulation and supports pregnancy",
+   actionDistractors:["Triggers ovulation at midcycle",
+                      "Drives breast and body-shape development at puberty",
+                      "Suppresses FSH from the anterior pituitary"],
+   note:"Also nudges body temperature up in the second half of the cycle."},
+
+  {id:"h_relax", type:"hormone", label:"Relaxin", gland:"Ovaries",
+   action:"Relaxes the uterus and softens the cervix and pelvic ligaments for childbirth",
+   actionDistractors:["Contracts the uterus during labor and ejects milk",
+                      "Maintains the endometrium through the second half of the cycle",
+                      "Raises blood calcium to support fetal bone growth"],
+   note:"Produced by the corpus luteum and placenta. Its effect on collagen is why pelvic girdle pain is a peripartum staple."},
+
+  {id:"h_oxy", type:"hormone", label:"Oxytocin", gland:"Posterior pituitary",
+   action:"Contracts the uterus and ejects milk; also involved in bonding and pain modulation",
+   actionDistractors:["Relaxes the uterus and softens the pelvic ligaments",
+                      "Concentrates urine by returning water to the bloodstream",
+                      "Stimulates milk production in the breast tissue itself"],
+   note:"Made in the hypothalamus, released from the posterior lobe. Prolactin makes the milk; oxytocin moves it."},
+
+  {id:"h_adh", type:"hormone", label:"Antidiuretic hormone (ADH)", gland:"Posterior pituitary",
+   action:"Tells the kidney to reabsorb water, concentrating urine and defending blood volume",
+   actionDistractors:["Tells the kidney to excrete water, diluting urine",
+                      "Retains sodium in exchange for potassium",
+                      "Raises blood pressure by increasing heart rate"],
+   note:"Rises with dehydration. Worth remembering before a long outdoor or high-exertion session."}
+ ]
+},
+{
+ section:"2.3 · Two hormones, one job",
+ note:"Several of these hold one variable steady by pushing from opposite directions.",
+ items:[
+  {id:"pair_glu", type:"pairs", label:"Blood glucose",
+   stem:"Which hormone pushes blood glucose in each direction?",
+   options:["Insulin","Glucagon","Cortisol","Calcitonin"],
+   upCorrect:1, downCorrect:0,
+   model:"Glucagon raises blood glucose through hepatic glycogenolysis and gluconeogenesis; insulin lowers it by moving glucose into cells. Cortisol also raises blood glucose, but slowly and as part of a wider stress response \u2014 it is not the fast counter-regulator."},
+
+  {id:"pair_ca", type:"pairs", label:"Blood calcium",
+   stem:"Which hormone pushes blood calcium in each direction?",
+   options:["PTH","Calcitonin","Aldosterone","Insulin"],
+   upCorrect:0, downCorrect:1,
+   model:"PTH raises blood calcium \u2014 it drives bone resorption, renal reabsorption, and vitamin D activation. Calcitonin does the opposite, lowering blood calcium and inhibiting bone resorption. Between them they hold serum calcium in a narrow range, which matters for every muscle contraction your patient makes."},
+
+  {id:"pair_mus", type:"pairs", label:"Muscle protein",
+   stem:"Which hormone builds skeletal muscle protein, and which breaks it down?",
+   options:["Testosterone","Cortisol","Calcitonin","Prolactin"],
+   upLabel:"Builds it up", downLabel:"Breaks it down",
+   upCorrect:0, downCorrect:1,
+   model:"Testosterone (with GH) is anabolic for muscle; cortisol is catabolic, mobilizing amino acids for fuel. This is not a textbook curiosity \u2014 it is why a patient on long-term corticosteroids loses proximal strength while a hypogonadal patient struggles to gain it."}
+ ]
+}
+];
+
+/* ============================================================
+   SHARED HELPERS
+   ============================================================ */
+function el(tag,cls,txt){const e=document.createElement(tag);if(cls)e.className=cls;if(txt!=null)e.textContent=txt;return e;}
+function shuffled(arr){
+  const a=arr.slice();
+  for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}
+  return a;
+}
+function shuffleOptions(options,correctIx){
+  const order=shuffled(options.map((_,i)=>i));
+  return {options:order.map(i=>options[i]), correct:order.indexOf(correctIx)};
+}
+function talkNote(text){
+  const d=el('div','talk');
+  d.innerHTML='<b>At your table:</b> '+text;
+  return d;
+}
+function feedback(card,ok,text,sure){
+  const old=card.querySelector('.fb'); if(old) old.remove();
+  const f=el('div','fb '+(ok?'ok':'no'));
+  f.appendChild(el('span','verdict',ok?'That holds up':'Not yet'));
+  f.appendChild(document.createTextNode(text));
+  if(!ok&&sure){
+    f.appendChild(el('span','calib','You marked this one as sure. Confident and wrong is the combination worth chasing down \u2014 reread this section tonight.'));
+  }
+  if(ok&&!sure){
+    f.appendChild(el('span','calib','Right, but you weren\u2019t sure. Say the reason out loud to your table before moving on.'));
+  }
+  card.appendChild(f);
+  return f;
+}
+function modelBox(html,label){
+  const m=el('div','model');
+  m.appendChild(el('span','lbl',label||'Why it matters'));
+  const body=el('div'); body.innerHTML=/^\s*<p/.test(html)?html:'<p>'+html+'</p>';
+  m.appendChild(body);
+  return m;
+}
+function resourceBox(list){
+  if(!list||!list.length) return null;
+  const d=el('details','res');
+  const sum=document.createElement('summary');
+  sum.textContent='Sources for this one';
+  d.appendChild(sum);
+  const ul=el('ul');
+  list.forEach(r=>{
+    const li=el('li');
+    if(r.url){
+      const a=document.createElement('a');
+      a.href=r.url; a.target='_blank'; a.rel='noopener noreferrer'; a.textContent=r.label;
+      li.appendChild(a);
+    } else { li.appendChild(document.createTextNode(r.label)); }
+    if(r.note) li.appendChild(el('span','src',r.note));
+    ul.appendChild(li);
+  });
+  d.appendChild(ul);
+  return d;
+}
+function optionList(options,onPick){
+  const wrap=el('div','opts');
+  options.forEach((text,ix)=>{
+    const b=el('button','opt');
+    b.type='button';
+    b.appendChild(el('span','key',String.fromCharCode(65+ix)));
+    b.appendChild(el('span',null,text));
+    b.onclick=()=>{
+      wrap.querySelectorAll('.opt').forEach(o=>o.classList.remove('picked'));
+      b.classList.add('picked');
+      onPick(ix);
+    };
+    wrap.appendChild(b);
+  });
+  return wrap;
+}
+function markOptions(wrap,chosen,correct){
+  wrap.querySelectorAll('.opt').forEach((o,ix)=>{
+    o.disabled=true; o.classList.remove('picked');
+    if(ix===correct) o.classList.add('right');
+    else if(ix===chosen) o.classList.add('wrong');
+  });
+}
+function checkButtons(card,onCheck){
+  const a=el('div','actions');
+  const sure=el('button','btn','Check \u2014 I\u2019m sure');
+  const unsure=el('button','btn ghost','Check \u2014 not sure');
+  a.appendChild(sure); a.appendChild(unsure);
+  sure.onclick=()=>onCheck(true,a);
+  unsure.onclick=()=>onCheck(false,a);
+  card.appendChild(a);
+  return a;
+}
+
+/* ============================================================
+   ACTIVITY BUILDERS
+   ============================================================ */
+function buildCloze(item){
+  const card=el('div','card');
+  const h=el('h3',null,item.label);
+  if(item.beyond) h.appendChild(el('span','beyond','Beyond the handout'));
+  card.appendChild(h);
+  if(item.talk) card.appendChild(talkNote(item.talk));
+
+  const filled=new Array(item.answers.length).fill(null);
+  let picked=null;
+
+  const stem=el('p','stem');
+  const slots=[];
+  item.parts.forEach(part=>{
+    if(typeof part==='number'){
+      const s=el('button','slot');
+      s.type='button';
+      s.textContent='—';
+      s.setAttribute('aria-label','Blank '+(part+1));
+      s.onclick=()=>{
+        if(filled[part]!==null){
+          const freed=filled[part]; filled[part]=null;
+          s.textContent='—'; s.classList.remove('filled');
+          bank.querySelectorAll('.chip').forEach(c=>{ if(c.dataset.term===freed) c.classList.remove('used'); });
+        } else if(picked){
+          filled[part]=picked.dataset.term;
+          s.textContent=picked.dataset.term; s.classList.add('filled');
+          picked.classList.add('used'); picked.classList.remove('picked'); picked=null;
+          slots.forEach(x=>x.classList.remove('active'));
+        }
+        sync();
+      };
+      slots[part]=s; stem.appendChild(s);
+    } else {
+      stem.appendChild(document.createTextNode(part));
+    }
+  });
+  card.appendChild(stem);
+
+  const bank=el('div','bank');
+  shuffled(item.bank).forEach(term=>{
+    const c=el('button','chip',term);
+    c.type='button'; c.dataset.term=term;
+    c.onclick=()=>{
+      if(picked===c){ c.classList.remove('picked'); picked=null; slots.forEach(s=>s.classList.remove('active')); return; }
+      if(picked) picked.classList.remove('picked');
+      picked=c; c.classList.add('picked');
+      slots.forEach((s,ix)=>s.classList.toggle('active',filled[ix]===null));
+    };
+    bank.appendChild(c);
+  });
+  card.appendChild(bank);
+
+  const acts=checkButtons(card,(sure)=>{
+    let allRight=true;
+    slots.forEach((s,ix)=>{
+      s.classList.remove('active');
+      const key=item.answers[ix];
+      const accepted=Array.isArray(key)?key:[key];
+      const ok=accepted.includes(filled[ix]);
+      s.classList.add(ok?'right':'wrong');
+      if(!ok){
+        allRight=false;
+        s.textContent=filled[ix]||'—';
+        const c=el('span','corr',accepted.join(' or '));
+        s.appendChild(c);
+      }
+      s.disabled=true;
+    });
+    bank.querySelectorAll('.chip').forEach(c=>c.disabled=true);
+    acts.remove();
+    card.classList.add(allRight?'settled':'flagged');
+    feedback(card,allRight,allRight
+      ? 'Every term is in the right place.'
+      : 'The correct term is shown in green under any slot you missed.',sure);
+    card.appendChild(modelBox(item.model));
+    record(item.id,allRight?'right':'wrong',sure,item.label);
+  });
+
+  function sync(){
+    const complete=filled.every(v=>v!==null);
+    acts.querySelectorAll('.btn').forEach(b=>b.disabled=!complete);
+  }
+  sync();
+  return card;
+}
+function buildMcq(item){
+  const card=el('div','card');
+  const h=el('h3',null,item.label);
+  if(item.beyond) h.appendChild(el('span','beyond','Beyond the handout'));
+  card.appendChild(h);
+  if(item.talk) card.appendChild(talkNote(item.talk));
+  card.appendChild(el('p','stem',item.stem));
+  let chosen=null;
+  const shuf=shuffleOptions(item.options,item.correct);
+  const opts=optionList(shuf.options,ix=>{chosen=ix;acts.querySelectorAll('.btn').forEach(b=>b.disabled=false);});
+  card.appendChild(opts);
+  const acts=checkButtons(card,(sure)=>{
+    const ok=chosen===shuf.correct;
+    markOptions(opts,chosen,shuf.correct);
+    acts.remove();
+    card.classList.add(ok?'settled':'flagged');
+    feedback(card,ok,ok?'Correct.':'The correct answer is highlighted.',sure);
+    card.appendChild(modelBox(item.model));
+    record(item.id,ok?'right':'wrong',sure,item.label);
+  });
+  acts.querySelectorAll('.btn').forEach(b=>b.disabled=true);
+  return card;
+}
+function buildTwoTier(item){
+  const card=el('div','card');
+  const h=el('h3',null,item.label);
+  if(item.beyond) h.appendChild(el('span','beyond','Beyond the handout'));
+  card.appendChild(h);
+  if(item.talk) card.appendChild(talkNote(item.talk));
+  card.appendChild(el('p','stem',item.stem));
+  let chosen=null, reason=null;
+  const shufA=shuffleOptions(item.options,item.correct);
+  const shufR=shuffleOptions(item.reasons,item.reasonCorrect);
+  const opts=optionList(shufA.options,ix=>{chosen=ix;showTier2();});
+  card.appendChild(opts);
+
+  const tier2=el('div','tier2'); tier2.hidden=true;
+  tier2.appendChild(el('p','why',item.whyPrompt));
+  const ropts=optionList(shufR.options,ix=>{reason=ix;acts.querySelectorAll('.btn').forEach(b=>b.disabled=false);});
+  tier2.appendChild(ropts);
+  card.appendChild(tier2);
+
+  function showTier2(){ tier2.hidden=false; }
+
+  const acts=checkButtons(card,(sure)=>{
+    const answerOk=chosen===shufA.correct;
+    const reasonOk=reason===shufR.correct;
+    const ok=answerOk&&reasonOk;
+    markOptions(opts,chosen,shufA.correct);
+    markOptions(ropts,reason,shufR.correct);
+    acts.remove();
+    card.classList.add(ok?'settled':'flagged');
+    let msg;
+    if(ok) msg='Right answer, right reason.';
+    else if(answerOk&&!reasonOk) msg='You picked the right answer for the wrong reason. That is the part to go back over — the answer will not transfer to a new case without it.';
+    else if(!answerOk&&reasonOk) msg='Your reasoning was sound but you landed on the wrong answer. Reread the stem and follow your own logic through.';
+    else msg='Both the answer and the reason need another look.';
+    feedback(card,ok,msg,sure);
+    card.appendChild(modelBox(item.model));
+    record(item.id,ok?'right':'wrong',sure,item.label);
+  });
+  acts.querySelectorAll('.btn').forEach(b=>b.disabled=true);
+  return card;
+}
+function buildChain(item){
+  const card=el('div','card');
+  const h=el('h3',null,item.label);
+  if(item.beyond) h.appendChild(el('span','beyond','Beyond the handout'));
+  card.appendChild(h);
+  if(item.talk) card.appendChild(talkNote(item.talk));
+  const host=el('div');
+  card.appendChild(host);
+  const early=resourceBox(item.resources);
+  if(early){early.dataset.early='1';card.appendChild(early);}
+
+  const picks=item.steps.filter(s=>s.kind==='pick');
+  let ix=0, missed=0;
+
+  function advance(){
+    if(ix>=item.steps.length) return;
+    const step=item.steps[ix], n=ix;
+    ix++;
+    const box=el('div','step'+(step.kind==='pick'?' pick':''));
+    if(step.kind==='look'||step.kind==='given'){
+      const lbl=el('span','num'+(step.kind==='given'?' given':''),
+                   step.kind==='given'?'What you need':'Look first');
+      box.appendChild(lbl);
+      const t=el('p'); t.innerHTML=step.text; box.appendChild(t);
+      const acts=el('div','actions'); acts.style.marginTop='12px';
+      const go=el('button','btn ghost','Got it');
+      acts.appendChild(go); box.appendChild(acts);
+      go.onclick=()=>{acts.remove();advance();host.lastChild.scrollIntoView({block:'nearest'});};
+      host.appendChild(box);
+      return;
+    }
+    // pick step
+    const isFinal=!!step.final;
+    const which=picks.indexOf(step)+1;
+    box.appendChild(el('span','num','Step '+which+' of '+picks.length));
+    box.appendChild(el('p','stem',step.stem));
+    let chosen=null;
+    const shuf=shuffleOptions(step.options,step.correct);
+    const opts=optionList(shuf.options,i=>{chosen=i;acts.querySelectorAll('.btn').forEach(b=>b.disabled=false);});
+    box.appendChild(opts);
+    let acts;
+    const grade=(sure)=>{
+      const ok=chosen===shuf.correct;
+      if(!ok) missed++;
+      markOptions(opts,chosen,shuf.correct);
+      acts.remove();
+      const fb=el('div','stepfb '+(ok?'ok':'no'));
+      fb.innerHTML='<b>'+(ok?'Yes. ':'Not that one. ')+'</b>'+(ok?step.right:step.wrong);
+      box.appendChild(fb);
+      if(isFinal){
+        const clean=missed===0;
+        card.classList.add(clean?'settled':'flagged');
+        feedback(card,clean,clean
+          ? 'You worked the whole chain without a wrong turn.'
+          : 'You got there, but check the step you missed \u2014 that is the link that will break on a new case.',sure);
+        const stale=card.querySelector('details.res[data-early]'); if(stale) stale.remove();
+        card.appendChild(modelBox(item.model));
+        const rb=resourceBox(item.resources); if(rb) card.appendChild(rb);
+        record(item.id,clean?'right':'wrong',sure,item.label);
+      } else {
+        advance();
+        host.lastChild.scrollIntoView({block:'nearest'});
+      }
+    };
+    if(isFinal){
+      acts=el('div','actions');
+      const a=el('button','btn','Check \u2014 I\u2019m sure');
+      const b2=el('button','btn ghost','Check \u2014 not sure');
+      a.onclick=()=>grade(true); b2.onclick=()=>grade(false);
+      acts.appendChild(a); acts.appendChild(b2);
+    } else {
+      acts=el('div','actions');
+      const a=el('button','btn','Check');
+      a.onclick=()=>grade(true);
+      acts.appendChild(a);
+    }
+    acts.style.marginTop='12px';
+    acts.querySelectorAll('.btn').forEach(b=>b.disabled=true);
+    box.appendChild(acts);
+    host.appendChild(box);
+  }
+  advance();
+  return card;
+}
+function buildDiscuss(item){
+  const card=el('div','card');
+  const h=el('h3',null,item.label);
+  if(item.beyond) h.appendChild(el('span','beyond','Beyond the handout'));
+  card.appendChild(h);
+  card.appendChild(el('p','stem',item.stem));
+  if(item.given){
+    const g=el('div','givens');
+    g.appendChild(el('span','lbl','What you know already'));
+    const ul=el('ul');
+    item.given.forEach(t=>{const li=el('li');li.innerHTML=t;ul.appendChild(li);});
+    g.appendChild(ul); card.appendChild(g);
+  }
+  if(item.guides){
+    const ol=el('ol','guides');
+    item.guides.forEach(t=>{const li=el('li');li.innerHTML=t;ol.appendChild(li);});
+    card.appendChild(ol);
+  }
+  const early=resourceBox(item.resources);
+  if(early){early.dataset.early='1';card.appendChild(early);}
+  const acts=el('div','actions');
+  const done=el('button','btn','We\u2019ve worked through all four');
+  acts.appendChild(done);
+  card.appendChild(acts);
+  done.onclick=()=>{
+    acts.remove();
+    card.classList.add('settled');
+    const stale=card.querySelector('details.res[data-early]'); if(stale) stale.remove();
+    card.appendChild(modelBox(item.model,'How we\u2019d answer it'));
+    const rb=resourceBox(item.resources); if(rb) card.appendChild(rb);
+    record(item.id,'seen',true,item.label);
+  };
+  return card;
+}
+function buildSort(item){
+  const card=el('div','card');
+  const h=el('h3',null,item.label);
+  if(item.beyond) h.appendChild(el('span','beyond','Beyond the handout'));
+  card.appendChild(h);
+  if(item.talk) card.appendChild(talkNote(item.talk));
+
+  const placed={};                 // bin -> [hormone names]
+  item.bins.forEach(b=>placed[b]=[]);
+  const counts={};                 // hormone -> placements
+  item.hormones.forEach(h=>counts[h.name]=0);
+  let picked=null;
+
+  const prog=el('p','sortprog');
+  const total=item.hormones.reduce((n,h)=>n+h.homes.length,0);
+  const bank=el('div','bank sortbank');
+
+  function chipFor(h){
+    const c=el('button','chip');
+    c.type='button'; c.dataset.name=h.name;
+    c.appendChild(el('span',null,h.name));
+    if(h.homes.length>1){ c.appendChild(el('span','multi','\u00d7'+h.homes.length)); }
+    c.onclick=()=>{
+      if(picked===c){ c.classList.remove('picked'); picked=null; return; }
+      if(picked) picked.classList.remove('picked');
+      picked=c; c.classList.add('picked');
+    };
+    return c;
+  }
+  shuffled(item.hormones).forEach(h=>bank.appendChild(chipFor(h)));
+
+  function syncProgress(){
+    let n=0; item.bins.forEach(b=>n+=placed[b].length);
+    prog.textContent=n+' of '+total+' placements made';
+    acts.querySelectorAll('.btn').forEach(b=>b.disabled=(n<total));
+  }
+
+  const grid=el('div','bins');
+  const binBodies={};
+  item.bins.forEach(bin=>{
+    const b=el('button','bin');
+    b.type='button';
+    b.appendChild(el('span','binname',bin));
+    const body=el('span','binbody');
+    b.appendChild(body); binBodies[bin]=body;
+    b.onclick=()=>{
+      if(!picked) return;
+      const name=picked.dataset.name;
+      if(placed[bin].includes(name)) return;
+      placed[bin].push(name);
+      counts[name]++;
+      const h=item.hormones.find(x=>x.name===name);
+      const tok=el('span','tok',name);
+      tok.onclick=(ev)=>{
+        ev.stopPropagation();
+        if(tok.dataset.locked) return;
+        placed[bin]=placed[bin].filter(x=>x!==name);
+        counts[name]--;
+        bank.querySelectorAll('.chip').forEach(c=>{ if(c.dataset.name===name) c.classList.remove('used'); });
+        tok.remove(); syncProgress();
+      };
+      body.appendChild(tok);
+      if(counts[name]>=h.homes.length){ picked.classList.add('used'); }
+      picked.classList.remove('picked'); picked=null;
+      syncProgress();
+    };
+    grid.appendChild(b);
+  });
+
+  card.appendChild(bank);
+  card.appendChild(prog);
+  card.appendChild(grid);
+
+  const acts=checkButtons(card,(sure)=>{
+    let wrongCount=0, misplaced=[];
+    item.bins.forEach(bin=>{
+      binBodies[bin].querySelectorAll('.tok').forEach(tok=>{
+        tok.dataset.locked='1';
+        const h=item.hormones.find(x=>x.name===tok.textContent);
+        const ok=h && h.homes.includes(bin);
+        tok.classList.add(ok?'tokright':'tokwrong');
+        if(!ok){ wrongCount++; misplaced.push(tok.textContent); }
+      });
+      // flag any expected hormone that never landed here
+      item.hormones.filter(h=>h.homes.includes(bin)).forEach(h=>{
+        if(!placed[bin].includes(h.name)){
+          const miss=el('span','tok tokmissing',h.name);
+          binBodies[bin].appendChild(miss);
+          wrongCount++;
+          if(!misplaced.includes(h.name)) misplaced.push(h.name);
+        }
+      });
+    });
+    bank.querySelectorAll('.chip').forEach(c=>c.disabled=true);
+    grid.querySelectorAll('.bin').forEach(b=>b.disabled=true);
+    acts.remove();
+    const clean=wrongCount===0;
+    card.classList.add(clean?'settled':'flagged');
+    feedback(card,clean,clean
+      ? 'Every hormone is in the right gland, including the three that live in two places.'
+      : 'Anything outlined in amber is in the wrong gland. Anything in grey is a hormone that belongs there but never got placed.',sure);
+    card.appendChild(modelBox(item.model));
+    const rb=resourceBox(item.resources); if(rb) card.appendChild(rb);
+    record(item.id,clean?'right':'wrong',sure,item.label,
+      clean?null:'Sort out: '+misplaced.slice(0,6).join(', ')+(misplaced.length>6?'\u2026':''));
+  });
+  syncProgress();
+  return card;
+}
+function buildHormone(item){
+  const card=el('div','card');
+  const h=el('h3',null,item.label);
+  if(item.beyond) h.appendChild(el('span','beyond','Beyond the handout'));
+  card.appendChild(h);
+
+  const qs=[];
+  let step=0, wrongCount=0;
+  const host=el('div');
+  card.appendChild(host);
+
+  // Q1 gland
+  const glandChoices=shuffled(
+    [item.gland].concat(shuffled(GLANDS.filter(g=>g!==item.gland)).slice(0,5)));
+  qs.push({
+    stem:'Which gland or region releases it?',
+    options:glandChoices,
+    isCorrect:(txt)=>txt===item.gland,
+    right:'',
+    wrong:'It comes from the '+item.gland.charAt(0).toLowerCase()+item.gland.slice(1)+'.'
+  });
+  // Q2 action
+  const actOpts=shuffled([item.action].concat(item.actionDistractors));
+  qs.push({
+    stem:'What is its primary action?',
+    options:actOpts,
+    isCorrect:(txt)=>txt===item.action,
+    wrong:'The primary action is the one highlighted in green.'
+  });
+  // Q3 clinical (optional)
+  if(item.clinical){
+    const cOpts=shuffled([item.clinical].concat(item.clinicalDistractors));
+    qs.push({
+      stem:'Which of these would you actually see or plan around?',
+      options:cOpts,
+      isCorrect:(txt)=>txt===item.clinical,
+      wrong:'The finding that fits is highlighted in green.'
+    });
+  }
+
+  function ask(){
+    if(step>=qs.length){
+      const clean=wrongCount===0;
+      card.classList.add(clean?'settled':'flagged');
+      if(item.note) card.appendChild(modelBox(item.note,'Worth knowing'));
+      record(item.id,clean?'right':'wrong',lastSure,item.label);
+      return;
+    }
+    const q=qs[step];
+    const box=el('div','step pick');
+    box.appendChild(el('span','num','Step '+(step+1)+' of '+qs.length));
+    box.appendChild(el('p','stem',q.stem));
+    let chosenIx=null;
+    const opts=optionList(q.options,i=>{chosenIx=i;acts.querySelectorAll('.btn').forEach(b=>b.disabled=false);});
+    box.appendChild(opts);
+    const acts=el('div','actions'); acts.style.marginTop='12px';
+    const isLast=step===qs.length-1;
+    const grade=(sure)=>{
+      lastSure=sure;
+      const correctIx=q.options.findIndex(t=>q.isCorrect(t));
+      const ok=chosenIx===correctIx;
+      if(!ok) wrongCount++;
+      markOptions(opts,chosenIx,correctIx);
+      acts.remove();
+      const fb=el('div','stepfb '+(ok?'ok':'no'));
+      fb.innerHTML='<b>'+(ok?'Yes. ':'Not that one. ')+'</b>'+(ok?'':q.wrong);
+      box.appendChild(fb);
+      step++; ask();
+      host.lastChild.scrollIntoView({block:'nearest'});
+    };
+    if(isLast){
+      const a=el('button','btn','Check \u2014 I\u2019m sure');
+      const b=el('button','btn ghost','Check \u2014 not sure');
+      a.onclick=()=>grade(true); b.onclick=()=>grade(false);
+      acts.appendChild(a); acts.appendChild(b);
+    } else {
+      const a=el('button','btn','Check');
+      a.onclick=()=>grade(true);
+      acts.appendChild(a);
+    }
+    acts.querySelectorAll('.btn').forEach(b=>b.disabled=true);
+    box.appendChild(acts);
+    host.appendChild(box);
+  }
+  let lastSure=true;
+  ask();
+  return card;
+}
+function buildPairs(item){
+  const card=el('div','card');
+  const h=el('h3',null,item.label);
+  if(item.beyond) h.appendChild(el('span','beyond','Beyond the handout'));
+  card.appendChild(h);
+  card.appendChild(el('p','stem',item.stem));
+
+  const shuf=shuffled(item.options.map((t,i)=>({t,i})));
+  const upKey=shuf.findIndex(o=>o.i===item.upCorrect);
+  const downKey=shuf.findIndex(o=>o.i===item.downCorrect);
+  const texts=shuf.map(o=>o.t);
+
+  let up=null, down=null;
+  const upWrap=el('div','pairrow');
+  upWrap.appendChild(el('p','pairlbl',item.upLabel||'Raises it'));
+  const upOpts=optionList(texts,i=>{up=i;sync();});
+  upWrap.appendChild(upOpts);
+  card.appendChild(upWrap);
+
+  const dnWrap=el('div','pairrow');
+  dnWrap.appendChild(el('p','pairlbl',item.downLabel||'Lowers it'));
+  const dnOpts=optionList(texts,i=>{down=i;sync();});
+  dnWrap.appendChild(dnOpts);
+  card.appendChild(dnWrap);
+
+  const acts=checkButtons(card,(sure)=>{
+    const ok=(up===upKey)&&(down===downKey);
+    markOptions(upOpts,up,upKey);
+    markOptions(dnOpts,down,downKey);
+    acts.remove();
+    card.classList.add(ok?'settled':'flagged');
+    feedback(card,ok,ok?'Both directions correct.':'The correct hormone in each direction is highlighted.',sure);
+    card.appendChild(modelBox(item.model));
+    const rb=resourceBox(item.resources); if(rb) card.appendChild(rb);
+    record(item.id,ok?'right':'wrong',sure,item.label);
+  });
+  function sync(){ acts.querySelectorAll('.btn').forEach(b=>b.disabled=(up===null||down===null)); }
+  sync();
+  return card;
+}
+
+/* ============================================================
+   APP: two parts, one page
+   ============================================================ */
+const PARTS = [
+  {key:'p1', num:'Part 1', title:'Anatomy of the Endocrine System',
+   blurb:'Find each gland in Visible Body and pin down where it sits, then reason through five clinical scenarios.',
+   lede:'Open Visible Body in Split View beside this page. Use the Endocrine System view, and hide or fade whatever is in the way \u2014 finding a structure is part of the work. Talk each item through at your table before you check it.',
+   sections:PART1},
+  {key:'p2', num:'Part 2', title:'Glands, Hormones, and What They Do',
+   blurb:'Sort all 30 hormones into their glands from memory, then work through what each one actually does.',
+   lede:'Start closed book \u2014 guess before you look anything up, then correct yourself. Part 1 was about finding things; this part is about what they release and why it reaches your plan of care.',
+   sections:PART2}
+];
+
+const state = {};
+const ITEMS = {};      // part key -> [items]
+PARTS.forEach(p=>{ ITEMS[p.key]=[]; p.sections.forEach(s=>s.items.forEach(i=>ITEMS[p.key].push(i))); });
+
+let current = null;    // null = landing
+
+function record(id,status,sure,label,detail){
+  state[id]={status,sure,label,detail};
+  updateRail();
+  updateLanding();
+}
+
+function partStats(key){
+  const items=ITEMS[key];
+  let done=0, missed=0;
+  items.forEach(i=>{const s=state[i.id]; if(s){done++; if(s.status==='wrong') missed++;}});
+  return {done, missed, total:items.length};
+}
+
+/* ---------- landing ---------- */
+const landing=document.getElementById('landing');
+const landingNav=document.getElementById('parts-nav');
+const partHost=document.getElementById('parts');
+const rail=document.getElementById('rail');
+const backBar=document.getElementById('backbar');
+
+function updateLanding(){
+  PARTS.forEach(p=>{
+    const st=partStats(p.key);
+    const meta=document.getElementById('meta-'+p.key);
+    if(!meta) return;
+    meta.textContent = st.done===0
+      ? st.total+' items'
+      : st.done+' of '+st.total+' checked'+(st.missed?' \u00b7 '+st.missed+' to review':'');
+    const bar=document.getElementById('bar-'+p.key);
+    bar.style.width=(st.total?Math.round(100*st.done/st.total):0)+'%';
+  });
+}
+
+function buildLanding(){
+  const wrap=el('div','cards');
+  PARTS.forEach(p=>{
+    const a=el('button','partcard');
+    a.type='button';
+    a.appendChild(el('span','partnum',p.num));
+    a.appendChild(el('span','parttitle',p.title));
+    a.appendChild(el('span','partblurb',p.blurb));
+    const track=el('span','track');
+    const bar=el('span','bar'); bar.id='bar-'+p.key;
+    track.appendChild(bar); a.appendChild(track);
+    const meta=el('span','partmeta'); meta.id='meta-'+p.key;
+    a.appendChild(meta);
+    a.onclick=()=>show(p.key);
+    wrap.appendChild(a);
+  });
+  landingNav.appendChild(wrap);
+  updateLanding();
+}
+
+/* ---------- part views ---------- */
+const BUILDERS={cloze:buildCloze,mcq:buildMcq,twoTier:buildTwoTier,chain:buildChain,
+                discuss:buildDiscuss,sort:buildSort,hormone:buildHormone,pairs:buildPairs};
+
+function buildParts(){
+  PARTS.forEach(p=>{
+    const view=el('section','partview');
+    view.id='view-'+p.key;
+    view.hidden=true;
+    const head=el('div','parthead');
+    head.appendChild(el('p','eyebrow',p.num));
+    head.appendChild(el('h1',null,p.title));
+    head.appendChild(el('p','lede',p.lede));
+    view.appendChild(head);
+    const lg=document.createElement('div');
+    lg.innerHTML=LEGEND_HTML;
+    view.appendChild(lg.firstChild);
+    p.sections.forEach(sec=>{
+      view.appendChild(el('h2','sec',sec.section));
+      if(sec.note) view.appendChild(el('p','sec-note',sec.note));
+      sec.items.forEach(item=>view.appendChild(BUILDERS[item.type](item)));
+    });
+    const done=el('div','partdone');
+    const back=el('button','btn ghost','\u2190 Back to the lab menu');
+    back.onclick=()=>show(null);
+    done.appendChild(back);
+    view.appendChild(done);
+    partHost.appendChild(view);
+  });
+}
+
+/* ---------- rail + review ---------- */
+function updateRail(){
+  if(!current){ rail.hidden=true; return; }
+  rail.hidden=false;
+  const items=ITEMS[current];
+  const pips=document.getElementById('pips');
+  pips.innerHTML='';
+  let done=0;
+  items.forEach(i=>{
+    const d=el('div','pip');
+    const st=state[i.id];
+    if(st){ done++; d.classList.add(st.status==='wrong'?'miss':'done'); }
+    pips.appendChild(d);
+  });
+  document.getElementById('railtext').textContent=done+' of '+items.length+' checked';
+  renderReview();
+}
+
+function renderReview(){
+  const box=document.getElementById('review');
+  const list=document.getElementById('reviewlist');
+  if(!current){ box.hidden=true; return; }
+  const rows=ITEMS[current].filter(i=>{const s=state[i.id];return s&&(s.status==='wrong'||s.sure===false);});
+  if(!rows.length){ box.hidden=true; return; }
+  box.hidden=false;
+  list.innerHTML='';
+  rows.forEach(i=>{
+    const s=state[i.id];
+    const li=el('li');
+    const tag=el('span','tag '+(s.status==='wrong'?'miss':'unsure'),
+                 s.status==='wrong'?'missed':'unsure');
+    li.appendChild(tag);
+    li.appendChild(document.createTextNode(i.label));
+    if(s.detail){ li.appendChild(el('span','note',s.detail)); }
+    else if(s.status==='wrong'&&s.sure){
+      li.appendChild(el('span','note','You were confident on this one \u2014 that gap is worth closing first.'));
+    }
+    list.appendChild(li);
+  });
+}
+
+/* ---------- navigation ---------- */
+function show(key){
+  current=key;
+  PARTS.forEach(p=>{document.getElementById('view-'+p.key).hidden=(p.key!==key);});
+  landing.hidden=!!key;
+  backBar.hidden=!key;
+  document.getElementById('review').hidden=!key;
+  if(key){ document.getElementById('backlabel').textContent=PARTS.find(p=>p.key===key).num; }
+  updateRail();
+  window.scrollTo(0,0);
+}
+
+buildParts();
+buildLanding();
+show(null);
+
+</script>
+</body>
+</html>
