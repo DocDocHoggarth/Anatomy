@@ -1,0 +1,2198 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Endocrine Feedback Loops</title>
+<style>
+
+  :root {
+    --bg: #F2F4F3;
+    --panel: #FFFFFF;
+    --ink: #1B2430;
+    --ink-soft: #4A5A68;
+    --ink-faint: #8695A0;
+    --line: #C9D1D3;
+    --stim: #B8862B;
+    --stim-soft: #F1E4C6;
+    --inhib: #8C2F39;
+    --inhib-soft: #F1DBDE;
+    --correct: #3F7A6B;
+    --correct-soft: #DCEAE5;
+    --alert: #B14A42;
+    --alert-soft: #F3DAD7;
+    --serif: "Iowan Old Style","Sitka Text","Palatino Linotype", Georgia, serif;
+    --sans: -apple-system, BlinkMacSystemFont,"Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  }
+
+  * { box-sizing: border-box; }
+
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--ink);
+    font-family: var(--sans);
+    line-height: 1.5;
+  }
+
+  .wrap {
+    max-width: 1120px;
+    margin: 0 auto;
+    padding: 28px 20px 64px;
+  }
+
+  /* ---------- Header ---------- */
+  header.top {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 12px;
+    border-bottom: 1px solid var(--line);
+    padding-bottom: 18px;
+    margin-bottom: 8px;
+  }
+
+  header.top h1 {
+    font-family: var(--serif);
+    font-weight: 500;
+    font-size: 1.65rem;
+    margin: 0;
+    letter-spacing: 0.2px;
+  }
+
+  header.top .subtitle {
+    font-size: 0.95rem;
+    color: var(--ink-soft);
+    margin-top: 4px;
+  }
+
+  .progress {
+    display: flex;
+    gap: 6px;
+    align-items: center;
+  }
+
+  .progress .seg {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 0.78rem;
+    color: var(--ink-faint);
+    padding: 5px 10px;
+    border: 1px solid var(--line);
+    border-radius: 3px;
+    background: var(--panel);
+  }
+
+  .progress .seg.active {
+    color: var(--ink);
+    border-color: var(--ink);
+    font-weight: 600;
+  }
+
+  .progress .seg.done {
+    color: var(--correct);
+    border-color: var(--correct);
+    background: var(--correct-soft);
+  }
+
+  .intro {
+    font-size: 0.95rem;
+    color: var(--ink-soft);
+    max-width: 62ch;
+    margin: 14px 0 26px;
+  }
+
+  /* ---------- Layout ---------- */
+  .stage {
+    display: grid;
+    grid-template-columns: minmax(0, 1.5fr) minmax(280px, 1fr);
+    gap: 28px;
+    align-items: start;
+  }
+
+  @media (max-width: 860px) {
+    .stage { grid-template-columns: 1fr; }
+  }
+
+  .diagram-card {
+    background: var(--panel);
+    border: 1px solid var(--line);
+    border-radius: 4px;
+    padding: 18px;
+  }
+
+  .diagram-svg {
+    width: 100%;
+    height: auto;
+    display: block;
+    overflow: visible;
+  }
+
+  .legend {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 18px;
+    margin-top: 14px;
+    padding-top: 14px;
+    border-top: 1px solid var(--line);
+    font-size: 0.82rem;
+    color: var(--ink-soft);
+  }
+
+  .legend .item { display: flex; align-items: center; gap: 7px; }
+  .legend .swatch { width: 22px; height: 3px; border-radius: 2px; display: inline-block; }
+  .legend .swatch.stim { background: var(--stim); }
+  .legend .swatch.inhib { background: var(--inhib); border-top: 2px dashed var(--inhib); height: 0; }
+  .legend .box-sample { width: 16px; height: 12px; border: 1.5px solid var(--ink-soft); border-radius: 2px; display: inline-block; }
+  .legend .box-sample.tissue { border-style: dashed; }
+
+  /* ---------- SVG foreignObject buttons: glands, hormone slots, feedback toggles ---------- */
+  .node-btn, .hormone-btn, .fb-btn {
+    width: 100%; height: 100%;
+    font-family: var(--sans);
+    border-radius: 4px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: 4px 8px;
+    transition: transform 0.12s ease, background 0.2s ease, border-color 0.2s ease;
+  }
+  .node-btn:focus-visible, .hormone-btn:focus-visible, .fb-btn:focus-visible {
+    outline: 2px solid var(--ink); outline-offset: 2px;
+  }
+
+  .node-btn {
+    background: var(--panel);
+    border: 1.5px dashed var(--line);
+    color: var(--ink-faint);
+    font-family: var(--serif);
+    font-size: 1.02rem;
+  }
+  .node-btn.filled {
+    border: 1.5px solid var(--correct);
+    background: var(--correct-soft);
+    color: var(--ink);
+    cursor: default;
+  }
+  .node-btn.wrong {
+    border-color: var(--alert);
+    background: var(--alert-soft);
+    color: var(--alert);
+  }
+  .node-btn.pulse-hint {
+    border-color: var(--ink-soft);
+  }
+
+  .hormone-btn {
+    background: var(--panel);
+    border: 1.5px dashed var(--line);
+    color: var(--ink-faint);
+    font-size: 0.86rem;
+    font-weight: 600;
+    letter-spacing: 0.2px;
+  }
+  .hormone-btn.filled {
+    border: 1.5px solid var(--stim);
+    background: var(--stim-soft);
+    color: #6b4d1a;
+    cursor: default;
+  }
+  .hormone-btn.wrong {
+    border-color: var(--alert);
+    background: var(--alert-soft);
+    color: var(--alert);
+  }
+  .hormone-btn.dir-up { border-color: var(--stim); background: var(--stim-soft); color: #6b4d1a; }
+  .hormone-btn.dir-down { border-color: var(--ink-soft); background: #E4E9EA; color: var(--ink-soft); }
+  .hormone-btn.dir-same { border-color: var(--line); background: var(--panel); color: var(--ink-soft); }
+
+  .fb-btn {
+    background: var(--panel);
+    border: 1.5px solid var(--line);
+    color: var(--ink-faint);
+    font-size: 0.78rem;
+    font-weight: 600;
+    flex-direction: column;
+    gap: 2px;
+    line-height: 1.2;
+  }
+  .fb-btn.set-inhibits { border-color: var(--inhib); background: var(--inhib-soft); color: var(--inhib); }
+  .fb-btn.set-stimulates { border-color: var(--stim); background: var(--stim-soft); color: #6b4d1a; }
+
+  @media (prefers-reduced-motion: no-preference) {
+    .anim-pulse { animation: pulse 0.55s ease-out; }
+  }
+  @keyframes pulse {
+    0% { transform: scale(1); }
+    45% { transform: scale(1.1); }
+    100% { transform: scale(1); }
+  }
+  @media (prefers-reduced-motion: no-preference) {
+    .anim-shake { animation: shake 0.4s ease; }
+  }
+  @keyframes shake {
+    0%, 100% { transform: translateX(0); }
+    25% { transform: translateX(-4px); }
+    75% { transform: translateX(4px); }
+  }
+
+  text.arrow-label {
+    font-family: var(--sans);
+    font-size: 12px;
+    fill: var(--ink-faint);
+  }
+  text.tissue-label {
+    font-family: var(--serif);
+    font-size: 15px;
+    fill: var(--ink-soft);
+  }
+  text.tissue-sub {
+    font-family: var(--sans);
+    font-size: 10.5px;
+    fill: var(--ink-faint);
+  }
+  rect.tissue-box {
+    fill: none;
+    stroke: var(--line);
+    stroke-width: 1.5;
+    stroke-dasharray: 4 3;
+    rx: 4;
+  }
+
+  /* ---------- Side panel ---------- */
+  .panel {
+    background: var(--panel);
+    border: 1px solid var(--line);
+    border-radius: 4px;
+    padding: 20px;
+    position: sticky;
+    top: 20px;
+  }
+
+  .panel h2 {
+    font-family: var(--serif);
+    font-weight: 500;
+    font-size: 1.15rem;
+    margin: 0 0 6px;
+  }
+
+  .panel .helper {
+    font-size: 0.88rem;
+    color: var(--ink-soft);
+    margin-bottom: 16px;
+  }
+
+  .status-line {
+    font-size: 0.85rem;
+    color: var(--ink);
+    background: var(--bg);
+    border: 1px solid var(--line);
+    border-radius: 3px;
+    padding: 8px 10px;
+    margin-bottom: 14px;
+    min-height: 18px;
+  }
+
+  .tray {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-bottom: 16px;
+  }
+
+  .tray-chip {
+    font-family: var(--sans);
+    font-size: 0.86rem;
+    padding: 10px 12px;
+    border-radius: 3px;
+    border: 1.5px solid var(--ink-soft);
+    background: var(--panel);
+    color: var(--ink);
+    cursor: pointer;
+  }
+  .tray-chip:hover { border-color: var(--ink); }
+  .tray-chip.selected {
+    background: var(--ink);
+    color: #fff;
+    border-color: var(--ink);
+  }
+  .tray-chip:focus-visible { outline: 2px solid var(--ink); outline-offset: 2px; }
+
+  .hint-btn, .primary-btn, .ghost-btn {
+    font-family: var(--sans);
+    font-size: 0.88rem;
+    padding: 11px 14px;
+    border-radius: 3px;
+    cursor: pointer;
+    width: 100%;
+    text-align: center;
+    margin-top: 6px;
+  }
+  .hint-btn {
+    background: var(--panel);
+    border: 1.5px solid var(--line);
+    color: var(--ink-soft);
+  }
+  .hint-btn:hover { border-color: var(--ink-soft); }
+  .primary-btn {
+    background: var(--ink);
+    border: 1.5px solid var(--ink);
+    color: #fff;
+    font-weight: 600;
+  }
+  .primary-btn:hover { background: #0f151c; }
+  .primary-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+  .ghost-btn {
+    background: transparent;
+    border: 1.5px solid var(--line);
+    color: var(--ink);
+  }
+
+  .hint-text {
+    font-size: 0.85rem;
+    color: var(--ink-soft);
+    background: var(--bg);
+    border-left: 3px solid var(--ink-soft);
+    padding: 10px 12px;
+    margin-top: 10px;
+    display: none;
+  }
+  .hint-text.show { display: block; }
+
+  .divider { border: none; border-top: 1px solid var(--line); margin: 18px 0; }
+
+  /* Scenario mode */
+  .scenario-list { display: flex; flex-direction: column; gap: 8px; margin-bottom: 4px; }
+  .scenario-card {
+    text-align: left;
+    padding: 12px 14px;
+    border: 1.5px solid var(--line);
+    border-radius: 4px;
+    background: var(--panel);
+    cursor: pointer;
+    font-family: var(--sans);
+  }
+  .scenario-card:hover { border-color: var(--ink-soft); }
+  .scenario-card.active { border-color: var(--ink); background: var(--bg); }
+  .scenario-card .name { font-weight: 600; font-size: 0.92rem; color: var(--ink); }
+  .scenario-card .type { font-size: 0.76rem; color: var(--ink-faint); margin-top: 2px; }
+  .scenario-card .check { color: var(--correct); font-size: 0.8rem; margin-left: 6px; }
+
+  .vignette {
+    font-size: 0.9rem;
+    font-style: italic;
+    color: var(--ink-soft);
+    border-left: 3px solid var(--stim);
+    padding: 8px 12px;
+    margin: 14px 0;
+  }
+
+  .predict-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    margin-bottom: 10px;
+  }
+  .predict-row .label { font-size: 0.86rem; font-weight: 600; width: 74px; flex-shrink: 0; }
+  .segmented { display: flex; border: 1.5px solid var(--line); border-radius: 3px; overflow: hidden; flex: 1; }
+  .segmented button {
+    flex: 1;
+    background: var(--panel);
+    border: none;
+    border-right: 1px solid var(--line);
+    padding: 10px 0;
+    cursor: pointer;
+    font-size: 0.95rem;
+    color: var(--ink-soft);
+  }
+  .segmented button:last-child { border-right: none; }
+  .segmented button[aria-pressed="true"] { background: var(--ink); color: #fff; }
+  .segmented button:focus-visible { outline: 2px solid var(--ink); outline-offset: -2px; }
+
+  .result-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.86rem;
+    padding: 6px 0;
+    border-bottom: 1px solid var(--line);
+  }
+  .result-row:last-of-type { border-bottom: none; }
+  .result-row .label { width: 74px; font-weight: 600; flex-shrink: 0; }
+  .result-row .mark.correct { color: var(--correct); font-weight: 700; }
+  .result-row .mark.incorrect { color: var(--alert); font-weight: 700; }
+
+  .explanation {
+    font-size: 0.88rem;
+    color: var(--ink);
+    background: var(--bg);
+    border-radius: 3px;
+    padding: 12px;
+    margin-top: 12px;
+  }
+
+  .done-screen h2 { margin-bottom: 10px; }
+  .done-screen p { font-size: 0.92rem; color: var(--ink-soft); }
+
+  .sr-only {
+    position: absolute; width: 1px; height: 1px;
+    overflow: hidden; clip: rect(0,0,0,0); white-space: nowrap;
+  }
+
+  .screen { display: none; }
+  .screen.active { display: block; }
+
+  #screen-menu .wrap { max-width: 980px; padding-top: 48px; }
+  #screen-menu header {
+    border-bottom: 1px solid var(--line);
+    padding-bottom: 22px;
+    margin-bottom: 32px;
+  }
+  #screen-menu header h1 {
+    font-family: var(--serif);
+    font-weight: 500;
+    font-size: 2rem;
+    margin: 0 0 10px;
+    letter-spacing: 0.2px;
+  }
+  #screen-menu header p {
+    font-size: 1rem;
+    color: var(--ink-soft);
+    max-width: 62ch;
+    margin: 0;
+  }
+  #screen-menu .grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 18px;
+  }
+  @media (max-width: 680px) {
+    #screen-menu .grid { grid-template-columns: 1fr; }
+  }
+  #screen-menu .card {
+    background: var(--panel);
+    border: 1px solid var(--line);
+    border-radius: 4px;
+    padding: 22px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    text-decoration: none;
+    color: inherit;
+    font-family: var(--sans);
+    text-align: left;
+    width: 100%;
+    cursor: pointer;
+    transition: border-color 0.15s ease;
+  }
+  #screen-menu .card:hover { border-color: var(--ink-soft); }
+  #screen-menu .card:focus-visible { outline: 2px solid var(--ink); outline-offset: 3px; }
+  #screen-menu .card .tag {
+    font-size: 0.76rem;
+    font-weight: 700;
+    color: var(--stim);
+    letter-spacing: 0.3px;
+  }
+  #screen-menu .card h2 {
+    font-family: var(--serif);
+    font-weight: 500;
+    font-size: 1.3rem;
+    margin: 0;
+  }
+  #screen-menu .card .hook {
+    font-size: 0.9rem;
+    color: var(--ink-soft);
+    flex-grow: 1;
+  }
+  #screen-menu .card .start {
+    font-size: 0.86rem;
+    font-weight: 600;
+    color: var(--ink);
+    margin-top: 6px;
+  }
+  #screen-menu footer {
+    margin-top: 36px;
+    font-size: 0.82rem;
+    color: var(--ink-faint);
+  }
+
+  /* ---- Guided tour (HPT only) ---- */
+  .tour-btn {
+    font-family: var(--sans);
+    font-size: 0.82rem;
+    padding: 10px 14px;
+    margin-top: 8px;
+    border-radius: 3px;
+    border: 1.5px solid var(--line);
+    background: var(--panel);
+    color: var(--ink-soft);
+    cursor: pointer;
+  }
+  .tour-btn:hover { border-color: var(--ink-soft); color: var(--ink); }
+  .tour-btn:focus-visible { outline: 2px solid var(--ink); outline-offset: 2px; }
+
+  .tour-highlight {
+    outline: 3px solid var(--stim) !important;
+    outline-offset: 3px;
+  }
+
+  .tour-tooltip {
+    position: fixed;
+    z-index: 2000;
+    background: var(--panel);
+    border: 1.5px solid var(--ink);
+    border-radius: 4px;
+    padding: 16px;
+    width: 280px;
+    max-width: calc(100vw - 24px);
+    box-shadow: 0 6px 22px rgba(27,36,48,0.22);
+    font-family: var(--sans);
+  }
+  .tour-tooltip.centered {
+    top: 40%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+  }
+  .tour-tooltip h3 {
+    font-family: var(--serif);
+    font-weight: 500;
+    font-size: 1.05rem;
+    margin: 0 0 8px;
+  }
+  .tour-tooltip p {
+    font-size: 0.88rem;
+    color: var(--ink-soft);
+    margin: 0;
+  }
+  .tour-footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-top: 14px;
+    gap: 10px;
+  }
+  .tour-count {
+    font-size: 0.76rem;
+    color: var(--ink-faint);
+    flex-shrink: 0;
+  }
+  .tour-actions { display: flex; gap: 8px; }
+  .tour-skip {
+    font-family: var(--sans);
+    font-size: 0.82rem;
+    padding: 6px 8px;
+    border-radius: 3px;
+    background: transparent;
+    border: none;
+    color: var(--ink-faint);
+    text-decoration: underline;
+    cursor: pointer;
+  }
+  .tour-next {
+    font-family: var(--sans);
+    font-size: 0.82rem;
+    font-weight: 600;
+    padding: 6px 14px;
+    border-radius: 3px;
+    background: var(--ink);
+    border: 1.5px solid var(--ink);
+    color: #fff;
+    cursor: pointer;
+  }
+
+  /* ---- Review questions (basic physiology) ---- */
+  .review-question {
+    font-size: 0.95rem;
+    font-weight: 600;
+    color: var(--ink);
+    margin: 10px 0 14px;
+  }
+  .review-options {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin-bottom: 14px;
+  }
+  .review-option {
+    text-align: left;
+    font-family: var(--sans);
+    font-size: 0.88rem;
+    padding: 12px 12px;
+    border-radius: 3px;
+    border: 1.5px solid var(--line);
+    background: var(--panel);
+    color: var(--ink);
+    cursor: pointer;
+  }
+  .review-option:hover:not(:disabled) { border-color: var(--ink-soft); }
+  .review-option:disabled { cursor: default; }
+  .review-option:focus-visible { outline: 2px solid var(--ink); outline-offset: 2px; }
+  .review-option.correct {
+    border-color: var(--correct);
+    background: var(--correct-soft);
+    color: var(--ink);
+    font-weight: 600;
+  }
+  .review-option.incorrect {
+    border-color: var(--alert);
+    background: var(--alert-soft);
+    color: var(--alert);
+  }
+
+  /* ---- Persistent "back to menu" link (all axes) ---- */
+  .menu-link-row {
+    margin-bottom: 14px;
+  }
+  .menu-link-btn {
+    font-family: var(--sans);
+    font-size: 0.85rem;
+    color: var(--ink-soft);
+    background: none;
+    border: none;
+    padding: 12px 10px;
+    margin-left: -10px;
+    cursor: pointer;
+  }
+  .menu-link-btn:hover { color: var(--ink); text-decoration: underline; }
+  .menu-link-btn:focus-visible { outline: 2px solid var(--ink); outline-offset: 2px; }
+
+</style>
+</head>
+<body>
+  <div class="screen active" id="screen-menu">
+    <div class="wrap">
+      <header>
+        <h1>Endocrine Feedback Loops</h1>
+        <p>Choose an axis below. For each one, you'll rebuild the loop from its parts, then run a few clinical scenarios to see how it responds under pressure — from a failing gland, a failing control center, or a medication.</p>
+      </header>
+      <div class="grid">
+    <button class="card" type="button" data-axis="hpt">
+      <span class="tag">HPT</span>
+      <h2>Thyroid Axis</h2>
+      <p class="hook">What happens when the thyroid fails on its own versus when the pituitary fails?</p>
+      <span class="start">Start &rarr;</span>
+    </button>
+    <button class="card" type="button" data-axis="hpg">
+      <span class="tag">HPG</span>
+      <h2>Gonadal Axis</h2>
+      <p class="hook">Why does a hormonal contraceptive suppress the same axis that shuts down under chronic stress?</p>
+      <span class="start">Start &rarr;</span>
+    </button>
+    <button class="card" type="button" data-axis="hpa">
+      <span class="tag">HPA</span>
+      <h2>Adrenal Axis</h2>
+      <p class="hook">Addison's and Cushing's disease both raise ACTH — so why does cortisol move in opposite directions?</p>
+      <span class="start">Start &rarr;</span>
+    </button>
+    <button class="card" type="button" data-axis="ras">
+      <span class="tag">RAS</span>
+      <h2>Renin–Angiotensin System</h2>
+      <p class="hook">Why does an ACE inhibitor raise renin even as it lowers blood pressure?</p>
+      <span class="start">Start &rarr;</span>
+    </button>
+      </div>
+      <footer>Work through these in any order. Progress on an activity is kept in memory while this tab is open, and resets the next time the page is loaded.</footer>
+    </div>
+  </div>
+
+  <div class="screen" id="screen-hpt">
+    <div class="wrap">
+
+      <div class="menu-link-row">
+        <button class="menu-link-btn" type="button" data-goto-menu="true">&larr; Back to menu</button>
+      </div>
+
+      <header class="top">
+        <div>
+          <h1>Hypothalamic–Pituitary–Thyroid Axis</h1>
+          <div class="subtitle">HPT · construct the loop, then see it under pressure</div>
+          <button class="tour-btn" type="button" id="hpt-tour-btn">Take the tour</button>
+        </div>
+        <div class="progress" id="hpt-progress" aria-hidden="true">
+          <span class="seg" data-seg="build">Build</span>
+          <span class="seg" data-seg="review">Review</span>
+          <span class="seg" data-seg="s0">Scenario 1</span>
+          <span class="seg" data-seg="s1">Scenario 2</span>
+          <span class="seg" data-seg="s2">Scenario 3</span>
+        </div>
+      </header>
+
+      <p class="intro">Work through this on your own pace. First rebuild the axis from its parts, then run three clinical
+  scenarios to see how the loop responds when a step breaks — or when a medication steps in.</p>
+
+      <div class="stage">
+        <div class="diagram-card">
+          <svg id="hpt-diagram" class="diagram-svg" viewBox="0 0 700 545" xmlns="http://www.w3.org/2000/svg" role="img"
+           aria-label="HPT axis diagram: hypothalamus, anterior pituitary, thyroid gland, and peripheral tissues, connected by forward signaling arrows and two feedback arrows.">
+        <defs>
+          <marker id="hpt-mk-stim" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+            <path d="M0,0 L10,5 L0,10 z" fill="#B8862B"></path>
+          </marker>
+          <marker id="hpt-mk-neutral" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+            <circle cx="5" cy="5" r="4" fill="#C9D1D3"></circle>
+          </marker>
+          <marker id="hpt-mk-inhib" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+            <line x1="8" y1="1" x2="8" y2="9" stroke="#8C2F39" stroke-width="2.4"></line>
+          </marker>
+        </defs>
+
+        <!-- forward arrows (fixed: stimulatory) -->
+        <line x1="340" y1="90" x2="340" y2="176" stroke="#B8862B" stroke-width="2" marker-end="url(#hpt-mk-stim)"></line>
+        <line x1="340" y1="250" x2="340" y2="336" stroke="#B8862B" stroke-width="2" marker-end="url(#hpt-mk-stim)"></line>
+        <line x1="340" y1="410" x2="340" y2="456" stroke="#B8862B" stroke-width="2" marker-end="url(#hpt-mk-stim)"></line>
+
+        <!-- feedback arrows (togglable) -->
+        <path id="hpt-fb1-path" d="M230,375 C 70,375 70,55 230,55" fill="none" stroke="#C9D1D3" stroke-width="2"
+              stroke-dasharray="5 4" marker-end="url(#hpt-mk-neutral)"></path>
+        <path id="hpt-fb2-path" d="M230,375 C 150,375 150,215 230,215" fill="none" stroke="#C9D1D3" stroke-width="2"
+              stroke-dasharray="5 4" marker-end="url(#hpt-mk-neutral)"></path>
+
+        <!-- Peripheral tissues (context node, not a drop target) -->
+        <rect class="tissue-box" x="250" y="460" width="180" height="52"></rect>
+        <text class="tissue-label" x="340" y="481" text-anchor="middle">Peripheral tissues</text>
+        <text class="tissue-sub" x="340" y="497" text-anchor="middle">metabolic rate · growth · heat production</text>
+
+        <!-- Gland slots -->
+        <foreignObject x="230" y="20" width="220" height="70">
+          <button xmlns="http://www.w3.org/1999/xhtml" class="node-btn" id="hpt-slot-hypothalamus" data-slot="hypothalamus" data-kind="gland">?</button>
+        </foreignObject>
+        <foreignObject x="230" y="180" width="220" height="70">
+          <button xmlns="http://www.w3.org/1999/xhtml" class="node-btn" id="hpt-slot-pituitary" data-slot="pituitary" data-kind="gland">?</button>
+        </foreignObject>
+        <foreignObject x="230" y="340" width="220" height="70">
+          <button xmlns="http://www.w3.org/1999/xhtml" class="node-btn" id="hpt-slot-thyroid" data-slot="thyroid" data-kind="gland">?</button>
+        </foreignObject>
+
+        <!-- Hormone slots -->
+        <foreignObject x="460" y="116" width="150" height="34">
+          <button xmlns="http://www.w3.org/1999/xhtml" class="hormone-btn" id="hpt-slot-trh" data-slot="trh" data-kind="hormone">?</button>
+        </foreignObject>
+        <foreignObject x="460" y="276" width="150" height="34">
+          <button xmlns="http://www.w3.org/1999/xhtml" class="hormone-btn" id="hpt-slot-tsh" data-slot="tsh" data-kind="hormone">?</button>
+        </foreignObject>
+        <foreignObject x="460" y="416" width="150" height="34">
+          <button xmlns="http://www.w3.org/1999/xhtml" class="hormone-btn" id="hpt-slot-t4" data-slot="t4" data-kind="hormone">?</button>
+        </foreignObject>
+
+        <!-- Feedback toggles -->
+        <foreignObject x="15" y="196" width="110" height="38">
+          <button xmlns="http://www.w3.org/1999/xhtml" class="fb-btn" id="hpt-fb-fb1" data-fb="fb1">type?</button>
+        </foreignObject>
+        <foreignObject x="95" y="278" width="110" height="38">
+          <button xmlns="http://www.w3.org/1999/xhtml" class="fb-btn" id="hpt-fb-fb2" data-fb="fb2">type?</button>
+        </foreignObject>
+      </svg>
+
+          <div class="legend">
+            <span class="item"><span class="box-sample"></span> gland / organ</span>
+            <span class="item"><span class="box-sample tissue"></span> effect site</span>
+            <span class="item"><span class="swatch stim"></span> stimulates</span>
+            <span class="item"><span class="swatch inhib"></span> inhibits (feedback)</span>
+          </div>
+        </div>
+
+        <div class="panel" id="hpt-panel"></div>
+      </div>
+
+      <div class="sr-only" id="hpt-live-region" aria-live="polite"></div>
+    </div>
+  </div>
+
+  <div class="screen" id="screen-hpg">
+    <div class="wrap">
+
+      <div class="menu-link-row">
+        <button class="menu-link-btn" type="button" data-goto-menu="true">&larr; Back to menu</button>
+      </div>
+
+      <header class="top">
+        <div>
+          <h1>Hypothalamic–Pituitary–Gonadal Axis</h1>
+          <div class="subtitle">HPG · construct the loop, then see it under pressure</div>
+        </div>
+        <div class="progress" id="hpg-progress" aria-hidden="true">
+          <span class="seg" data-seg="build">Build</span>
+          <span class="seg" data-seg="review">Review</span>
+          <span class="seg" data-seg="s0">Scenario 1</span>
+          <span class="seg" data-seg="s1">Scenario 2</span>
+          <span class="seg" data-seg="s2">Scenario 3</span>
+        </div>
+      </header>
+
+      <p class="intro">Work through this on your own pace. First rebuild the axis from its parts, then run three clinical
+  scenarios to see how the loop responds when a step breaks — or when a medication steps in.</p>
+
+      <div class="stage">
+        <div class="diagram-card">
+          <svg id="hpg-diagram" class="diagram-svg" viewBox="0 0 700 545" xmlns="http://www.w3.org/2000/svg" role="img"
+           aria-label="HPG axis diagram: hypothalamus, anterior pituitary, gonads, and reproductive tissues, connected by forward signaling arrows and two feedback arrows.">
+        <defs>
+          <marker id="hpg-mk-stim" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+            <path d="M0,0 L10,5 L0,10 z" fill="#B8862B"></path>
+          </marker>
+          <marker id="hpg-mk-neutral" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+            <circle cx="5" cy="5" r="4" fill="#C9D1D3"></circle>
+          </marker>
+          <marker id="hpg-mk-inhib" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+            <line x1="8" y1="1" x2="8" y2="9" stroke="#8C2F39" stroke-width="2.4"></line>
+          </marker>
+        </defs>
+
+        <!-- forward arrows (fixed: stimulatory) -->
+        <line x1="340" y1="90" x2="340" y2="176" stroke="#B8862B" stroke-width="2" marker-end="url(#hpg-mk-stim)"></line>
+        <line x1="340" y1="250" x2="340" y2="336" stroke="#B8862B" stroke-width="2" marker-end="url(#hpg-mk-stim)"></line>
+        <line x1="340" y1="410" x2="340" y2="456" stroke="#B8862B" stroke-width="2" marker-end="url(#hpg-mk-stim)"></line>
+
+        <!-- feedback arrows (togglable) -->
+        <path id="hpg-fb1-path" d="M230,375 C 70,375 70,55 230,55" fill="none" stroke="#C9D1D3" stroke-width="2"
+              stroke-dasharray="5 4" marker-end="url(#hpg-mk-neutral)"></path>
+        <path id="hpg-fb2-path" d="M230,375 C 150,375 150,215 230,215" fill="none" stroke="#C9D1D3" stroke-width="2"
+              stroke-dasharray="5 4" marker-end="url(#hpg-mk-neutral)"></path>
+
+        <!-- Peripheral tissues (context node, not a drop target) -->
+        <rect class="tissue-box" x="250" y="460" width="180" height="52"></rect>
+        <text class="tissue-label" x="340" y="481" text-anchor="middle">Reproductive tissues</text>
+        <text class="tissue-sub" x="340" y="497" text-anchor="middle">gametogenesis · secondary sex characteristics</text>
+
+        <!-- Gland slots -->
+        <foreignObject x="230" y="20" width="220" height="70">
+          <button xmlns="http://www.w3.org/1999/xhtml" class="node-btn" id="hpg-slot-hypothalamus" data-slot="hypothalamus" data-kind="gland">?</button>
+        </foreignObject>
+        <foreignObject x="230" y="180" width="220" height="70">
+          <button xmlns="http://www.w3.org/1999/xhtml" class="node-btn" id="hpg-slot-pituitary" data-slot="pituitary" data-kind="gland">?</button>
+        </foreignObject>
+        <foreignObject x="230" y="340" width="220" height="70">
+          <button xmlns="http://www.w3.org/1999/xhtml" class="node-btn" id="hpg-slot-gonad" data-slot="gonad" data-kind="gland">?</button>
+        </foreignObject>
+
+        <!-- Hormone slots -->
+        <foreignObject x="460" y="116" width="150" height="34">
+          <button xmlns="http://www.w3.org/1999/xhtml" class="hormone-btn" id="hpg-slot-gnrh" data-slot="gnrh" data-kind="hormone">?</button>
+        </foreignObject>
+        <foreignObject x="460" y="276" width="150" height="34">
+          <button xmlns="http://www.w3.org/1999/xhtml" class="hormone-btn" id="hpg-slot-lhfsh" data-slot="lhfsh" data-kind="hormone">?</button>
+        </foreignObject>
+        <foreignObject x="460" y="416" width="150" height="34">
+          <button xmlns="http://www.w3.org/1999/xhtml" class="hormone-btn" id="hpg-slot-sexsteroids" data-slot="sexsteroids" data-kind="hormone">?</button>
+        </foreignObject>
+
+        <!-- Feedback toggles -->
+        <foreignObject x="15" y="196" width="110" height="38">
+          <button xmlns="http://www.w3.org/1999/xhtml" class="fb-btn" id="hpg-fb-fb1" data-fb="fb1">type?</button>
+        </foreignObject>
+        <foreignObject x="95" y="278" width="110" height="38">
+          <button xmlns="http://www.w3.org/1999/xhtml" class="fb-btn" id="hpg-fb-fb2" data-fb="fb2">type?</button>
+        </foreignObject>
+      </svg>
+
+          <div class="legend">
+            <span class="item"><span class="box-sample"></span> gland / organ</span>
+            <span class="item"><span class="box-sample tissue"></span> effect site</span>
+            <span class="item"><span class="swatch stim"></span> stimulates</span>
+            <span class="item"><span class="swatch inhib"></span> inhibits (feedback)</span>
+          </div>
+        </div>
+
+        <div class="panel" id="hpg-panel"></div>
+      </div>
+
+      <div class="sr-only" id="hpg-live-region" aria-live="polite"></div>
+    </div>
+  </div>
+
+  <div class="screen" id="screen-hpa">
+    <div class="wrap">
+
+      <div class="menu-link-row">
+        <button class="menu-link-btn" type="button" data-goto-menu="true">&larr; Back to menu</button>
+      </div>
+
+      <header class="top">
+        <div>
+          <h1>Hypothalamic–Pituitary–Adrenal Axis</h1>
+          <div class="subtitle">HPA · construct the loop, then see it under pressure</div>
+        </div>
+        <div class="progress" id="hpa-progress" aria-hidden="true">
+          <span class="seg" data-seg="build">Build</span>
+          <span class="seg" data-seg="review">Review</span>
+          <span class="seg" data-seg="s0">Scenario 1</span>
+          <span class="seg" data-seg="s1">Scenario 2</span>
+          <span class="seg" data-seg="s2">Scenario 3</span>
+        </div>
+      </header>
+
+      <p class="intro">Work through this on your own pace. First rebuild the axis from its parts, then run three clinical
+  scenarios to see how the loop responds when a step breaks — or when a medication steps in.</p>
+
+      <div class="stage">
+        <div class="diagram-card">
+          <svg id="hpa-diagram" class="diagram-svg" viewBox="0 0 700 545" xmlns="http://www.w3.org/2000/svg" role="img"
+           aria-label="HPA axis diagram: hypothalamus, anterior pituitary, adrenal cortex, and target tissues, connected by forward signaling arrows and two feedback arrows.">
+        <defs>
+          <marker id="hpa-mk-stim" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+            <path d="M0,0 L10,5 L0,10 z" fill="#B8862B"></path>
+          </marker>
+          <marker id="hpa-mk-neutral" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+            <circle cx="5" cy="5" r="4" fill="#C9D1D3"></circle>
+          </marker>
+          <marker id="hpa-mk-inhib" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+            <line x1="8" y1="1" x2="8" y2="9" stroke="#8C2F39" stroke-width="2.4"></line>
+          </marker>
+        </defs>
+
+        <!-- forward arrows (fixed: stimulatory) -->
+        <line x1="340" y1="90" x2="340" y2="176" stroke="#B8862B" stroke-width="2" marker-end="url(#hpa-mk-stim)"></line>
+        <line x1="340" y1="250" x2="340" y2="336" stroke="#B8862B" stroke-width="2" marker-end="url(#hpa-mk-stim)"></line>
+        <line x1="340" y1="410" x2="340" y2="456" stroke="#B8862B" stroke-width="2" marker-end="url(#hpa-mk-stim)"></line>
+
+        <!-- feedback arrows (togglable) -->
+        <path id="hpa-fb1-path" d="M230,375 C 70,375 70,55 230,55" fill="none" stroke="#C9D1D3" stroke-width="2"
+              stroke-dasharray="5 4" marker-end="url(#hpa-mk-neutral)"></path>
+        <path id="hpa-fb2-path" d="M230,375 C 150,375 150,215 230,215" fill="none" stroke="#C9D1D3" stroke-width="2"
+              stroke-dasharray="5 4" marker-end="url(#hpa-mk-neutral)"></path>
+
+        <!-- Peripheral tissues (context node, not a drop target) -->
+        <rect class="tissue-box" x="250" y="460" width="180" height="52"></rect>
+        <text class="tissue-label" x="340" y="481" text-anchor="middle">Target tissues</text>
+        <text class="tissue-sub" x="340" y="497" text-anchor="middle">glucose mobilization · immune modulation · stress response</text>
+
+        <!-- Gland slots -->
+        <foreignObject x="230" y="20" width="220" height="70">
+          <button xmlns="http://www.w3.org/1999/xhtml" class="node-btn" id="hpa-slot-hypothalamus" data-slot="hypothalamus" data-kind="gland">?</button>
+        </foreignObject>
+        <foreignObject x="230" y="180" width="220" height="70">
+          <button xmlns="http://www.w3.org/1999/xhtml" class="node-btn" id="hpa-slot-pituitary" data-slot="pituitary" data-kind="gland">?</button>
+        </foreignObject>
+        <foreignObject x="230" y="340" width="220" height="70">
+          <button xmlns="http://www.w3.org/1999/xhtml" class="node-btn" id="hpa-slot-adrenal" data-slot="adrenal" data-kind="gland">?</button>
+        </foreignObject>
+
+        <!-- Hormone slots -->
+        <foreignObject x="460" y="116" width="150" height="34">
+          <button xmlns="http://www.w3.org/1999/xhtml" class="hormone-btn" id="hpa-slot-crh" data-slot="crh" data-kind="hormone">?</button>
+        </foreignObject>
+        <foreignObject x="460" y="276" width="150" height="34">
+          <button xmlns="http://www.w3.org/1999/xhtml" class="hormone-btn" id="hpa-slot-acth" data-slot="acth" data-kind="hormone">?</button>
+        </foreignObject>
+        <foreignObject x="460" y="416" width="150" height="34">
+          <button xmlns="http://www.w3.org/1999/xhtml" class="hormone-btn" id="hpa-slot-cortisol" data-slot="cortisol" data-kind="hormone">?</button>
+        </foreignObject>
+
+        <!-- Feedback toggles -->
+        <foreignObject x="15" y="196" width="110" height="38">
+          <button xmlns="http://www.w3.org/1999/xhtml" class="fb-btn" id="hpa-fb-fb1" data-fb="fb1">type?</button>
+        </foreignObject>
+        <foreignObject x="95" y="278" width="110" height="38">
+          <button xmlns="http://www.w3.org/1999/xhtml" class="fb-btn" id="hpa-fb-fb2" data-fb="fb2">type?</button>
+        </foreignObject>
+      </svg>
+
+          <div class="legend">
+            <span class="item"><span class="box-sample"></span> gland / organ</span>
+            <span class="item"><span class="box-sample tissue"></span> effect site</span>
+            <span class="item"><span class="swatch stim"></span> stimulates</span>
+            <span class="item"><span class="swatch inhib"></span> inhibits (feedback)</span>
+          </div>
+        </div>
+
+        <div class="panel" id="hpa-panel"></div>
+      </div>
+
+      <div class="sr-only" id="hpa-live-region" aria-live="polite"></div>
+    </div>
+  </div>
+
+  <div class="screen" id="screen-ras">
+    <div class="wrap">
+
+      <div class="menu-link-row">
+        <button class="menu-link-btn" type="button" data-goto-menu="true">&larr; Back to menu</button>
+      </div>
+
+      <header class="top">
+        <div>
+          <h1>Renin–Angiotensin System</h1>
+          <div class="subtitle">RAS · construct the cascade, then see it under pressure</div>
+        </div>
+        <div class="progress" id="ras-progress" aria-hidden="true">
+          <span class="seg" data-seg="build">Build</span>
+          <span class="seg" data-seg="review">Review</span>
+          <span class="seg" data-seg="s0">Scenario 1</span>
+          <span class="seg" data-seg="s1">Scenario 2</span>
+          <span class="seg" data-seg="s2">Scenario 3</span>
+        </div>
+      </header>
+
+      <p class="intro">Work through this on your own pace. First rebuild the axis from its parts, then run three clinical
+  scenarios to see how the loop responds when a step breaks — or when a medication steps in.</p>
+
+      <div class="stage">
+        <div class="diagram-card">
+          <svg id="ras-diagram" class="diagram-svg" viewBox="0 0 700 632" xmlns="http://www.w3.org/2000/svg" role="img"
+           aria-label="RAS diagram: kidney, liver, lung, and adrenal cortex connected by a renin-angiotensin-aldosterone cascade, with a single feedback arrow back to the kidney.">
+        <defs>
+          <marker id="ras-mk-stim" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+            <path d="M0,0 L10,5 L0,10 z" fill="#B8862B"></path>
+          </marker>
+          <marker id="ras-mk-neutral" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+            <circle cx="5" cy="5" r="4" fill="#C9D1D3"></circle>
+          </marker>
+          <marker id="ras-mk-inhib" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+            <line x1="8" y1="1" x2="8" y2="9" stroke="#8C2F39" stroke-width="2.4"></line>
+          </marker>
+        </defs>
+
+        <!-- forward arrows (fixed: cascade steps) -->
+        <line x1="340" y1="84" x2="340" y2="158" stroke="#B8862B" stroke-width="2" marker-end="url(#ras-mk-stim)"></line>
+        <line x1="340" y1="224" x2="340" y2="298" stroke="#B8862B" stroke-width="2" marker-end="url(#ras-mk-stim)"></line>
+        <line x1="340" y1="364" x2="340" y2="438" stroke="#B8862B" stroke-width="2" marker-end="url(#ras-mk-stim)"></line>
+        <line x1="340" y1="504" x2="340" y2="554" stroke="#B8862B" stroke-width="2" marker-end="url(#ras-mk-stim)"></line>
+
+        <!-- feedback arrow (togglable, single: RAS feeds back to the kidney only) -->
+        <path id="ras-fb1-path" d="M230,472 C 70,472 70,52 230,52" fill="none" stroke="#C9D1D3" stroke-width="2"
+              stroke-dasharray="5 4" marker-end="url(#ras-mk-neutral)"></path>
+
+        <!-- Effect site (context node, not a drop target) -->
+        <rect class="tissue-box" x="240" y="556" width="200" height="56"></rect>
+        <text class="tissue-label" x="340" y="580" text-anchor="middle">Vasculature &amp; blood volume</text>
+        <text class="tissue-sub" x="340" y="597" text-anchor="middle">vasoconstriction &#183; Na&#8314; / water retention &#183; blood pressure</text>
+
+        <!-- Organ slots -->
+        <foreignObject x="230" y="20" width="220" height="64">
+          <button xmlns="http://www.w3.org/1999/xhtml" class="node-btn" id="ras-slot-kidney" data-slot="kidney" data-kind="gland">?</button>
+        </foreignObject>
+        <foreignObject x="230" y="160" width="220" height="64">
+          <button xmlns="http://www.w3.org/1999/xhtml" class="node-btn" id="ras-slot-liver" data-slot="liver" data-kind="gland">?</button>
+        </foreignObject>
+        <foreignObject x="230" y="300" width="220" height="64">
+          <button xmlns="http://www.w3.org/1999/xhtml" class="node-btn" id="ras-slot-lung" data-slot="lung" data-kind="gland">?</button>
+        </foreignObject>
+        <foreignObject x="230" y="440" width="220" height="64">
+          <button xmlns="http://www.w3.org/1999/xhtml" class="node-btn" id="ras-slot-adrenal" data-slot="adrenal" data-kind="gland">?</button>
+        </foreignObject>
+
+        <!-- Hormone / molecule slots -->
+        <foreignObject x="450" y="105" width="180" height="34">
+          <button xmlns="http://www.w3.org/1999/xhtml" class="hormone-btn" id="ras-slot-renin" data-slot="renin" data-kind="hormone">?</button>
+        </foreignObject>
+        <foreignObject x="450" y="245" width="180" height="34">
+          <button xmlns="http://www.w3.org/1999/xhtml" class="hormone-btn" id="ras-slot-angiotensin1" data-slot="angiotensin1" data-kind="hormone">?</button>
+        </foreignObject>
+        <foreignObject x="450" y="385" width="180" height="34">
+          <button xmlns="http://www.w3.org/1999/xhtml" class="hormone-btn" id="ras-slot-angiotensin2" data-slot="angiotensin2" data-kind="hormone">?</button>
+        </foreignObject>
+        <foreignObject x="450" y="513" width="180" height="34">
+          <button xmlns="http://www.w3.org/1999/xhtml" class="hormone-btn" id="ras-slot-aldosterone" data-slot="aldosterone" data-kind="hormone">?</button>
+        </foreignObject>
+
+        <!-- Feedback toggle (single) -->
+        <foreignObject x="8" y="243" width="124" height="38">
+          <button xmlns="http://www.w3.org/1999/xhtml" class="fb-btn" id="ras-fb-fb1" data-fb="fb1">type?</button>
+        </foreignObject>
+      </svg>
+
+          <div class="legend">
+            <span class="item"><span class="box-sample"></span> gland / organ</span>
+            <span class="item"><span class="box-sample tissue"></span> effect site</span>
+            <span class="item"><span class="swatch stim"></span> stimulates</span>
+            <span class="item"><span class="swatch inhib"></span> inhibits (feedback)</span>
+          </div>
+        </div>
+
+        <div class="panel" id="ras-panel"></div>
+      </div>
+
+      <div class="sr-only" id="ras-live-region" aria-live="polite"></div>
+    </div>
+  </div>
+
+<script>
+(function () {
+  "use strict";
+  var HPT_CONFIG = {
+    glands: [
+      { id: "hypothalamus", label: "Hypothalamus" },
+      { id: "pituitary", label: "Anterior Pituitary" },
+      { id: "thyroid", label: "Thyroid Gland" }
+    ],
+    hormones: [
+      { id: "trh", label: "TRH" },
+      { id: "tsh", label: "TSH" },
+      { id: "t4", label: "T3 / T4" }
+    ],
+    feedback: [
+      { id: "fb1", label: "Thyroid → Hypothalamus" },
+      { id: "fb2", label: "Thyroid → Pituitary" }
+    ],
+    hints: [
+      "Start with what starts the axis: which structure at the top of the diagram fires the first signal?",
+      "The hypothalamus releases a small peptide toward the pituitary — its name is a releasing hormone, abbreviated TRH.",
+      "Full pathway: Hypothalamus (TRH) \u2192 Anterior Pituitary (TSH) \u2192 Thyroid Gland (T3/T4). Both dashed arrows carry inhibits (\u22a3) back up the chain — that's the negative feedback."
+    ],
+    scenarios: [
+      {
+        id: "hashimotos",
+        name: "Hashimoto's thyroiditis",
+        type: "Primary gland failure",
+        vignette: "Autoimmune inflammation is slowly destroying thyroid tissue, so the gland can no longer respond normally to TSH.",
+        changes: { trh: "up", tsh: "up", t4: "down" },
+        explanation: "A failing thyroid can't produce T4 no matter how hard the axis pushes. With less T4 to enforce the usual inhibition, TRH and TSH both climb \u2014 the classic primary-gland pattern: low hormone at the bottom, high signal at the top."
+      },
+      {
+        id: "central",
+        name: "Central hypothyroidism",
+        type: "Central (pituitary) failure",
+        vignette: "A pituitary tumor has damaged the thyrotroph cells that normally secrete TSH.",
+        changes: { trh: "up", tsh: "down", t4: "down" },
+        explanation: "The pituitary itself can't respond, so TSH stays low even as T4 falls \u2014 the opposite of what you'd expect if the thyroid alone were the problem. TRH may climb as the hypothalamus senses low T4, but the damaged pituitary can't act on it."
+      },
+      {
+        id: "levothyroxine",
+        name: "Levothyroxine therapy",
+        type: "Medication",
+        vignette: "A patient begins a daily levothyroxine (synthetic T4) tablet.",
+        changes: { trh: "down", tsh: "down", t4: "up" },
+        explanation: "Exogenous T4 acts on the axis exactly like the gland's own hormone would \u2014 it suppresses TRH and TSH through the same negative feedback. That's why TSH, not T4 alone, is the usual lab value for checking whether a dose is right."
+      }
+    ]
+  };
+  var HPG_CONFIG = {
+    glands: [
+      { id: "hypothalamus", label: "Hypothalamus" },
+      { id: "pituitary", label: "Anterior Pituitary" },
+      { id: "gonad", label: "Gonads" }
+    ],
+    hormones: [
+      { id: "gnrh", label: "GnRH" },
+      { id: "lhfsh", label: "LH / FSH" },
+      { id: "sexsteroids", label: "Sex Steroids" }
+    ],
+    feedback: [
+      { id: "fb1", label: "Gonads → Hypothalamus" },
+      { id: "fb2", label: "Gonads → Pituitary" }
+    ],
+    hints: [
+      "Start with what starts the axis: which structure at the top of the diagram fires the first signal?",
+      "The hypothalamus releases a pulsatile peptide toward the pituitary — its name is a releasing hormone, abbreviated GnRH.",
+      "Full pathway: Hypothalamus (GnRH) → Anterior Pituitary (LH/FSH) → Gonads (sex steroids). Both dashed arrows carry inhibits (⊣) back up the chain — that's the negative feedback."
+    ],
+    scenarios: [
+      {
+        id: "primary_failure",
+        name: "Primary gonadal failure",
+        type: "Primary gland failure",
+        vignette: "The gonads themselves are no longer producing sex steroids in response to LH and FSH — as happens, for example, with menopause or primary testicular failure.",
+        changes: { gnrh: "up", lhfsh: "up", sexsteroids: "down" },
+        explanation: "With the gonads unable to respond, sex steroid output falls no matter how strongly the axis signals. Losing that upstream inhibition lets GnRH and LH/FSH both climb — the same primary-gland pattern you'd see in the thyroid or adrenal axis: low hormone at the bottom, high signal at the top."
+      },
+      {
+        id: "hypothalamic_suppression",
+        name: "Functional hypothalamic suppression",
+        type: "Central failure",
+        vignette: "Chronic low energy availability — for example, from very high training volume with inadequate intake — is suppressing pulsatile GnRH release.",
+        changes: { gnrh: "down", lhfsh: "down", sexsteroids: "down" },
+        explanation: "When the hypothalamus itself goes quiet, everything downstream falls together — GnRH, LH/FSH, and sex steroids all drop. This central pattern is the opposite of primary gonadal failure: here the top of the loop has stopped signaling, not the bottom refusing to respond."
+      },
+      {
+        id: "ocp",
+        name: "Combined oral contraceptive",
+        type: "Medication",
+        vignette: "A patient starts a combined estrogen–progestin oral contraceptive.",
+        changes: { gnrh: "down", lhfsh: "down", sexsteroids: "up" },
+        explanation: "Exogenous estrogen and progestin act on the axis exactly like the body's own sex steroids would — they suppress GnRH and LH/FSH through the same negative feedback, which is what prevents ovulation. The ovaries' own output actually drops as they go quiet, but the exogenous dose keeps the feedback signal the axis 'sees' elevated — the same principle as thyroid hormone replacement suppressing TSH."
+      }
+    ]
+  };
+  var HPA_CONFIG = {
+    glands: [
+      { id: "hypothalamus", label: "Hypothalamus" },
+      { id: "pituitary", label: "Anterior Pituitary" },
+      { id: "adrenal", label: "Adrenal Cortex" }
+    ],
+    hormones: [
+      { id: "crh", label: "CRH" },
+      { id: "acth", label: "ACTH" },
+      { id: "cortisol", label: "Cortisol" }
+    ],
+    feedback: [
+      { id: "fb1", label: "Adrenal → Hypothalamus" },
+      { id: "fb2", label: "Adrenal → Pituitary" }
+    ],
+    hints: [
+      "Start with what starts the axis: which structure at the top of the diagram fires the first signal?",
+      "The hypothalamus releases a small peptide toward the pituitary — its name is a releasing hormone, abbreviated CRH.",
+      "Full pathway: Hypothalamus (CRH) → Anterior Pituitary (ACTH) → Adrenal Cortex (Cortisol). Both dashed arrows carry inhibits (⊣) back up the chain — that's the negative feedback."
+    ],
+    scenarios: [
+      {
+        id: "addisons",
+        name: "Addison's disease",
+        type: "Primary gland failure",
+        vignette: "Autoimmune destruction is slowly disabling the adrenal cortex, so it can no longer respond normally to ACTH.",
+        changes: { crh: "up", acth: "up", cortisol: "down" },
+        explanation: "A failing adrenal cortex can't produce cortisol no matter how hard the axis pushes. With less cortisol to enforce the usual inhibition, CRH and ACTH both climb — the classic primary-gland pattern: low hormone at the bottom, high signal at the top."
+      },
+      {
+        id: "cushings",
+        name: "Cushing's disease",
+        type: "Central excess (pituitary tumor)",
+        vignette: "A small ACTH-secreting tumor in the pituitary is driving the adrenal gland on its own schedule.",
+        changes: { crh: "down", acth: "up", cortisol: "up" },
+        explanation: "The tumor secretes ACTH independent of the usual control, so cortisol climbs right along with it — even though the resulting high cortisol should be suppressing the pituitary. CRH falls because the hypothalamus correctly senses cortisol is already high, but it has no control over the autonomous tumor. High ACTH doesn't always mean the same thing: compare this to Addison's, where ACTH is also high but cortisol goes the opposite direction."
+      },
+      {
+        id: "prednisone",
+        name: "Chronic prednisone therapy",
+        type: "Medication",
+        vignette: "A patient has been taking daily oral prednisone for several months to control a chronic inflammatory condition.",
+        changes: { crh: "down", acth: "down", cortisol: "up" },
+        explanation: "Exogenous glucocorticoid suppresses CRH and ACTH through the same negative feedback the body normally uses — the adrenal cortex, no longer driven by ACTH, can shrink from disuse. Stopping the drug abruptly leaves a cortisol gap: the adrenal is under-stimulated and slow to restart, which is why steroid doses are tapered rather than stopped outright."
+      }
+    ]
+  };
+  var RAS_CONFIG = {
+    glands: [
+      { id: "kidney", label: "Kidney (JG cells)" },
+      { id: "liver", label: "Liver (angiotensinogen)" },
+      { id: "lung", label: "Lung (ACE)" },
+      { id: "adrenal", label: "Adrenal Cortex" }
+    ],
+    hormones: [
+      { id: "renin", label: "Renin" },
+      { id: "angiotensin1", label: "Angiotensin I" },
+      { id: "angiotensin2", label: "Angiotensin II" },
+      { id: "aldosterone", label: "Aldosterone" }
+    ],
+    feedback: [
+      { id: "fb1", label: "Circulation → Kidney" }
+    ],
+    hints: [
+      "Start with what starts this cascade: which organ senses blood pressure and volume, and fires the first signal?",
+      "The kidney releases an enzyme — not a classic hormone — that acts on angiotensinogen, a precursor the liver keeps circulating at all times, whether or not renin is around. Renin doesn't trigger the liver to make it; renin just finds it and cleaves it.",
+      "Full cascade: Kidney (Renin) → Liver's angiotensinogen becomes Angiotensin I → the Lung's ACE converts it to Angiotensin II → Adrenal Cortex (Aldosterone). One feedback arrow carries inhibits (⊣) back to the kidney — rising pressure and volume shut renin down."
+    ],
+    scenarios: [
+      {
+        id: "ras_stenosis",
+        name: "Renal artery stenosis",
+        type: "Kidney-driven activation",
+        vignette: "Narrowing of the renal artery chronically under-perfuses one kidney, which senses low pressure and ramps up renin release.",
+        changes: { renin: "up", angiotensin1: "up", angiotensin2: "up", aldosterone: "up" },
+        explanation: "Every step downstream of renin rises together here, because the kidney keeps driving the cascade and every conversion step is intact. This chronic activation is a classic cause of secondary hypertension — worth considering when blood pressure resists usual treatment."
+      },
+      {
+        id: "conns",
+        name: "Primary hyperaldosteronism (Conn's syndrome)",
+        type: "Autonomous adrenal excess",
+        vignette: "A small adrenal adenoma is secreting aldosterone on its own, independent of the usual signal from angiotensin II.",
+        changes: { renin: "down", angiotensin1: "down", angiotensin2: "down", aldosterone: "up" },
+        explanation: "The adrenal tumor doesn't wait for angiotensin II — it secretes aldosterone regardless. The resulting salt and water retention raises blood pressure, which the kidney senses and responds to normally: it shuts renin down. That's why Conn's syndrome shows a pattern that looks 'backwards' — aldosterone high while everything upstream of it, including renin, is suppressed."
+      },
+      {
+        id: "ace_inhibitor",
+        name: "ACE inhibitor (e.g., lisinopril)",
+        type: "Medication",
+        vignette: "A patient starts an ACE inhibitor for blood pressure control.",
+        changes: { renin: "up", angiotensin1: "up", angiotensin2: "down", aldosterone: "down" },
+        explanation: "The drug blocks the lung's conversion step directly, so Angiotensin I backs up while Angiotensin II — and the aldosterone it would have triggered — both fall. With less vasoconstriction and less salt/water retention, blood pressure drops. The kidney senses that drop and does what it always does when pressure falls: releases more renin — which is why renin rises even though the drug is working as intended."
+      }
+    ]
+  };
+  var BUILD_HELPER = {
+    hpt: "Reconstruct the HPT axis from its parts, then identify how the feedback arrows work.",
+    hpg: "Reconstruct the HPG axis from its parts, then identify how the feedback arrows work.",
+    hpa: "Reconstruct the HPA axis from its parts, then identify how the feedback arrows work.",
+    ras: "Reconstruct the RAS cascade from its parts, then identify how the feedback arrow works."
+  };
+  var ALL_PLACED_MSG = {
+    hpt: "All parts placed. Set the two feedback arrows on the diagram if you haven't yet.",
+    hpg: "All parts placed. Set the two feedback arrows on the diagram if you haven't yet.",
+    hpa: "All parts placed. Set the two feedback arrows on the diagram if you haven't yet.",
+    ras: "All parts placed. Set the feedback arrow on the diagram if you haven't yet."
+  };
+  var RECAP = {
+    hpt: "You rebuilt the HPT axis and ran all three scenarios. The pattern to carry forward: a <strong>primary</strong> gland failure pushes the upstream signal up while the hormone itself falls; a <strong>central</strong> failure drops both together; and a <strong>medication</strong> plugs into the same feedback the body already uses.",
+    hpg: "You rebuilt the HPG axis and ran all three scenarios. The pattern to carry forward: a <strong>primary</strong> gland failure pushes the upstream signal up while the hormone itself falls; a <strong>central</strong> failure drops both together; and a <strong>medication</strong> plugs into the same feedback the body already uses.",
+    hpa: "You rebuilt the HPA axis and ran all three scenarios. The pattern to carry forward: a <strong>primary</strong> gland failure pushes the upstream signal up while the hormone itself falls; a <strong>central</strong> failure drops both together; and a <strong>medication</strong> plugs into the same feedback the body already uses.",
+    ras: "You rebuilt the RAS cascade and ran all three scenarios. The pattern to carry forward: when the <strong>kidney itself</strong> drives the cascade, everything downstream rises together; when a downstream gland goes <strong>autonomous</strong>, it decouples from what's upstream of it; and a <strong>medication</strong> that blocks one conversion step can raise renin even while it lowers blood pressure."
+  };
+  var REVIEW = {
+    hpt: [
+      {
+        id: "q0",
+        question: "Which structure releases TRH to begin the HPT axis?",
+        options: [
+        { id: "o0", text: "Hypothalamus" },
+        { id: "o1", text: "Anterior pituitary" },
+        { id: "o2", text: "Thyroid gland" },
+        { id: "o3", text: "Adrenal cortex" }
+        ],
+        correctOptionId: "o0",
+        explanation: "TRH (thyrotropin-releasing hormone) is released by the hypothalamus and travels to the anterior pituitary."
+      },
+      {
+        id: "q1",
+        question: "TSH is released by which structure?",
+        options: [
+        { id: "o0", text: "Hypothalamus" },
+        { id: "o1", text: "Anterior pituitary" },
+        { id: "o2", text: "Thyroid gland" },
+        { id: "o3", text: "Posterior pituitary" }
+        ],
+        correctOptionId: "o1",
+        explanation: "TSH (thyroid-stimulating hormone) is released by the anterior pituitary in response to TRH."
+      },
+      {
+        id: "q2",
+        question: "What hormone(s) does the thyroid gland release in response to TSH?",
+        options: [
+        { id: "o0", text: "Cortisol" },
+        { id: "o1", text: "Aldosterone" },
+        { id: "o2", text: "T3 and T4" },
+        { id: "o3", text: "ACTH" }
+        ],
+        correctOptionId: "o2",
+        explanation: "TSH stimulates the thyroid gland to release T3 and T4, which regulate metabolic rate throughout the body."
+      },
+      {
+        id: "q3",
+        question: "What kind of feedback do T3 and T4 exert on the hypothalamus and pituitary?",
+        options: [
+        { id: "o0", text: "Positive feedback" },
+        { id: "o1", text: "Negative feedback" },
+        { id: "o2", text: "No feedback" },
+        { id: "o3", text: "Feedback only on the pituitary" }
+        ],
+        correctOptionId: "o1",
+        explanation: "Rising T3/T4 inhibits further TRH and TSH release — classic negative feedback that keeps thyroid hormone levels in a stable range."
+      },
+      {
+        id: "q4",
+        question: "Which of these is a primary physiologic role of thyroid hormone?",
+        options: [
+        { id: "o0", text: "Regulating blood pressure via vasoconstriction" },
+        { id: "o1", text: "Regulating metabolic rate and heat production" },
+        { id: "o2", text: "Regulating blood calcium levels" },
+        { id: "o3", text: "Regulating fluid balance via aldosterone" }
+        ],
+        correctOptionId: "o1",
+        explanation: "Thyroid hormone's main systemic role is setting the body's metabolic rate, along with supporting growth and heat production."
+      }
+    ],
+    hpg: [
+      {
+        id: "q0",
+        question: "What hormone does the hypothalamus release to begin the HPG axis, and how?",
+        options: [
+        { id: "o0", text: "GnRH, released continuously" },
+        { id: "o1", text: "GnRH, released in pulses" },
+        { id: "o2", text: "FSH, released continuously" },
+        { id: "o3", text: "Estrogen, released in pulses" }
+        ],
+        correctOptionId: "o1",
+        explanation: "GnRH is released in a pulsatile pattern — the pulse frequency itself carries signaling information, not just the hormone's presence."
+      },
+      {
+        id: "q1",
+        question: "Which two hormones does the anterior pituitary release in response to GnRH?",
+        options: [
+        { id: "o0", text: "TSH and ACTH" },
+        { id: "o1", text: "LH and FSH" },
+        { id: "o2", text: "Estrogen and progesterone" },
+        { id: "o3", text: "CRH and TRH" }
+        ],
+        correctOptionId: "o1",
+        explanation: "GnRH stimulates the anterior pituitary to release LH (luteinizing hormone) and FSH (follicle-stimulating hormone)."
+      },
+      {
+        id: "q2",
+        question: "LH and FSH act on which structures?",
+        options: [
+        { id: "o0", text: "The adrenal cortex" },
+        { id: "o1", text: "The thyroid gland" },
+        { id: "o2", text: "The gonads" },
+        { id: "o3", text: "The kidneys" }
+        ],
+        correctOptionId: "o2",
+        explanation: "LH and FSH travel to the gonads (ovaries or testes), where they drive gamete production and sex steroid release."
+      },
+      {
+        id: "q3",
+        question: "What type of feedback do sex steroids typically exert on GnRH, LH, and FSH?",
+        options: [
+        { id: "o0", text: "Positive feedback only" },
+        { id: "o1", text: "Negative feedback" },
+        { id: "o2", text: "No feedback" },
+        { id: "o3", text: "Feedback only during pregnancy" }
+        ],
+        correctOptionId: "o1",
+        explanation: "For most of the cycle, rising sex steroids suppress GnRH, LH, and FSH through negative feedback, keeping the axis in balance."
+      },
+      {
+        id: "q4",
+        question: "Besides producing sex steroids, what is another key function of the gonads in this axis?",
+        options: [
+        { id: "o0", text: "Producing gametes" },
+        { id: "o1", text: "Producing cortisol" },
+        { id: "o2", text: "Producing renin" },
+        { id: "o3", text: "Producing thyroid hormone" }
+        ],
+        correctOptionId: "o0",
+        explanation: "The gonads have a dual role: producing sex steroids (hormonal function) and producing gametes (reproductive function)."
+      }
+    ],
+    hpa: [
+      {
+        id: "q0",
+        question: "What hormone does the hypothalamus release to begin the HPA axis?",
+        options: [
+        { id: "o0", text: "ACTH" },
+        { id: "o1", text: "CRH" },
+        { id: "o2", text: "Cortisol" },
+        { id: "o3", text: "Aldosterone" }
+        ],
+        correctOptionId: "o1",
+        explanation: "CRH (corticotropin-releasing hormone) is released by the hypothalamus and travels to the anterior pituitary."
+      },
+      {
+        id: "q1",
+        question: "ACTH is released by which structure?",
+        options: [
+        { id: "o0", text: "Hypothalamus" },
+        { id: "o1", text: "Anterior pituitary" },
+        { id: "o2", text: "Adrenal cortex" },
+        { id: "o3", text: "Adrenal medulla" }
+        ],
+        correctOptionId: "o1",
+        explanation: "ACTH (adrenocorticotropic hormone) is released by the anterior pituitary in response to CRH."
+      },
+      {
+        id: "q2",
+        question: "ACTH stimulates which structure to release cortisol?",
+        options: [
+        { id: "o0", text: "Adrenal medulla" },
+        { id: "o1", text: "Adrenal cortex" },
+        { id: "o2", text: "Thyroid gland" },
+        { id: "o3", text: "Kidney" }
+        ],
+        correctOptionId: "o1",
+        explanation: "ACTH acts on the adrenal cortex, stimulating it to synthesize and release cortisol."
+      },
+      {
+        id: "q3",
+        question: "What kind of feedback does cortisol exert on the hypothalamus and pituitary?",
+        options: [
+        { id: "o0", text: "Positive feedback" },
+        { id: "o1", text: "Negative feedback" },
+        { id: "o2", text: "No feedback" },
+        { id: "o3", text: "Feedback only on the hypothalamus" }
+        ],
+        correctOptionId: "o1",
+        explanation: "Rising cortisol inhibits further CRH and ACTH release, keeping cortisol levels within a normal range under non-stressed conditions."
+      },
+      {
+        id: "q4",
+        question: "Which of these is a normal physiologic role of cortisol?",
+        options: [
+        { id: "o0", text: "Mobilizing glucose and modulating immune activity" },
+        { id: "o1", text: "Retaining sodium and water via the kidney" },
+        { id: "o2", text: "Converting angiotensin I to angiotensin II" },
+        { id: "o3", text: "Stimulating milk letdown" }
+        ],
+        correctOptionId: "o0",
+        explanation: "Cortisol's core roles include raising blood glucose, mobilizing energy stores, and modulating (usually dampening) immune activity."
+      }
+    ],
+    ras: [
+      {
+        id: "q0",
+        question: "What triggers the kidney to release renin?",
+        options: [
+        { id: "o0", text: "High blood pressure or high blood volume" },
+        { id: "o1", text: "Low blood pressure or low blood volume" },
+        { id: "o2", text: "High blood glucose" },
+        { id: "o3", text: "High blood calcium" }
+        ],
+        correctOptionId: "o1",
+        explanation: "The kidney releases renin when it senses low blood pressure or low blood volume, as part of the body's effort to restore both."
+      },
+      {
+        id: "q1",
+        question: "Renin acts on angiotensinogen, which is produced by which organ?",
+        options: [
+        { id: "o0", text: "The kidney" },
+        { id: "o1", text: "The liver" },
+        { id: "o2", text: "The lung" },
+        { id: "o3", text: "The adrenal cortex" }
+        ],
+        correctOptionId: "o1",
+        explanation: "Angiotensinogen circulates constantly and is produced by the liver; renin cleaves it to form angiotensin I."
+      },
+      {
+        id: "q2",
+        question: "Where does angiotensin-converting enzyme (ACE) mainly convert angiotensin I to angiotensin II?",
+        options: [
+        { id: "o0", text: "The kidney" },
+        { id: "o1", text: "The liver" },
+        { id: "o2", text: "The lungs" },
+        { id: "o3", text: "The adrenal cortex" }
+        ],
+        correctOptionId: "o2",
+        explanation: "ACE is concentrated in the pulmonary (lung) vascular endothelium, which is where most angiotensin I is converted to angiotensin II."
+      },
+      {
+        id: "q3",
+        question: "Angiotensin II stimulates the adrenal cortex to release which hormone?",
+        options: [
+        { id: "o0", text: "Cortisol" },
+        { id: "o1", text: "Aldosterone" },
+        { id: "o2", text: "ACTH" },
+        { id: "o3", text: "Renin" }
+        ],
+        correctOptionId: "o1",
+        explanation: "Angiotensin II triggers aldosterone release from the adrenal cortex, which promotes sodium and water retention by the kidney."
+      },
+      {
+        id: "q4",
+        question: "Which of these are direct effects of angiotensin II?",
+        options: [
+        { id: "o0", text: "Vasodilation and sodium excretion" },
+        { id: "o1", text: "Vasoconstriction and aldosterone release" },
+        { id: "o2", text: "Bronchodilation and slowed heart rate" },
+        { id: "o3", text: "Insulin release and glucose uptake" }
+        ],
+        correctOptionId: "o1",
+        explanation: "Angiotensin II is a potent vasoconstrictor and also triggers aldosterone release — both actions raise blood pressure and help restore blood volume."
+      }
+    ]
+  };
+
+  function shuffle(arr) {
+    var a = arr.slice();
+    for (var i = a.length - 1; i > 0; i--) {
+      var j = Math.floor(Math.random() * (i + 1));
+      var tmp = a[i]; a[i] = a[j]; a[j] = tmp;
+    }
+    return a;
+  }
+
+  function showAxis(axisKey) {
+    endTour();
+    document.querySelectorAll(".screen").forEach(function (s) { s.classList.remove("active"); });
+    document.getElementById("screen-" + axisKey).classList.add("active");
+    window.scrollTo(0, 0);
+  }
+  function showMenu() {
+    endTour();
+    document.querySelectorAll(".screen").forEach(function (s) { s.classList.remove("active"); });
+    document.getElementById("screen-menu").classList.add("active");
+    window.scrollTo(0, 0);
+  }
+
+  // ---------------- Guided tour (HPT only) ----------------
+  // The interaction pattern here (select a piece, tap where it belongs, cycle
+  // feedback arrows, ask for hints) is identical across all four axes, so the
+  // walkthrough only needs to run once, on the first activity a student opens.
+
+  var HPT_TOUR_STEPS = [
+    { target: null, title: "New here? Quick walkthrough", body: "This shows you how the activity works. The other three axes use the exact same interaction, so you'll only need this once." },
+    { target: "hpt-diagram", title: "The loop starts empty", body: "Every box and arrow on the diagram needs to be filled in correctly before you can move on." },
+    { target: "hpt-tray", title: "Pick a piece", body: "Tap any card below to select it \u2014 it highlights to show it's selected." },
+    { target: "hpt-slot-hypothalamus", title: "Then place it", body: "Tap the spot on the diagram where you think it belongs. Correct guesses turn green and lock in; wrong ones bounce back so you can try again." },
+    { target: "hpt-fb-fb1", title: "Set the feedback arrows too", body: "These dashed arrows need a type. Tap to cycle through stimulates and inhibits \u2014 every axis in this set inhibits back up the chain." },
+    { target: "hpt-hint-btn", title: "Stuck? Ask for a hint", body: "Each tap reveals a bit more, from a nudge to the full answer \u2014 use as many or as few as you need." },
+    { target: null, title: "Once the loop is complete", body: "A button appears to take you into three clinical scenarios, where you predict how each hormone responds before finding out what actually happens. Ready?" }
+  ];
+
+  var tourState = { active: false, index: 0, tooltipEl: null, highlightedEl: null };
+
+  function tourCleanup() {
+    if (tourState.highlightedEl) {
+      tourState.highlightedEl.classList.remove("tour-highlight");
+      tourState.highlightedEl = null;
+    }
+    if (tourState.tooltipEl) {
+      tourState.tooltipEl.remove();
+      tourState.tooltipEl = null;
+    }
+  }
+
+  function endTour() {
+    tourCleanup();
+    tourState.active = false;
+  }
+
+  function positionTourTooltip(el, targetEl) {
+    if (!targetEl) {
+      el.classList.add("centered");
+      return;
+    }
+    el.classList.remove("centered");
+    var rect = targetEl.getBoundingClientRect();
+    var gap = 14;
+    var tw = el.offsetWidth, th = el.offsetHeight;
+    var spaceBelow = window.innerHeight - rect.bottom;
+    var top;
+    if (spaceBelow > th + gap + 10 || rect.top < th + gap) {
+      top = rect.bottom + gap;
+    } else {
+      top = rect.top - th - gap;
+    }
+    var left = rect.left + rect.width / 2 - tw / 2;
+    left = Math.max(12, Math.min(left, window.innerWidth - tw - 12));
+    top = Math.max(12, Math.min(top, window.innerHeight - th - 12));
+    el.style.top = top + "px";
+    el.style.left = left + "px";
+  }
+
+  function renderTourStep() {
+    tourCleanup();
+    var step = HPT_TOUR_STEPS[tourState.index];
+    var targetEl = step.target ? document.getElementById(step.target) : null;
+    var isLast = tourState.index === HPT_TOUR_STEPS.length - 1;
+
+    if (targetEl) {
+      targetEl.scrollIntoView({ block: "center", behavior: "smooth" });
+      targetEl.classList.add("tour-highlight");
+      tourState.highlightedEl = targetEl;
+    }
+
+    var box = document.createElement("div");
+    box.className = "tour-tooltip";
+    box.setAttribute("role", "dialog");
+    box.setAttribute("aria-label", step.title);
+    box.innerHTML =
+      "<h3>" + step.title + "</h3>" +
+      "<p>" + step.body + "</p>" +
+      "<div class=\"tour-footer\">" +
+      "<span class=\"tour-count\">" + (tourState.index + 1) + " of " + HPT_TOUR_STEPS.length + "</span>" +
+      "<div class=\"tour-actions\">" +
+      "<button type=\"button\" class=\"tour-skip\">Skip</button>" +
+      "<button type=\"button\" class=\"tour-next\">" + (isLast ? "Got it" : "Next") + "</button>" +
+      "</div></div>";
+    document.body.appendChild(box);
+    tourState.tooltipEl = box;
+
+    box.querySelector(".tour-skip").addEventListener("click", endTour);
+    box.querySelector(".tour-next").addEventListener("click", function () {
+      if (isLast) { endTour(); return; }
+      tourState.index++;
+      renderTourStep();
+    });
+
+    if (targetEl) {
+      setTimeout(function () { positionTourTooltip(box, targetEl); }, 260);
+    } else {
+      positionTourTooltip(box, null);
+    }
+    box.querySelector(".tour-next").focus();
+  }
+
+  function startTour() {
+    tourState.active = true;
+    tourState.index = 0;
+    renderTourStep();
+  }
+
+  var hptTourAutoShown = false;
+  var tourBtn = document.getElementById("hpt-tour-btn");
+  if (tourBtn) tourBtn.addEventListener("click", startTour);
+
+  document.querySelectorAll("#screen-menu .card").forEach(function (btn) {
+    btn.addEventListener("click", function () {
+      var axis = btn.getAttribute("data-axis");
+      showAxis(axis);
+      if (axis === "hpt" && !hptTourAutoShown) {
+        hptTourAutoShown = true;
+        setTimeout(startTour, 200);
+      }
+    });
+  });
+
+  document.querySelectorAll("[data-goto-menu]").forEach(function (btn) {
+    btn.addEventListener("click", showMenu);
+  });
+
+
+  function initAxis(axisKey, CONFIG) {
+    function byId(id) { return document.getElementById(axisKey + "-" + id); }
+    function announce(msg) { byId("live-region").textContent = msg; }
+
+    var ALL_TRAY_ITEMS = CONFIG.glands.map(function (g) { return { kind: "gland", id: g.id, label: g.label }; })
+      .concat(CONFIG.hormones.map(function (h) { return { kind: "hormone", id: h.id, label: h.label }; }));
+
+    function freshFbType() {
+      var o = {};
+      CONFIG.feedback.forEach(function (f) { o[f.id] = "unset"; });
+      return o;
+    }
+
+    var state = {
+      phase: "build",
+      glandFill: {}, hormoneFill: {}, fbType: freshFbType(),
+      trayOrder: shuffle(ALL_TRAY_ITEMS),
+      selected: null,
+      hintTier: -1,
+      reviewIndex: 0,
+      reviewAnswers: {},
+      activeScenario: null,
+      predictions: {},
+      completed: {}
+    };
+
+    var panel = byId("panel");
+
+    function trayItems() {
+      return state.trayOrder.filter(function (item) {
+        if (item.kind === "gland") return !state.glandFill[item.id];
+        return !state.hormoneFill[item.id];
+      });
+    }
+
+    function buildComplete() {
+      var glandsDone = CONFIG.glands.every(function (g) { return state.glandFill[g.id]; });
+      var hormonesDone = CONFIG.hormones.every(function (h) { return state.hormoneFill[h.id]; });
+      var fbDone = CONFIG.feedback.every(function (f) { return state.fbType[f.id] === "inhibits"; });
+      return glandsDone && hormonesDone && fbDone;
+    }
+
+    function renderPanelBuild() {
+      var items = trayItems();
+      var statusMsg = state.selected
+        ? "Selected: " + state.selected.label + " \u2014 now tap where it belongs on the diagram."
+        : "Select a piece below, then tap its spot on the diagram.";
+
+      var html = "";
+      html += "<h2>Build the loop</h2>";
+      html += "<p class=\"helper\">" + BUILD_HELPER[axisKey] + "</p>";
+      html += "<div class=\"status-line\" id=\"" + axisKey + "-status-line\">" + statusMsg + "</div>";
+
+      if (items.length) {
+        html += "<div class=\"tray\" id=\"" + axisKey + "-tray\"></div>";
+      } else {
+        html += "<div class=\"tray\"><em style=\"color:var(--ink-faint); font-size:0.86rem;\">" + ALL_PLACED_MSG[axisKey] + "</em></div>";
+      }
+
+      html += "<button class=\"hint-btn\" id=\"" + axisKey + "-hint-btn\" type=\"button\">Need a hint?</button>";
+      html += "<div class=\"hint-text\" id=\"" + axisKey + "-hint-text\"></div>";
+
+      if (buildComplete()) {
+        html += "<hr class=\"divider\">";
+        html += "<button class=\"primary-btn\" id=\"" + axisKey + "-continue-btn\" type=\"button\">Loop complete \u2014 continue to review questions</button>";
+      }
+
+      panel.innerHTML = html;
+
+      if (items.length) {
+        var tray = byId("tray");
+        items.forEach(function (item) {
+          var b = document.createElement("button");
+          b.className = "tray-chip";
+          b.type = "button";
+          b.textContent = item.label;
+          b.setAttribute("data-kind", item.kind);
+          b.setAttribute("data-id", item.id);
+          if (state.selected && state.selected.id === item.id && state.selected.kind === item.kind) {
+            b.classList.add("selected");
+          }
+          b.addEventListener("click", function () { selectChip(item); });
+          tray.appendChild(b);
+        });
+      }
+
+      byId("hint-btn").addEventListener("click", advanceHint);
+      if (buildComplete()) {
+        byId("continue-btn").addEventListener("click", enterReviewMode);
+      }
+    }
+
+    function selectChip(item) {
+      state.selected = item;
+      renderPanelBuild();
+    }
+
+    function advanceHint() {
+      state.hintTier = Math.min(state.hintTier + 1, CONFIG.hints.length - 1);
+      var el = byId("hint-text");
+      el.textContent = CONFIG.hints[state.hintTier];
+      el.classList.add("show");
+    }
+
+    function attemptPlace(slotId, kind) {
+      if (!state.selected || state.selected.kind !== kind) {
+        announce("Select a " + (kind === "gland" ? "gland" : "hormone") + " from the list first.");
+        return;
+      }
+      var btn = byId("slot-" + slotId);
+      if (state.selected.id === slotId) {
+        if (kind === "gland") state.glandFill[slotId] = state.selected.label;
+        else state.hormoneFill[slotId] = state.selected.label;
+        btn.textContent = state.selected.label;
+        btn.classList.remove("wrong");
+        btn.classList.add("filled", "anim-pulse");
+        announce(state.selected.label + " placed correctly.");
+        state.selected = null;
+        renderPanelBuild();
+      } else {
+        btn.classList.add("wrong", "anim-shake");
+        announce("Not quite \u2014 try another spot.");
+        setTimeout(function () {
+          btn.classList.remove("wrong", "anim-shake");
+          btn.textContent = "?";
+        }, 650);
+      }
+    }
+
+    function cycleFeedback(fbId) {
+      var order = ["unset", "stimulates", "inhibits"];
+      var cur = order.indexOf(state.fbType[fbId]);
+      var next = order[(cur + 1) % order.length];
+      state.fbType[fbId] = next;
+      var btn = byId("fb-" + fbId);
+      btn.classList.remove("set-inhibits", "set-stimulates");
+      if (next === "unset") { btn.textContent = "type?"; }
+      if (next === "stimulates") { btn.textContent = "Stimulates \u2192"; btn.classList.add("set-stimulates"); }
+      if (next === "inhibits") { btn.textContent = "Inhibits \u22a3"; btn.classList.add("set-inhibits"); }
+      updateFeedbackArrowVisual(fbId);
+      if (buildComplete()) renderPanelBuild();
+    }
+
+    function updateFeedbackArrowVisual(fbId) {
+      var path = byId(fbId + "-path");
+      var type = state.fbType[fbId];
+      if (type === "inhibits") {
+        path.setAttribute("stroke", "#8C2F39");
+        path.setAttribute("marker-end", "url(#" + axisKey + "-mk-inhib)");
+      } else if (type === "stimulates") {
+        path.setAttribute("stroke", "#B8862B");
+        path.setAttribute("marker-end", "url(#" + axisKey + "-mk-stim)");
+      } else {
+        path.setAttribute("stroke", "#C9D1D3");
+        path.setAttribute("marker-end", "url(#" + axisKey + "-mk-neutral)");
+      }
+    }
+
+    function wireDiagramBuildHandlers() {
+      CONFIG.glands.forEach(function (g) {
+        byId("slot-" + g.id).addEventListener("click", function () { attemptPlace(g.id, "gland"); });
+      });
+      CONFIG.hormones.forEach(function (h) {
+        byId("slot-" + h.id).addEventListener("click", function () { attemptPlace(h.id, "hormone"); });
+      });
+      CONFIG.feedback.forEach(function (f) {
+        byId("fb-" + f.id).addEventListener("click", function () { cycleFeedback(f.id); });
+      });
+    }
+
+    function updateProgressBar() {
+      var seg = document.querySelectorAll("#" + axisKey + "-progress .seg");
+      seg.forEach(function (s) { s.classList.remove("active", "done"); });
+      var buildSeg = byId("progress").querySelector("[data-seg='build']");
+      var reviewSeg = byId("progress").querySelector("[data-seg='review']");
+      if (state.phase === "build") {
+        buildSeg.classList.add("active");
+        return;
+      }
+      buildSeg.classList.add("done");
+      if (state.phase === "review") {
+        reviewSeg.classList.add("active");
+        return;
+      }
+      reviewSeg.classList.add("done");
+      if (state.phase === "scenario") {
+        CONFIG.scenarios.forEach(function (sc, i) {
+          var el = byId("progress").querySelector("[data-seg='s" + i + "']");
+          if (state.completed[sc.id]) el.classList.add("done");
+          else if (state.activeScenario === sc.id) el.classList.add("active");
+        });
+      } else if (state.phase === "done") {
+        CONFIG.scenarios.forEach(function (sc, i) {
+          byId("progress").querySelector("[data-seg='s" + i + "']").classList.add("done");
+        });
+      }
+    }
+
+    // ---------------- REVIEW MODE (basic physiology, before scenarios) ----------------
+
+    function enterReviewMode() {
+      state.phase = "review";
+      state.reviewIndex = 0;
+      updateProgressBar();
+      renderPanelReviewQuestion();
+    }
+
+    function renderPanelReviewQuestion() {
+      var questions = REVIEW[axisKey];
+      var q = questions[state.reviewIndex];
+      var answered = state.reviewAnswers[q.id];
+
+      var html = "";
+      html += "<h2>Quick review</h2>";
+      html += "<p class=\"helper\">Question " + (state.reviewIndex + 1) + " of " + questions.length + " \u2014 basic physiology, before you dive into scenarios.</p>";
+      html += "<p class=\"review-question\">" + q.question + "</p>";
+      html += "<div class=\"review-options\" id=\"" + axisKey + "-review-options\"></div>";
+      html += "<div id=\"" + axisKey + "-review-feedback\"></div>";
+      if (answered) {
+        var isCorrect = answered === q.correctOptionId;
+        html += "<div class=\"explanation\"><strong>" + (isCorrect ? "Correct. " : "Not quite. ") + "</strong>" + q.explanation + "</div>";
+        var isLast = state.reviewIndex === questions.length - 1;
+        html += "<button class=\"primary-btn\" id=\"" + axisKey + "-review-next-btn\" type=\"button\">" + (isLast ? "See your results" : "Next question") + "</button>";
+      }
+      panel.innerHTML = html;
+
+      var optsContainer = byId("review-options");
+      q.options.forEach(function (opt) {
+        var b = document.createElement("button");
+        b.type = "button";
+        b.className = "review-option";
+        b.textContent = opt.text;
+        if (answered) {
+          b.disabled = true;
+          if (opt.id === q.correctOptionId) b.classList.add("correct");
+          else if (opt.id === answered) b.classList.add("incorrect");
+        } else {
+          b.addEventListener("click", function () {
+            state.reviewAnswers[q.id] = opt.id;
+            renderPanelReviewQuestion();
+          });
+        }
+        optsContainer.appendChild(b);
+      });
+
+      if (answered) {
+        byId("review-next-btn").addEventListener("click", function () {
+          if (state.reviewIndex < questions.length - 1) {
+            state.reviewIndex++;
+            renderPanelReviewQuestion();
+          } else {
+            renderReviewSummary();
+          }
+        });
+      }
+    }
+
+    function renderReviewSummary() {
+      var questions = REVIEW[axisKey];
+      var correctCount = questions.filter(function (q) { return state.reviewAnswers[q.id] === q.correctOptionId; }).length;
+      var html = "";
+      html += "<h2>Review complete</h2>";
+      html += "<p class=\"helper\">You got " + correctCount + " of " + questions.length + " correct. This was just the normal physiology \u2014 the scenarios next are where it gets applied.</p>";
+      html += "<button class=\"primary-btn\" id=\"" + axisKey + "-to-scenarios-btn\" type=\"button\">Continue to scenarios</button>";
+      panel.innerHTML = html;
+      byId("to-scenarios-btn").addEventListener("click", enterScenarioMode);
+    }
+
+    function enterScenarioMode() {
+      state.phase = "scenario";
+      updateProgressBar();
+      renderPanelScenarioMenu();
+    }
+
+    function allScenariosDone() {
+      return CONFIG.scenarios.every(function (s) { return state.completed[s.id]; });
+    }
+
+    function renderPanelScenarioMenu() {
+      var html = "";
+      html += "<h2>Run a scenario</h2>";
+      html += "<p class=\"helper\">Pick a scenario, predict the direction of each hormone, then reveal what actually happens.</p>";
+      html += "<div class=\"scenario-list\" id=\"" + axisKey + "-scenario-list\"></div>";
+      if (allScenariosDone()) {
+        html += "<hr class=\"divider\">";
+        html += "<button class=\"primary-btn\" id=\"" + axisKey + "-finish-btn\" type=\"button\">Finish activity</button>";
+      }
+      panel.innerHTML = html;
+
+      var list = byId("scenario-list");
+      CONFIG.scenarios.forEach(function (sc) {
+        var b = document.createElement("button");
+        b.type = "button";
+        b.className = "scenario-card";
+        b.innerHTML = "<div class=\"name\">" + sc.name + (state.completed[sc.id] ? "<span class=\"check\">\u2713 done</span>" : "") + "</div><div class=\"type\">" + sc.type + "</div>";
+        b.addEventListener("click", function () { openScenario(sc.id); });
+        list.appendChild(b);
+      });
+
+      if (allScenariosDone()) {
+        byId("finish-btn").addEventListener("click", finishActivity);
+      }
+      resetDiagramScenarioVisuals();
+    }
+
+    function openScenario(id) {
+      state.activeScenario = id;
+      state.predictions = {};
+      updateProgressBar();
+      renderPanelScenarioDetail();
+    }
+
+    function scenarioById(id) {
+      var found = null;
+      CONFIG.scenarios.forEach(function (s) { if (s.id === id) found = s; });
+      return found;
+    }
+
+    function renderPanelScenarioDetail() {
+      var sc = scenarioById(state.activeScenario);
+      var html = "";
+      html += "<h2>" + sc.name + "</h2>";
+      html += "<p class=\"helper\">" + sc.type + "</p>";
+      html += "<div class=\"vignette\">" + sc.vignette + "</div>";
+      html += "<p class=\"helper\" style=\"margin-bottom:10px;\">Predict each hormone before revealing:</p>";
+      html += "<div id=\"" + axisKey + "-predict-rows\"></div>";
+      html += "<button class=\"primary-btn\" id=\"" + axisKey + "-reveal-btn\" type=\"button\" disabled>Reveal what happens</button>";
+      html += "<button class=\"ghost-btn\" id=\"" + axisKey + "-back-btn\" type=\"button\">Back to scenario list</button>";
+      panel.innerHTML = html;
+
+      var rows = byId("predict-rows");
+      CONFIG.hormones.forEach(function (h) {
+        var row = document.createElement("div");
+        row.className = "predict-row";
+        row.innerHTML =
+          "<span class=\"label\">" + h.label + "</span>" +
+          "<div class=\"segmented\" data-h=\"" + h.id + "\">" +
+          "<button type=\"button\" data-dir=\"up\" aria-pressed=\"false\">\u2191</button>" +
+          "<button type=\"button\" data-dir=\"same\" aria-pressed=\"false\">\u2192</button>" +
+          "<button type=\"button\" data-dir=\"down\" aria-pressed=\"false\">\u2193</button>" +
+          "</div>";
+        rows.appendChild(row);
+      });
+
+      rows.querySelectorAll(".segmented").forEach(function (seg) {
+        var hId = seg.getAttribute("data-h");
+        seg.querySelectorAll("button").forEach(function (btn) {
+          btn.addEventListener("click", function () {
+            state.predictions[hId] = btn.getAttribute("data-dir");
+            seg.querySelectorAll("button").forEach(function (b2) { b2.setAttribute("aria-pressed", "false"); });
+            btn.setAttribute("aria-pressed", "true");
+            checkAllPredicted();
+          });
+        });
+      });
+
+      byId("reveal-btn").addEventListener("click", revealScenario);
+      byId("back-btn").addEventListener("click", renderPanelScenarioMenu);
+    }
+
+    function checkAllPredicted() {
+      var allSet = CONFIG.hormones.every(function (h) { return state.predictions[h.id]; });
+      byId("reveal-btn").disabled = !allSet;
+    }
+
+    function resetDiagramScenarioVisuals() {
+      CONFIG.hormones.forEach(function (h) {
+        var el = byId("slot-" + h.id);
+        el.classList.remove("dir-up", "dir-down", "dir-same", "anim-pulse");
+        el.textContent = h.label;
+      });
+    }
+
+    function revealScenario() {
+      var sc = scenarioById(state.activeScenario);
+      state.completed[sc.id] = true;
+
+      CONFIG.hormones.forEach(function (h) {
+        var dir = sc.changes[h.id];
+        var el = byId("slot-" + h.id);
+        el.classList.remove("dir-up", "dir-down", "dir-same");
+        el.classList.add("dir-" + dir, "anim-pulse");
+        var arrow = dir === "up" ? " \u2191" : dir === "down" ? " \u2193" : " \u2192";
+        el.textContent = h.label + arrow;
+      });
+
+      var html = "";
+      html += "<h2>" + sc.name + "</h2>";
+      html += "<div class=\"vignette\">" + sc.vignette + "</div>";
+      CONFIG.hormones.forEach(function (h) {
+        var actual = sc.changes[h.id];
+        var predicted = state.predictions[h.id];
+        var isCorrect = actual === predicted;
+        var arrowSym = actual === "up" ? "\u2191" : actual === "down" ? "\u2193" : "\u2192";
+        html += "<div class=\"result-row\"><span class=\"label\">" + h.label + "</span>" +
+          "<span>actual " + arrowSym + "</span>" +
+          "<span class=\"mark " + (isCorrect ? "correct" : "incorrect") + "\">" + (isCorrect ? "\u2713 matched your prediction" : "\u2717 you predicted " + symbolFor(predicted)) + "</span></div>";
+      });
+      html += "<div class=\"explanation\">" + sc.explanation + "</div>";
+      html += "<button class=\"ghost-btn\" id=\"" + axisKey + "-back-btn\" type=\"button\">Back to scenario list</button>";
+      panel.innerHTML = html;
+      byId("back-btn").addEventListener("click", renderPanelScenarioMenu);
+      updateProgressBar();
+      announce(sc.name + " revealed.");
+    }
+
+    function symbolFor(dir) {
+      if (dir === "up") return "\u2191";
+      if (dir === "down") return "\u2193";
+      return "\u2192";
+    }
+
+    function resetAxis() {
+      state.phase = "build";
+      state.glandFill = {};
+      state.hormoneFill = {};
+      state.fbType = freshFbType();
+      state.trayOrder = shuffle(ALL_TRAY_ITEMS);
+      state.selected = null;
+      state.hintTier = -1;
+      state.reviewIndex = 0;
+      state.reviewAnswers = {};
+      state.activeScenario = null;
+      state.predictions = {};
+      state.completed = {};
+
+      CONFIG.glands.forEach(function (g) {
+        var el = byId("slot-" + g.id);
+        el.textContent = "?";
+        el.classList.remove("filled", "wrong", "anim-pulse", "anim-shake");
+      });
+      CONFIG.hormones.forEach(function (h) {
+        var el = byId("slot-" + h.id);
+        el.textContent = "?";
+        el.classList.remove("filled", "wrong", "dir-up", "dir-down", "dir-same", "anim-pulse", "anim-shake");
+      });
+      CONFIG.feedback.forEach(function (f) {
+        var el = byId("fb-" + f.id);
+        el.textContent = "type?";
+        el.classList.remove("set-inhibits", "set-stimulates");
+        updateFeedbackArrowVisual(f.id);
+      });
+
+      renderPanelBuild();
+      updateProgressBar();
+    }
+
+    function finishActivity() {
+      state.phase = "done";
+      updateProgressBar();
+      resetDiagramScenarioVisuals();
+      var html = "";
+      html += "<div class=\"done-screen\">";
+      html += "<h2>Loop complete</h2>";
+      html += "<p>" + RECAP[axisKey] + "</p>";
+      html += "<button class=\"ghost-btn\" id=\"" + axisKey + "-restart-btn\" type=\"button\">Restart this activity</button>";
+      html += "<button class=\"ghost-btn\" id=\"" + axisKey + "-menu-btn\" type=\"button\">Back to menu</button>";
+      html += "</div>";
+      panel.innerHTML = html;
+      byId("restart-btn").addEventListener("click", resetAxis);
+      byId("menu-btn").addEventListener("click", showMenu);
+    }
+
+    wireDiagramBuildHandlers();
+    renderPanelBuild();
+    updateProgressBar();
+  }
+
+  initAxis("hpt", HPT_CONFIG);
+  initAxis("hpg", HPG_CONFIG);
+  initAxis("hpa", HPA_CONFIG);
+  initAxis("ras", RAS_CONFIG);
+
+})();
+</script>
+</body>
+</html>
