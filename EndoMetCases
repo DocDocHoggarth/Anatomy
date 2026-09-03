@@ -1,0 +1,377 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PT Clinical Physiology Simulator</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f1f5f9; /* slate-100 */
+        }
+        
+        .scenario-box {
+            background-color: #f8fafc;
+            border-left: 6px solid #2563eb;
+        }
+
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        .fade-in {
+            animation: fadeIn 0.4s ease-out;
+        }
+
+        .slide-in {
+            animation: slideIn 0.3s ease-out forwards;
+        }
+
+        .option-btn {
+            transition: all 0.2s ease;
+        }
+
+        .option-btn:hover:not(:disabled) {
+            border-color: #3b82f6; /* blue-500 */
+            background-color: #eff6ff; /* blue-50 */
+            transform: translateY(-2px);
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
+
+        .selected-correct {
+            border-color: #22c55e !important;
+            background-color: #dcfce7 !important;
+            color: #166534 !important;
+        }
+
+        .selected-incorrect {
+            border-color: #ef4444 !important;
+            background-color: #fee2e2 !important;
+            color: #991b1b !important;
+            opacity: 0.7;
+        }
+    </style>
+</head>
+<body class="text-slate-800 p-4 md:p-8 flex justify-center items-start min-h-screen">
+
+<div class="max-w-4xl w-full bg-white rounded-2xl shadow-xl overflow-hidden flex flex-col">
+    <!-- Header -->
+    <header class="bg-blue-600 text-white p-6 text-center">
+        <h1 class="text-2xl md:text-3xl font-bold mb-2">Clinical Physiology Case Simulator</h1>
+        <p class="text-blue-100 text-sm md:text-base">Test your clinical reasoning by tracing systemic presentations to their metabolic origins.</p>
+    </header>
+    
+    <!-- Navigation -->
+    <div class="flex overflow-x-auto bg-slate-50 p-4 gap-2 border-b border-slate-200" id="navMenu">
+        <!-- Dynamically populated via JS -->
+    </div>
+
+    <!-- Main Content Area -->
+    <div class="p-6 md:p-8 min-h-[500px]" id="mainContent">
+        <!-- Dynamically populated via JS -->
+    </div>
+</div>
+
+<script>
+    // Database of cases, integrated with concepts from the GL PDFs
+    const cases = [
+        {
+            title: "The Accelerated Engine",
+            system: "Endocrine & Metabolic Systems",
+            scenario: "A 42-year-old female is referred to PT for difficulty rising from a chair and climbing stairs (proximal muscle weakness). During a 5-minute warm-up on the stationary bike, her heart rate spikes to 145 bpm. She feels 'jittery', is constantly sweating, and has lost 10 pounds this month unprompted despite eating more than usual. Her physician suspects hyperthyroidism.",
+            questions: [
+                {
+                    text: "1. Based on the endocrine guided learning, what is the physiological mechanism explaining her exaggerated heart rate and proximal muscle weakness?",
+                    options: [
+                        { text: "Hyperthyroidism decreases total blood volume, forcing the heart to pump twice as fast.", isCorrect: false, feedback: "Incorrect. Hyperthyroidism typically increases cardiac output and metabolism. It does not cause a drop in blood volume." },
+                        { text: "Excess thyroid hormone (T3/T4) upregulates beta-adrenergic receptors and accelerates muscle protein turnover.", isCorrect: true, feedback: "Correct! Excess thyroid hormone upregulates beta-adrenergic receptors, making the heart hyper-sensitive to sympathetic input (catecholamines). It also creates a hypermetabolic state that alters protein turnover, leading to muscle weakness." },
+                        { text: "Thyroid hormone directly destroys the SA node and mechanically denervates skeletal muscle.", isCorrect: false, feedback: "Incorrect. Thyroid hormones amplify cellular metabolism rather than acting as a neurotoxin to physically destroy nodes or nerves." }
+                    ],
+                    implication: "PT Implication: Standard target heart rate zones are invalid. Focus on low-intensity resistance training while she awaits medical management to avoid exercise-induced arrhythmias."
+                },
+                {
+                    text: "2. Which bioenergetic concept directly explains her constant sweating and unprompted weight loss?",
+                    options: [
+                        { text: "She is utilizing exclusively Non-Exercise Activity Thermogenesis (NEAT) due to her jitteriness.", isCorrect: false, feedback: "Incorrect. While fidgeting (NEAT) burns calories, the profound systemic changes (sweating, profound weight loss) are driven by an internal metabolic shift, not just moving more." },
+                        { text: "Her liver is overproducing glucagon, causing rapid lipolysis and subsequent heat generation.", isCorrect: false, feedback: "Incorrect. Glucagon does mobilize glucose, but the systemic hypermetabolism seen here is a hallmark of thyroid hormone excess, which controls the 'speed' of the metabolic engine." },
+                        { text: "Elevated T3/T4 significantly increases her Basal Metabolic Rate (BMR) by increasing oxygen consumption and heat production.", isCorrect: true, feedback: "Correct! As noted in the metabolic handout, thyroid hormones set the basal metabolic rate. An excess leads to rapid nutrient breakdown and elevated core temperature, driving weight loss despite increased calorie intake." }
+                    ],
+                    implication: "PT Implication: Because her BMR is running so high, her energy reserves for Exercise Activity Thermogenesis (EAT) are severely depleted. Fatigue will set in rapidly."
+                },
+                {
+                    text: "3. Reviewing the Hypothalamic-Pituitary-Thyroid (HPT) axis, what would her blood work likely show regarding Thyroid-Stimulating Hormone (TSH)?",
+                    options: [
+                        { text: "Abnormally high TSH due to the pituitary attempting to compensate for the muscle weakness.", isCorrect: false, feedback: "Incorrect. The pituitary monitors circulating hormone levels, not muscle weakness." },
+                        { text: "Abnormally low TSH due to negative feedback from elevated T3/T4 levels inhibiting the pituitary gland.", isCorrect: true, feedback: "Correct! In primary hyperthyroidism, the thyroid gland overproduces T3 and T4. These high levels send a strong negative feedback signal to the pituitary, suppressing the release of TSH." },
+                        { text: "Normal TSH, because the negative feedback loop only engages during fasting states.", isCorrect: false, feedback: "Incorrect. The HPT negative feedback loop is constantly active to maintain homeostasis." }
+                    ],
+                    implication: "Clinical Insight: Reviewing lab values confirms diagnosis. Low TSH + High T3/T4 is the classic diagnostic marker for primary hyperthyroidism."
+                }
+            ]
+        },
+        {
+            title: "The Fragile Tendon",
+            system: "Endocrine & Metabolic Systems",
+            scenario: "A 60-year-old male is 6 weeks post-op for a massive rotator cuff repair. He has a history of rheumatoid arthritis managed with long-term, high-dose systemic corticosteroids (prednisone). He bruises easily, and his surgical shoulder remains incredibly weak. You also note in his chart that his fasting blood glucose levels have been steadily climbing.",
+            questions: [
+                {
+                    text: "1. Why is his repaired tendon failing to heal at a normal physiological rate?",
+                    options: [
+                        { text: "Excess cortisol inhibits fibroblast proliferation, decreases collagen synthesis, and promotes protein degradation.", isCorrect: true, feedback: "Correct! Glucocorticoids are highly catabolic to connective tissue, downregulating the synthesis of new collagen and breaking down existing proteins (causing thin skin/bruising)." },
+                        { text: "Cortisol promotes excessive fibroblast proliferation, creating dense scar tissue that blocks healing.", isCorrect: false, feedback: "Incorrect. Cortisol is catabolic (breaks tissue down). It suppresses proliferation and inflammation; it does not cause excess scarring." },
+                        { text: "Prednisone causes ectopic calcification in the joint space, mechanically abrading the healing tendon.", isCorrect: false, feedback: "Incorrect. Corticosteroids do not mechanically abrade tissues via calcification; they act hormonally at the cellular level." }
+                    ],
+                    implication: "PT Implication: Mechanical loading must be progressed significantly slower because the tensile strength of the healing collagen is chemically compromised."
+                },
+                {
+                    text: "2. According to the metabolic handout, what hormonal action explains his climbing blood glucose levels?",
+                    options: [
+                        { text: "Cortisol destroys the beta cells of the pancreas, halting all insulin production.", isCorrect: false, feedback: "Incorrect. Cortisol induces insulin resistance and increases glucose production, but it does not cause autoimmune destruction of the beta cells (which would be Type 1 Diabetes)." },
+                        { text: "Corticosteroids block the renal excretion of glucose, forcing it to build up in the blood.", isCorrect: false, feedback: "Incorrect. Cortisol acts primarily on the liver and tissues, not by blocking renal excretion of glucose." },
+                        { text: "Cortisol promotes gluconeogenesis—the production of glucose from non-carbohydrate sources in the liver.", isCorrect: true, feedback: "Correct! As a stress hormone, cortisol ensures energy availability by signaling the liver to create new glucose (gluconeogenesis), which can lead to steroid-induced hyperglycemia over time." }
+                    ],
+                    implication: "PT Implication: Steroid-induced diabetes delays wound healing further and increases infection risk. Monitor for signs of hyperglycemia."
+                },
+                {
+                    text: "3. What long-term physiological action explains why this patient is at high risk for osteopenia/osteoporosis?",
+                    options: [
+                        { text: "Prednisone actively draws calcium out of the bones to buffer stomach acid.", isCorrect: false, feedback: "Incorrect. The mechanism is cellular, affecting bone-building and bone-destroying cells, not an acid-buffering chemical reaction in the stomach." },
+                        { text: "Cortisol counteracts insulin, leading to a reduction in bone formation and altering calcium absorption.", isCorrect: true, feedback: "Correct! Chronic high cortisol levels directly impair bone formation (reducing osteoblast activity) and alter calcium absorption, leading to rapid bone loss." },
+                        { text: "The medication blocks the mechanical signaling of weight-bearing exercises, stopping Wolff's Law.", isCorrect: false, feedback: "Incorrect. Mechanotransduction still occurs when he moves, but the cellular machinery (osteoblasts) is biochemically suppressed by the hormone." }
+                    ],
+                    implication: "PT Implication: High-velocity manipulations and heavy, sudden loading should be approached with extreme caution due to compromised bone density."
+                }
+            ]
+        },
+        {
+            title: "The Stiff Shoulder & Exercise Metabolism",
+            system: "Metabolic System (Type 2 Diabetes)",
+            scenario: "A 55-year-old male with poorly controlled Type 2 Diabetes (A1c 9.8%) presents with severe adhesive capsulitis (frozen shoulder). He is hesitant to exercise, stating 'my body doesn't process sugar right anyway, so what's the point of moving?'",
+            questions: [
+                {
+                    text: "1. Based on the metabolic module, how does Type 2 Diabetes fundamentally alter cellular energy uptake?",
+                    options: [
+                        { text: "The immune system destroys the pancreas, so no insulin is produced to move glucose.", isCorrect: false, feedback: "Incorrect. That describes Type 1 Diabetes. In Type 2, insulin is often still produced, but the body doesn't respond to it properly." },
+                        { text: "Insulin resistance prevents the normal signaling cascade, so GLUT-4 transporters do not move to the cell surface to let glucose in.", isCorrect: true, feedback: "Correct! In Type 2 Diabetes, the cells fail to respond to insulin properly. The signaling cascade is broken, meaning the GLUT-4 'doors' stay inside the cell, leaving glucose trapped in the bloodstream." },
+                        { text: "Glucagon levels drop to zero, meaning the liver absorbs all available blood sugar.", isCorrect: false, feedback: "Incorrect. In Type 2 Diabetes, glucagon regulation is also often impaired, but the primary defect in glucose uptake is skeletal muscle insulin resistance, not zero glucagon." }
+                    ],
+                    implication: "PT Implication: Because his cells are resistant to insulin, he is in a functional state of cellular starvation despite having high blood sugar. This severely impacts his stamina and tissue healing."
+                },
+                {
+                    text: "2. How can you explain the immediate metabolic benefit of exercise to this patient, despite his insulin resistance?",
+                    options: [
+                        { text: "Exercise forces the pancreas to suddenly secrete massive amounts of healthy insulin.", isCorrect: false, feedback: "Incorrect. During exercise, insulin levels typically *drop* to allow for fuel mobilization (like glucagon and catecholamine action)." },
+                        { text: "Exercise instantly reverses his insulin resistance for exactly 24 hours.", isCorrect: false, feedback: "Incorrect. While exercise improves insulin sensitivity post-workout, it does not 'instantly reverse' the pathology. There is a more mechanical reason exercise works acutely." },
+                        { text: "Muscle contraction stimulates GLUT-4 transporters to move to the cell membrane independently of insulin.", isCorrect: true, feedback: "Correct! This is a crucial PT concept. Even if a patient is insulin resistant, the mechanical act of muscle contraction opens the 'doors' (GLUT-4) to pull glucose out of the blood without needing insulin." }
+                    ],
+                    implication: "PT Implication: This is your primary patient education tool. You can literally prescribe movement as a mechanical 'bypass' for their faulty insulin signaling."
+                },
+                {
+                    text: "3. What long-term structural metabolic adaptation will a consistent training program provide?",
+                    options: [
+                        { text: "Training replaces the damaged beta cells in the pancreas with new, healthy cells.", isCorrect: false, feedback: "Incorrect. Exercise is powerful, but it does not regenerate pancreatic beta cells." },
+                        { text: "Training increases the number and efficiency of GLUT-4 transporters and improves mitochondrial density.", isCorrect: true, feedback: "Correct! Regular training creates structural adaptations. More GLUT-4 transporters and more mitochondria mean the muscle becomes a permanently larger and better 'sink' for clearing glucose from the blood." },
+                        { text: "Training shifts the body's BMR to rely entirely on protein for energy, bypassing glucose altogether.", isCorrect: false, feedback: "Incorrect. The body does not want to rely on protein for daily energy (that indicates starvation or severe stress). Training actually improves metabolic flexibility between fat and carbohydrates." }
+                    ],
+                    implication: "PT Implication: While a single bout of exercise acts like a dose of medication to lower blood sugar, consistent training structurally remodels the muscle to permanently handle energy better."
+                }
+            ]
+        },
+        {
+            title: "The Calcium Drain",
+            system: "Endocrine System (Parathyroid)",
+            scenario: "A 68-year-old female presents for mid-back pain. She has been urinating frequently, feels profoundly fatigued, has muscle twitching, and recently passed a kidney stone. During a gentle thoracic mobilization, she experiences a sharp pain. Imaging reveals a new compression fracture.",
+            questions: [
+                {
+                    text: "1. Assuming a parathyroid issue, how is her body prioritizing blood calcium over skeletal integrity?",
+                    options: [
+                        { text: "The parathyroid blocks vitamin D absorption in the gut, forcing bones to dissolve to survive.", isCorrect: false, feedback: "Incorrect. PTH actually stimulates the kidneys to activate Vitamin D, which increases gut absorption. The issue here is *excess* PTH." },
+                        { text: "Overactive parathyroid glands secrete excess PTH, which overstimulates osteoclast activity, rapidly pulling calcium from bone into blood.", isCorrect: true, feedback: "Correct! Excess PTH continuously stimulates osteoclasts (bone-destroying cells). They resorb bone to elevate blood calcium levels, causing kidney stones and leaving bones hollow." },
+                        { text: "Low PTH levels cause osteoblasts to die off prematurely, meaning old bone is never replaced.", isCorrect: false, feedback: "Incorrect. This patient is experiencing Hyperparathyroidism (high PTH). Low PTH would result in low blood calcium, not kidney stones." }
+                    ],
+                    implication: "PT Implication: She is actively, chemically osteoporotic until the parathyroid dysfunction is medically managed. Avoid heavy loading and joint manipulations."
+                },
+                {
+                    text: "2. What role does her altered calcium level play in her profound fatigue and muscle twitching?",
+                    options: [
+                        { text: "Calcium acts as a sedative in the brain, so high levels put her to sleep.", isCorrect: false, feedback: "Incorrect. While hypercalcemia causes fatigue, it's primarily a peripheral neuromuscular issue, not a central nervous system sedative effect." },
+                        { text: "High calcium solidifies the muscle fibers, making them too stiff and heavy to move.", isCorrect: false, feedback: "Incorrect. Fatigue and twitching are due to electrochemical imbalances at the neuromuscular junction, not physical solidification of muscle bellies." },
+                        { text: "Calcium is vital for muscle contraction; abnormal levels alter neuromuscular excitability.", isCorrect: true, feedback: "Correct! Calcium gradients dictate how nerves fire and muscles contract. Hypercalcemia depresses neuromuscular excitability, leading to profound weakness, fatigue, and twitching." }
+                    ],
+                    implication: "PT Implication: Her weakness is an electrochemical blockade, not just deconditioning. Standard strengthening exercises will not 'cure' this specific weakness until her calcium levels are normalized."
+                },
+                {
+                    text: "3. Under normal physiological conditions, what triggers the negative feedback loop to STOP the secretion of PTH?",
+                    options: [
+                        { text: "High levels of plasma glucose.", isCorrect: false, feedback: "Incorrect. Glucose triggers insulin release, not parathyroid hormone regulation." },
+                        { text: "Elevated levels of plasma calcium.", isCorrect: true, feedback: "Correct! The parathyroid glands monitor blood calcium. When plasma calcium concentrations rise back to normal (or get too high), this triggers a negative feedback loop to halt PTH secretion." },
+                        { text: "High levels of thyroid-stimulating hormone (TSH).", isCorrect: false, feedback: "Incorrect. TSH regulates the thyroid gland's production of T3/T4, not the parathyroid gland's regulation of calcium." }
+                    ],
+                    implication: "Clinical Insight: In this patient, the negative feedback loop is broken (often due to a benign tumor on the parathyroid gland), causing the gland to ignore high calcium levels and keep pumping out PTH."
+                }
+            ]
+        }
+    ];
+
+    let currentCaseIndex = 0;
+    let currentQuestionIndex = 0;
+    // Track which options have been clicked for the current question to keep them disabled
+    let clickedOptions = new Set(); 
+
+    function initApp() {
+        const navMenu = document.getElementById('navMenu');
+        cases.forEach((c, index) => {
+            const btn = document.createElement('button');
+            btn.className = `px-4 py-2 rounded-lg font-semibold whitespace-nowrap transition-colors border-2 
+                             ${index === 0 ? 'bg-blue-600 text-white border-blue-600' : 'text-slate-500 border-transparent hover:bg-slate-200 hover:text-blue-600'}`;
+            btn.innerText = `Case ${index + 1}`;
+            btn.onclick = () => loadCase(index);
+            navMenu.appendChild(btn);
+        });
+        loadCase(0);
+    }
+
+    function loadCase(index) {
+        currentCaseIndex = index;
+        currentQuestionIndex = 0;
+        clickedOptions.clear();
+        
+        // Update Nav visual state
+        const navButtons = document.getElementById('navMenu').children;
+        for (let i = 0; i < navButtons.length; i++) {
+            if (i === index) {
+                navButtons[i].className = 'px-4 py-2 rounded-lg font-semibold whitespace-nowrap transition-colors border-2 bg-blue-600 text-white border-blue-600';
+            } else {
+                navButtons[i].className = 'px-4 py-2 rounded-lg font-semibold whitespace-nowrap transition-colors border-2 text-slate-500 border-transparent hover:bg-slate-200 hover:text-blue-600';
+            }
+        }
+
+        renderQuestion();
+    }
+
+    function renderQuestion() {
+        const caseData = cases[currentCaseIndex];
+        const questionData = caseData.questions[currentQuestionIndex];
+        const contentArea = document.getElementById('mainContent');
+        
+        let html = `
+            <div class="fade-in" id="questionBlock">
+                <div class="text-sm font-bold text-blue-600 uppercase tracking-wider mb-1">${caseData.system}</div>
+                <h2 class="text-2xl font-bold mb-4">${caseData.title}</h2>
+                <div class="scenario-box p-4 rounded-r-lg mb-6 text-slate-700 leading-relaxed">
+                    ${caseData.scenario}
+                </div>
+                
+                <div class="flex justify-between items-center mb-4">
+                    <div class="text-sm font-bold text-slate-500 uppercase tracking-wider">
+                        Question ${currentQuestionIndex + 1} of ${caseData.questions.length}
+                    </div>
+                </div>
+                
+                <div class="text-lg font-bold mb-6 text-slate-800">${questionData.text}</div>
+                
+                <div class="grid gap-3" id="optionsContainer">
+        `;
+
+        questionData.options.forEach((opt, i) => {
+            // Check if this option was already clicked (if it's wrong, it should be disabled)
+            const isClicked = clickedOptions.has(i);
+            const extraClasses = isClicked ? 'selected-incorrect' : '';
+            const isDisabled = isClicked ? 'disabled' : '';
+
+            html += `
+                <button class="option-btn border-2 border-slate-300 bg-white p-4 rounded-xl text-left font-medium text-slate-700 flex gap-4 ${extraClasses}" 
+                        ${isDisabled}
+                        onclick="handleAnswer(${i}, this)">
+                    <span class="font-bold text-blue-600 shrink-0">${String.fromCharCode(65 + i)}.</span>
+                    <span>${opt.text}</span>
+                </button>
+            `;
+        });
+
+        html += `
+                </div>
+                <div id="feedbackPanel" class="mt-6 p-5 rounded-xl hidden"></div>
+            </div>
+        `;
+
+        contentArea.innerHTML = html;
+    }
+
+    function handleAnswer(optIdx, btnElement) {
+        const caseData = cases[currentCaseIndex];
+        const questionData = caseData.questions[currentQuestionIndex];
+        const selectedOption = questionData.options[optIdx];
+        
+        const feedbackPanel = document.getElementById('feedbackPanel');
+        const optionsContainer = document.getElementById('optionsContainer');
+        const allButtons = optionsContainer.querySelectorAll('.option-btn');
+
+        // Reset display
+        feedbackPanel.className = 'mt-6 p-5 rounded-xl hidden slide-in';
+
+        if (selectedOption.isCorrect) {
+            // Correct Answer Logic
+            allButtons.forEach(btn => btn.disabled = true);
+            btnElement.classList.add('selected-correct');
+
+            let nextActionHtml = '';
+            if (currentQuestionIndex < caseData.questions.length - 1) {
+                nextActionHtml = `<button class="mt-4 bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-6 rounded-lg float-right transition-colors" onclick="nextQuestion()">Next Question →</button>`;
+            } else if (currentCaseIndex < cases.length - 1) {
+                nextActionHtml = `<button class="mt-4 bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-6 rounded-lg float-right transition-colors" onclick="loadCase(${currentCaseIndex + 1})">Next Case →</button>`;
+            } else {
+                nextActionHtml = `<div class="mt-6 pt-4 border-t border-green-300 text-center font-bold text-green-800">You have completed all physiological cases!</div>`;
+            }
+
+            feedbackPanel.classList.add('bg-green-100', 'border', 'border-green-400', 'block');
+            feedbackPanel.innerHTML = `
+                <div class="font-bold text-lg text-green-800 mb-2 flex items-center gap-2">
+                    <svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                    Correct!
+                </div>
+                <p class="text-green-900">${selectedOption.feedback}</p>
+                <div class="mt-4 pt-4 border-t border-green-300 font-semibold text-green-900">
+                    ${questionData.implication}
+                </div>
+                ${nextActionHtml}
+                <div class="clear-both"></div>
+            `;
+        } else {
+            // Incorrect Answer Logic - Don't reveal correct answer!
+            btnElement.disabled = true;
+            btnElement.classList.add('selected-incorrect');
+            clickedOptions.add(optIdx); // Remember this was clicked so it stays disabled
+
+            feedbackPanel.classList.add('bg-red-100', 'border', 'border-red-400', 'block');
+            feedbackPanel.innerHTML = `
+                <div class="font-bold text-lg text-red-800 mb-2 flex items-center gap-2">
+                    <svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                    Not Quite.
+                </div>
+                <p class="text-red-900 mb-2">${selectedOption.feedback}</p>
+                <p class="font-bold text-red-800">Review the mechanism and try again!</p>
+            `;
+        }
+    }
+
+    function nextQuestion() {
+        currentQuestionIndex++;
+        clickedOptions.clear(); // Reset clicked states for the new question
+        renderQuestion();
+    }
+
+    // Initialize the app on load
+    window.onload = initApp;
+</script>
+
+</body>
+</html>
