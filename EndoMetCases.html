@@ -4,18 +4,182 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>PT Clinical Physiology Simulator</title>
-    <!-- Tailwind CSS for modern responsive styling -->
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <style>
-        body {
-            font-family: 'Inter', sans-serif;
-            background-color: #f1f5f9;
+        * {
+            box-sizing: border-box;
         }
 
-        .scenario-callout {
-            background: linear-gradient(135deg, #eff6ff 0%, #f8fafc 100%);
-            border-left: 5px solid #2563eb;
+        body {
+            font-family: Calibri, Candara, "Segoe UI", Optima, Arial, sans-serif;
+            background-color: #F5F5F5;
+            color: #333333;
+            margin: 0;
+            padding: 12px;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            min-height: 100vh;
+        }
+
+        .app-card {
+            max-width: 56rem;
+            width: 100%;
+            background: #ffffff;
+            border-radius: 1rem;
+            box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1), 0 8px 10px -6px rgba(0,0,0,0.1);
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            border: 1px solid #D9D9D9;
+        }
+
+        /* Header */
+        .header {
+            position: relative;
+            overflow: hidden;
+        }
+
+        .header-inner {
+            background: linear-gradient(to bottom right, #1a1a1a, #2d2d2d, #3d3d3d);
+            color: #ffffff;
+            padding: 24px;
+            text-align: center;
+            position: relative;
+        }
+
+        .header-logo {
+            display: none;
+            position: absolute;
+            top: 1.25rem;
+            right: 1.5rem;
+            text-align: right;
+            line-height: 1.2;
+        }
+
+        .header-logo-primary {
+            font-size: 10px;
+            font-weight: 700;
+            letter-spacing: 0.03em;
+            color: rgba(255,255,255,0.9);
+        }
+
+        .header-logo-secondary {
+            font-size: 10px;
+            color: rgba(255,255,255,0.6);
+        }
+
+        .header-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            background: rgba(200,16,46,0.2);
+            color: #ffffff;
+            font-size: 0.75rem;
+            font-weight: 600;
+            padding: 0.25rem 0.75rem;
+            border-radius: 9999px;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-bottom: 0.5rem;
+            border: 1px solid rgba(200,16,46,0.4);
+        }
+
+        .header-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            letter-spacing: -0.02em;
+            margin: 0;
+        }
+
+        .header-subtitle {
+            color: rgba(255,255,255,0.7);
+            font-size: 0.875rem;
+            margin: 0.25rem auto 0;
+            max-width: 42rem;
+        }
+
+        .course-bar {
+            background: #C8102E;
+            color: #ffffff;
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-align: center;
+            padding: 0.5rem 1rem;
+        }
+
+        /* Nav Tabs */
+        .tabs-nav {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            overflow-x: auto;
+            background: #F5F5F5;
+            padding: 0.75rem;
+            border-bottom: 1px solid #D9D9D9;
+        }
+
+        .tabs-nav::-webkit-scrollbar {
+            height: 6px;
+        }
+        .tabs-nav::-webkit-scrollbar-thumb {
+            background: #D9D9D9;
+            border-radius: 9999px;
+        }
+
+        .tab {
+            display: flex;
+            align-items: center;
+            gap: 0.4rem;
+            padding: 0.5rem 0.75rem;
+            border-radius: 0.75rem;
+            font-weight: 600;
+            font-size: 0.75rem;
+            white-space: nowrap;
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+            border: 2px solid transparent;
+            cursor: pointer;
+            font-family: inherit;
+        }
+
+        .tab-current {
+            background: #C8102E;
+            color: #ffffff;
+            border-color: #C8102E;
+            box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1), 0 2px 4px -2px rgba(0,0,0,0.1);
+        }
+
+        .tab-completed {
+            background: #ecfdf5;
+            color: #047857;
+            border-color: #6ee7b7;
+        }
+        .tab-completed:hover {
+            background: #d1fae5;
+        }
+
+        .tab-default {
+            background: #ffffff;
+            color: #333333;
+            border-color: #D9D9D9;
+        }
+        .tab-default:hover {
+            border-color: #C8102E;
+            background: #F5F5F5;
+        }
+
+        /* Main Content */
+        .main-content {
+            padding: 24px;
+            flex: 1 1 0%;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+
+        .content-wrap {
+            display: flex;
+            flex-direction: column;
+            gap: 1.25rem;
         }
 
         @keyframes fadeIn {
@@ -27,19 +191,146 @@
             animation: fadeIn 0.3s ease-out forwards;
         }
 
+        .badges-row {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            justify-content: space-between;
+            gap: 0.5rem;
+        }
+
+        .system-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.75rem;
+            font-weight: 700;
+            color: #2d6b96;
+            letter-spacing: 0.03em;
+            text-transform: uppercase;
+            background: rgba(69,153,199,0.1);
+            padding: 0.25rem 0.75rem;
+            border-radius: 0.5rem;
+            border: 1px solid rgba(69,153,199,0.3);
+        }
+
+        .progress-badge {
+            display: flex;
+            align-items: center;
+            gap: 0.375rem;
+            font-size: 0.75rem;
+            font-weight: 700;
+            color: #333333;
+            background: #F5F5F5;
+            padding: 0.25rem 0.75rem;
+            border-radius: 9999px;
+            border: 1px solid #D9D9D9;
+        }
+
+        .progress-dots {
+            display: flex;
+            gap: 0.25rem;
+            margin-left: 0.25rem;
+        }
+
+        .dot {
+            width: 0.625rem;
+            height: 0.625rem;
+            border-radius: 9999px;
+        }
+        .dot-current { background: #C8102E; }
+        .dot-done { background: #10b981; }
+        .dot-pending { background: #D9D9D9; }
+
+        .case-title {
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: #1a1a1a;
+            margin: 0;
+        }
+
+        .scenario-callout {
+            background: linear-gradient(135deg, #ffffff 0%, #f5f5f5 100%);
+            border-left: 5px solid #C8102E;
+            padding: 1rem;
+            border-top-right-radius: 0.75rem;
+            border-bottom-right-radius: 0.75rem;
+            color: #333333;
+            font-size: 0.875rem;
+            line-height: 1.625;
+            box-shadow: 0 1px 2px 0 rgba(0,0,0,0.05);
+        }
+
+        .scenario-label {
+            font-size: 0.75rem;
+            font-weight: 800;
+            text-transform: uppercase;
+            color: #C8102E;
+            letter-spacing: 0.05em;
+            margin-bottom: 0.25rem;
+        }
+
+        .question-prompt {
+            font-size: 1rem;
+            font-weight: 700;
+            color: #1a1a1a;
+            border-bottom: 1px solid #D9D9D9;
+            padding-bottom: 0.5rem;
+        }
+
+        .options-grid {
+            display: grid;
+            gap: 0.75rem;
+        }
+
         .option-button {
+            width: 100%;
+            border: 2px solid #D9D9D9;
+            background: #ffffff;
+            padding: 1rem;
+            border-radius: 0.75rem;
+            text-align: left;
+            font-weight: 500;
+            color: #333333;
+            display: flex;
+            align-items: flex-start;
+            gap: 0.875rem;
+            box-shadow: 0 1px 2px 0 rgba(0,0,0,0.05);
+            cursor: pointer;
+            font-family: inherit;
             transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
         }
 
         .option-button:hover:not(:disabled) {
-            border-color: #2563eb;
-            background-color: #eff6ff;
+            border-color: #C8102E;
+            background-color: #fdf2f3;
             transform: translateY(-2px);
             box-shadow: 0 4px 10px -1px rgba(0, 0, 0, 0.08);
         }
 
         .option-button:disabled {
             cursor: not-allowed;
+        }
+
+        .option-letter {
+            font-weight: 700;
+            color: #C8102E;
+            flex-shrink: 0;
+            margin-top: 0.125rem;
+            background: #fdf2f3;
+            border: 1px solid #f0c4cb;
+            width: 1.75rem;
+            height: 1.75rem;
+            border-radius: 0.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.875rem;
+        }
+
+        .option-text {
+            font-size: 0.875rem;
+            line-height: 1.375;
         }
 
         .status-correct {
@@ -57,43 +348,357 @@
             text-decoration: line-through;
         }
 
-        .case-tabs-container::-webkit-scrollbar {
-            height: 6px;
+        .feedback-box {
+            margin-top: 0.5rem;
+            padding: 1.25rem;
+            border-radius: 0.75rem;
+            display: none;
         }
-        .case-tabs-container::-webkit-scrollbar-thumb {
-            background: #cbd5e1;
+        .feedback-box.visible {
+            display: block;
+        }
+
+        .feedback-correct {
+            background: #ecfdf5;
+            border: 2px solid #10b981;
+            color: #022c22;
+        }
+        .feedback-incorrect {
+            background: #fff1f2;
+            border: 2px solid #fb7185;
+            color: #4c0519;
+        }
+
+        .feedback-title {
+            font-weight: 700;
+            font-size: 1rem;
+            margin-bottom: 0.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        .feedback-title.correct { color: #065f46; }
+        .feedback-title.incorrect { color: #9f1239; margin-bottom: 0.25rem; font-size: 0.875rem; }
+
+        .feedback-icon-correct {
+            width: 1.5rem;
+            height: 1.5rem;
+            color: #059669;
+            flex-shrink: 0;
+        }
+        .feedback-icon-incorrect {
+            width: 1.25rem;
+            height: 1.25rem;
+            color: #e11d48;
+            flex-shrink: 0;
+        }
+
+        .feedback-body {
+            font-size: 0.875rem;
+            line-height: 1.625;
+        }
+        .feedback-body.correct { color: #064e3b; }
+        .feedback-body.incorrect { color: #881337; margin-bottom: 0.625rem; font-size: 0.75rem; }
+
+        .implication-box {
+            margin-top: 0.875rem;
+            padding: 0.875rem 0.75rem 0.75rem;
+            border-top: 1px solid #a7f3d0;
+            font-size: 0.75rem;
+            font-weight: 600;
+            color: #064e3b;
+            background: rgba(209,250,229,0.6);
+            border-radius: 0.5rem;
+        }
+
+        .retry-note {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.375rem;
+            font-size: 0.75rem;
+            font-weight: 700;
+            color: #be123c;
+            background: rgba(255,228,230,0.8);
+            padding: 0.25rem 0.625rem;
+            border-radius: 0.375rem;
+        }
+
+        .action-btn {
+            margin-top: 1rem;
+            color: #ffffff;
+            font-weight: 700;
+            padding: 0.625rem 1.5rem;
+            border-radius: 0.75rem;
+            box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1), 0 2px 4px -2px rgba(0,0,0,0.1);
+            float: right;
+            transition: background-color 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            border: none;
+            cursor: pointer;
+            font-family: inherit;
+            font-size: 0.875rem;
+        }
+
+        .next-btn { background: #C8102E; }
+        .next-btn:hover { background: #a50d26; }
+        .next-btn:active { background: #8a0b20; }
+
+        .case-complete-btn { background: #4599C7; }
+        .case-complete-btn:hover { background: #357fa8; }
+        .case-complete-btn:active { background: #2d6b8f; }
+
+        .action-icon {
+            width: 1rem;
+            height: 1rem;
+        }
+
+        .clear-both { clear: both; }
+
+        .mastery-box {
+            margin-top: 1.25rem;
+            padding-top: 1rem;
+            border-top: 1px solid #6ee7b7;
+            text-align: center;
+        }
+        .mastery-title {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: #065f46;
+            font-weight: 800;
+            font-size: 1rem;
+            margin-bottom: 0.5rem;
+        }
+        .mastery-icon {
+            width: 1.25rem;
+            height: 1.25rem;
+            color: #059669;
+            flex-shrink: 0;
+        }
+        .mastery-text {
+            font-size: 0.75rem;
+            color: #047857;
+            margin: 0;
+        }
+
+        /* Footer */
+        .footer {
+            background: #F5F5F5;
+            padding: 0.75rem 1.5rem;
+            border-top: 1px solid #D9D9D9;
+            font-size: 0.75rem;
+            color: #666666;
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        .footer-status {
+            font-weight: 600;
+            color: #333333;
+        }
+
+        /* Blank-fill engine: shared by sentence-builder and diagram-builder questions */
+        .sentence-flow {
+            font-size: 0.95rem;
+            line-height: 2.1;
+            color: #333333;
+        }
+
+        .diagram-flow {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            gap: 0.4rem;
+            padding: 1rem 0.25rem;
+        }
+
+        .flow-arrow {
+            width: 1.1rem;
+            height: 1.1rem;
+            color: #b0b0b0;
+            flex-shrink: 0;
+        }
+
+        .blank-slot {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            min-width: 84px;
+            min-height: 2.1rem;
+            padding: 0.3rem 0.65rem;
+            margin: 0 1px;
+            border: 2px dashed #C8102E;
+            border-radius: 0.5rem;
+            background: #fdf2f3;
+            color: #C8102E;
+            font-weight: 700;
+            font-size: 0.8rem;
+            text-align: center;
+            line-height: 1.2;
+            cursor: pointer;
+            font-family: inherit;
+            transition: all 0.15s;
+        }
+        .blank-slot.hormone {
             border-radius: 9999px;
+            min-width: 56px;
+        }
+        .blank-slot.empty::after {
+            content: "tap to fill";
+            opacity: 0.65;
+            font-weight: 400;
+            font-size: 0.65rem;
+            display: block;
+        }
+        .blank-slot.filled {
+            border-style: solid;
+            background: #ffffff;
+            color: #1a1a1a;
+        }
+        .blank-slot.correct {
+            border-color: #16a34a;
+            border-style: solid;
+            background: #f0fdf4;
+            color: #14532d;
+        }
+        .blank-slot.incorrect {
+            border-color: #f87171;
+            border-style: solid;
+            background: #fef2f2;
+            color: #991b1b;
+        }
+
+        .word-bank {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+            padding: 1rem;
+            background: #F5F5F5;
+            border: 1px solid #D9D9D9;
+            border-radius: 0.75rem;
+            margin-top: 0.85rem;
+        }
+        .word-chip {
+            padding: 0.4rem 0.85rem;
+            background: #ffffff;
+            border: 2px solid #D9D9D9;
+            border-radius: 9999px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            color: #333333;
+            cursor: pointer;
+            font-family: inherit;
+            transition: all 0.15s;
+        }
+        .word-chip:hover {
+            border-color: #4599C7;
+        }
+        .word-chip.armed {
+            border-color: #4599C7;
+            background: #eaf4fa;
+            color: #2d6b96;
+            box-shadow: 0 0 0 3px rgba(69,153,199,0.25);
+        }
+        .word-chip.used {
+            display: none;
+        }
+
+        .feedback-note {
+            display: flex;
+            align-items: flex-start;
+            gap: 0.5rem;
+            background: #eaf4fa;
+            border: 1px solid rgba(69,153,199,0.3);
+            border-radius: 0.75rem;
+            padding: 0.7rem 0.9rem;
+            font-size: 0.75rem;
+            line-height: 1.5;
+            color: #2d6b96;
+            margin-top: 0.6rem;
+        }
+        .feedback-note svg {
+            width: 1rem;
+            height: 1rem;
+            flex-shrink: 0;
+            margin-top: 0.1rem;
+        }
+
+        .blankfill-status {
+            font-size: 0.78rem;
+            font-weight: 700;
+            margin-top: 0.6rem;
+            min-height: 1rem;
+        }
+        .blankfill-status.partial {
+            color: #b45309;
+        }
+
+        /* Responsive */
+        @media (min-width: 640px) {
+            body { padding: 24px; }
+            .header-inner { padding: 32px; }
+            .header-logo { display: block; }
+            .header-title { font-size: 1.875rem; }
+            .header-subtitle { font-size: 1rem; }
+            .course-bar { font-size: 0.875rem; }
+            .tabs-nav { padding: 1rem; }
+            .tab { padding: 0.5rem 1rem; font-size: 0.875rem; }
+            .main-content { padding: 32px; }
+            .system-badge { font-size: 0.875rem; }
+            .case-title { font-size: 1.5rem; }
+            .scenario-callout { padding: 1.25rem; font-size: 1rem; }
+            .question-prompt { font-size: 1.125rem; }
+            .option-text { font-size: 1rem; }
+            .feedback-title { font-size: 1.125rem; }
+            .feedback-title.incorrect { font-size: 1rem; }
+            .feedback-body { font-size: 1rem; }
+            .feedback-body.incorrect { font-size: 0.875rem; }
+            .implication-box { font-size: 0.875rem; }
+            .sentence-flow { font-size: 1.05rem; }
+            .blank-slot { font-size: 0.9rem; min-width: 100px; }
+            .word-chip { font-size: 0.85rem; }
+            .feedback-note { font-size: 0.8rem; }
+        }
+
+        @media (min-width: 768px) {
+            body { padding: 32px; }
         }
     </style>
 </head>
-<body class="text-slate-800 p-3 sm:p-6 md:p-8 flex justify-center items-start min-h-screen">
+<body>
 
-<div class="max-w-4xl w-full bg-white rounded-2xl shadow-xl overflow-hidden flex flex-col border border-slate-200">
+<div class="app-card">
     <!-- Top Banner -->
-    <header class="bg-gradient-to-r from-blue-700 via-indigo-700 to-blue-800 text-white p-6 sm:p-8 text-center relative">
-        <div class="inline-flex items-center gap-2 bg-blue-500/30 text-blue-100 text-xs font-semibold px-3 py-1 rounded-full uppercase tracking-wider mb-2 border border-blue-400/30">
-            DPT Foundations • Endocrine & Bioenergetics Lab
+    <header class="header">
+        <div class="header-inner">
+            <div class="header-logo">
+                <div class="header-logo-primary">NORTH CENTRAL COLLEGE</div>
+                <div class="header-logo-secondary">Doctor of Physical Therapy</div>
+            </div>
+            <div class="header-badge">DPT Foundations &bull; Endocrine &amp; Bioenergetics Lab</div>
+            <h1 class="header-title">Clinical Physiology Case Simulator</h1>
+            <p class="header-subtitle">Analyze clinical cases by tracing systemic presentations to underlying receptor mechanics, cellular metabolism, and feedback loops.</p>
         </div>
-        <h1 class="text-2xl sm:text-3xl font-extrabold tracking-tight">Clinical Physiology Case Simulator</h1>
-        <p class="text-blue-100 text-sm sm:text-base mt-1 max-w-2xl mx-auto">
-            Analyze clinical cases by tracing systemic presentations to underlying receptor mechanics, cellular metabolism, and feedback loops.
-        </p>
+        <div class="course-bar">DPTD 733 &bull; Foundational Movement Science III</div>
     </header>
-    
+
     <!-- Navigation Tabs for Cases -->
-    <nav class="flex items-center gap-2 overflow-x-auto bg-slate-100 p-3 sm:p-4 border-b border-slate-200 case-tabs-container" id="navContainer">
+    <nav class="tabs-nav" id="navContainer">
         <!-- Dynamically rendered tabs -->
     </nav>
 
     <!-- Main Content Area -->
-    <main class="p-6 sm:p-8 flex-1 flex flex-col justify-between" id="activeCaseContent">
+    <main class="main-content" id="activeCaseContent">
         <!-- Dynamically rendered question & options -->
     </main>
 
-    <!-- Footer Progress and Curriculum Details -->
-    <footer class="bg-slate-50 px-6 py-3.5 border-t border-slate-200 text-xs text-slate-500 flex flex-wrap justify-between items-center gap-2">
-        <span class="font-medium text-slate-600">DPTD 733: Foundational Movement Science III</span>
-        <span id="footerCaseStatus" class="font-semibold text-slate-700">Case 1 of 4</span>
+    <!-- Footer Progress -->
+    <footer class="footer">
+        <span id="footerCaseStatus" class="footer-status">Case 1 of 4</span>
     </footer>
 </div>
 
@@ -102,37 +707,24 @@
         {
             title: "The Accelerated Engine",
             system: "Thyroid & Bioenergetics",
-            icon: "⚡",
             scenario: "A 42-year-old female is referred to outpatient physical therapy presenting with profound fatigue and progressive proximal lower-extremity weakness. She struggles to rise from a chair without pushing with both arms and feels unsteady descending stairs. During a light 5-minute warm-up on a stationary recumbent bike (minimal resistance), her heart rate surges to 148 bpm, accompanied by profuse diaphoresis. She reports feeling 'shaky and jittery,' heat intolerant, and notes an unintended 12 lb weight loss over the past 6 weeks despite a voracious appetite. Her physician is investigating suspected hyperthyroidism.",
             questions: [
                 {
-                    prompt: "1. What cellular endocrine mechanism explains her exaggerated tachycardia and proximal muscle weakness during minimal exertion?",
-                    options: [
-                        {
-                            text: "Excess thyroid hormones (T3/T4) deplete systemic plasma volume, requiring compensatory tachycardia to sustain mean arterial pressure.",
-                            isCorrect: false,
-                            feedback: "Incorrect. Hyperthyroidism typically increases cardiac output and peripheral blood flow rather than causing hypovolemia. Her tachycardia is driven by autonomic receptor sensitization, not fluid deficit."
-                        },
-                        {
-                            text: "Elevated T3/T4 upregulates cardiac beta-adrenergic receptors and accelerates skeletal muscle protein degradation.",
-                            isCorrect: true,
-                            feedback: "Correct! As emphasized in the endocrine GL, thyroid hormones exert a permissive effect by upregulating beta-adrenergic receptors on cardiomyocytes, making the heart hypersensitive to circulating catecholamines. Concurrently, hyperthyroidism accelerates muscle protein turnover and catabolism, precipitating proximal thyrotoxic myopathy."
-                        },
-                        {
-                            text: "Thyroid hormones directly depolarize the sinoatrial node while physically denervating proximal alpha motor units.",
-                            isCorrect: false,
-                            feedback: "Incorrect. Thyroid hormones do not act as chemical neurotoxins that denervate motor axons or directly depolarize the SA node. Their actions are mediated via cellular gene expression and receptor sensitivity."
-                        },
-                        {
-                            text: "High circulating calcitonin blocks acetylcholine release at the neuromuscular junction, inducing flaccid paresis.",
-                            isCorrect: false,
-                            feedback: "Incorrect. Calcitonin promotes bone mineralization and calcium excretion; it has no inhibitory action on neuromuscular acetylcholine release."
-                        }
+                    type: "sentence",
+                    prompt: "1. Fill in the blanks to complete the mechanism behind her exaggerated tachycardia during minimal exertion:",
+                    segments: [
+                        { type: "text", value: "Thyroid hormones don't directly stimulate the heart. Instead, the endocrine GL describes this as a " },
+                        { type: "blank", id: "b1", correct: "permissive", style: "hormone" },
+                        { type: "text", value: " interaction: they ensure the heart's responsiveness to circulating " },
+                        { type: "blank", id: "b2", correct: "adrenaline", style: "hormone" },
+                        { type: "text", value: ", amplifying its effects." }
                     ],
-                    implication: "PT Implication: Target heart rate calculations (such as Karvonen) are completely invalid for this patient. Her cardiac output is dangerously disconnected from physical workload, posing severe risk for exercise-induced tachyarrhythmias. High-intensity conditioning must be deferred until medical euthyroid status is achieved."
+                    wordBank: ["permissive", "adrenaline", "antagonistic", "synergistic", "tropic", "cortisol"],
+                    feedback: "Correct! As the endocrine GL's section on hormonal interactions explains, this is a permissive interaction: thyroid hormones don't directly stimulate heart rate, but they ensure the heart's responsiveness to adrenaline, amplifying its effects. That's why even a light warm-up sends her heart rate surging to 148 bpm.",
+                    implication: "PT Implication: Because her heart is hypersensitized to circulating adrenaline rather than responding proportionally to workload, target heart rate calculations (such as Karvonen) are unreliable for this patient. High-intensity conditioning should be deferred until medical euthyroid status is achieved."
                 },
                 {
-                    prompt: "2. Connecting to metabolic energy accounting (TEE = BMR + TEF + EAT/NEAT), what is driving her rapid weight loss and diaphoresis?",
+                    prompt: "2. Connecting to metabolic energy accounting (TEE = BMR + TEF + EAT/NEAT), what is driving her rapid weight loss, diaphoresis, and muscle weakness?",
                     options: [
                         {
                             text: "Non-Exercise Activity Thermogenesis (NEAT) is solely responsible due to involuntary fine resting tremors.",
@@ -142,7 +734,7 @@
                         {
                             text: "Elevated T3/T4 drastically elevates her Basal Metabolic Rate (BMR) by ramping cellular oxygen consumption and heat production.",
                             isCorrect: true,
-                            feedback: "Correct! The metabolic GL describes thyroid hormones as the 'control knobs' setting the baseline speed of the metabolic engine. T3/T4 dramatically raises BMR (which normally accounts for 60-70% of TEE) by accelerating mitochondrial respiration, uncoupling ATP synthesis, and boosting thermogenesis."
+                            feedback: "Correct! As detailed in the metabolic GL, thyroid hormones set the basal metabolic rate by increasing oxygen consumption and heat production in tissues \u2014 and BMR normally accounts for 60-70% of total energy expenditure. Thyroid hormones also influence protein turnover and muscle contractile behavior, which, combined with her elevated metabolic rate, helps explain both her weight loss and her proximal muscle weakness."
                         },
                         {
                             text: "Hyperthyroidism shuts down glycolysis entirely, forcing the renal system to excrete intact carbohydrates.",
@@ -153,54 +745,67 @@
                     implication: "PT Implication: Because her BMR 'floor' is operating at maximum capacity, her energetic reserve for Exercise Activity Thermogenesis (EAT) is near zero. Physical therapy sessions must be kept short, set in a climate-controlled room, and interspersed with frequent seated rest bouts."
                 },
                 {
-                    prompt: "3. Reviewing the Hypothalamic-Pituitary-Thyroid (HPT) negative feedback loop, what pattern would diagnostic blood work confirm in primary hyperthyroidism?",
+                    type: "diagram",
+                    prompt: "3. Build the Hypothalamic-Pituitary-Thyroid (HPT) axis by placing each structure and hormone in order:",
+                    segments: [
+                        { type: "blank", id: "n1", correct: "Hypothalamus", style: "node" },
+                        { type: "arrow" },
+                        { type: "blank", id: "h1", correct: "TRH", style: "hormone" },
+                        { type: "arrow" },
+                        { type: "blank", id: "n2", correct: "Anterior Pituitary", style: "node" },
+                        { type: "arrow" },
+                        { type: "blank", id: "h2", correct: "TSH", style: "hormone" },
+                        { type: "arrow" },
+                        { type: "blank", id: "n3", correct: "Thyroid Gland", style: "node" },
+                        { type: "arrow" },
+                        { type: "blank", id: "h3", correct: "T3/T4", style: "hormone" }
+                    ],
+                    wordBank: ["Hypothalamus", "TRH", "Anterior Pituitary", "TSH", "Thyroid Gland", "T3/T4", "Adrenal Cortex", "CRH", "ACTH", "Cortisol"],
+                    feedbackNote: "Negative feedback: once you've built the axis, notice that rising T3/T4 loop back and suppress further TRH and TSH release.",
+                    feedback: "Correct! As the endocrine GL explains, elevated levels of T3 and T4 inhibit the release of TRH and TSH, creating a negative feedback loop. Because her thyroid is producing hormone independent of normal pituitary control, this feedback loop is fully engaged: TRH and TSH secretion are suppressed even as T3/T4 remain high.",
+                    implication: "Clinical Insight: This negative feedback loop is central to how the HPT axis regulates itself. Recognizing that her body's normal 'brake' on thyroid hormone production has been overridden helps explain the severity of her presentation, and underscores the need for medical endocrine management before advancing therapeutic loads."
+                },
+                {
+                    prompt: "4. The metabolic GL's hormone table marks thyroid hormone \"NC\" (no meaningful change) across fed, fasting, and exercise states \u2014 unlike insulin, glucagon, or catecholamines, which all shift. What does this tell you about her hyperthyroidism?",
                     options: [
                         {
-                            text: "Elevated TSH accompanied by low free T3/T4 due to pituitary compensatory drive.",
-                            isCorrect: false,
-                            feedback: "Incorrect. Elevated TSH with low T3/T4 is the hallmark of primary *hypo*thyroidism, where the anterior pituitary attempts to stimulate a failing thyroid gland."
-                        },
-                        {
-                            text: "Suppressed (near zero) TSH with markedly elevated free T3/T4 due to potent negative feedback on the anterior pituitary.",
+                            text: "Unlike hormones that shift moment-to-moment, thyroid hormone sets a stable metabolic baseline \u2014 so her elevated state isn't a temporary spike, it's a constantly shifted 'floor' that persists across rest, meals, and activity.",
                             isCorrect: true,
-                            feedback: "Correct! In primary hyperthyroidism (e.g., Graves' disease), autonomous thyroid hypersecretion floods the circulation with T3 and T4. These high circulating levels act on both the anterior pituitary (adenohypophysis) and hypothalamus, shutting down TRH and TSH secretion."
+                            feedback: "Correct! The metabolic GL's hormone table shows thyroid marked NC across fed, fasting, and exercise states, while insulin, glucagon, and catecholamines all shift with the state. Thyroid hormone works more like a dial that's been turned up and left there \u2014 consistent with the GL's 'control knobs' framing, where thyroid sets the baseline speed of the metabolic engine rather than responding moment-to-moment."
                         },
                         {
-                            text: "High TRH from the hypothalamus with normal TSH and elevated calcitonin.",
+                            text: "Her thyroid hormone will normalize automatically once she rests, the same way catecholamines drop during recovery.",
                             isCorrect: false,
-                            feedback: "Incorrect. High circulating T3/T4 suppresses TRH secretion from the hypothalamus; TRH would be low, not high."
+                            feedback: "Incorrect. The GL's hormone table marks thyroid as NC across state transitions \u2014 it doesn't rise and fall acutely with rest or activity the way catecholamines do."
+                        },
+                        {
+                            text: "Because thyroid hormone doesn't change with activity, exercise has no effect on her symptoms at all.",
+                            isCorrect: false,
+                            feedback: "Incorrect. While thyroid hormone itself doesn't shift acutely with exercise, her cardiovascular and metabolic response to activity is still very much affected by her chronically elevated baseline."
                         }
                     ],
-                    implication: "Clinical Insight: Confirming lab trends protects patient safety. A suppressed TSH with high free T4 indicates systemic thyrotoxicosis, requiring medical endocrine stabilization before advancing therapeutic resistance loads."
+                    implication: "PT Implication: Because her hyperthyroid state is a constant baseline shift rather than a temporary spike, symptom monitoring should happen across the entire session \u2014 not just during exertion \u2014 and expectations for a 'good day' vs. 'bad day' should account for this persistently altered baseline."
                 }
             ]
         },
         {
             title: "The Fragile Tendon",
             system: "Adrenal & Connective Tissue",
-            icon: "🩹",
             scenario: "A 60-year-old male is 7 weeks status-post open surgical repair of a massive supraspinatus tear. He has a 12-year history of severe rheumatoid arthritis managed with long-term, high-dose oral prednisone (a synthetic glucocorticoid). In clinic, the surgical incision demonstrates delayed epithelialization, the surrounding skin is paper-thin with pronounced ecchymosis (bruising) from gentle palpation, and he has marked deltoid and supraspinatus atrophy. Chart review indicates a fasting blood glucose of 144 mg/dL.",
             questions: [
                 {
-                    prompt: "1. Based on the catabolic actions of glucocorticoids, why is his repaired tendon failing to achieve expected tensile strength?",
-                    options: [
-                        {
-                            text: "Excess glucocorticoids stimulate exuberant myofibroblast activity, choking the tendon in disorganized hypertrophic scar.",
-                            isCorrect: false,
-                            feedback: "Incorrect. Cortisol is anti-proliferative and catabolic; it inhibits cellular proliferation and matrix synthesis rather than producing hypertrophic scars."
-                        },
-                        {
-                            text: "Glucocorticoids inhibit fibroblast proliferation, downregulate type I collagen synthesis, and accelerate protein catabolism.",
-                            isCorrect: true,
-                            feedback: "Correct! As detailed in the endocrine and metabolic handouts, cortisol and synthetic glucocorticoids exert powerful catabolic effects on musculoskeletal tissues. They inhibit fibroblast proliferation, suppress type I collagen transcription, and promote the breakdown of muscle and tendon proteins into free amino acids."
-                        },
-                        {
-                            text: "Prednisone causes precipitation of hydroxyapatite crystals in the tendon sheath, physically fraying surgical anchor sutures.",
-                            isCorrect: false,
-                            feedback: "Incorrect. Prednisone does not crystallize or physically abrade tissues. Its deleterious actions are biochemical and transcriptional."
-                        }
+                    type: "sentence",
+                    prompt: "1. Fill in the blanks to complete the mechanism behind his poor tissue healing:",
+                    segments: [
+                        { type: "text", value: "Cortisol decreases " },
+                        { type: "blank", id: "b1", correct: "amino acid", style: "hormone" },
+                        { type: "text", value: " uptake by muscle and drives " },
+                        { type: "blank", id: "b2", correct: "catabolism", style: "hormone" },
+                        { type: "text", value: " of proteins throughout the body." }
                     ],
-                    implication: "PT Implication: Time-based post-operative protocols must be abandoned for criteria-based biological pacing! Collagen synthesis is blunted. Premature active elevation or aggressive end-range passive stretching carries an exceptionally high risk of tendon re-tear."
+                    wordBank: ["amino acid", "catabolism", "glucose", "synthesis", "anabolism", "glycogen"],
+                    feedback: "Correct! As shown in the metabolic GL, cortisol decreases amino acid uptake by muscle and controls catabolism of proteins throughout the body, while also promoting gluconeogenesis and mobilizing fat. This catabolic environment \u2014 more protein breakdown, less uptake for rebuilding \u2014 is why his healing tissue isn't gaining the tensile strength expected at 7 weeks post-op.",
+                    implication: "PT Implication: Time-based post-operative protocols must be abandoned for criteria-based biological pacing! With protein catabolism elevated and amino acid uptake by muscle suppressed, premature active elevation or aggressive end-range passive stretching carries an exceptionally high risk of tendon re-tear."
                 },
                 {
                     prompt: "2. Why has this patient developed elevated fasting blood glucose (144 mg/dL) while taking systemic prednisone?",
@@ -227,50 +832,63 @@
                     prompt: "3. What long-term skeletal consequence of chronic corticosteroid therapy creates an immediate red flag during manual therapy?",
                     options: [
                         {
-                            text: "Cortisol reduces osteoblast bone formation, impairs intestinal calcium absorption, and increases renal calcium clearance.",
+                            text: "Cortisol reduces bone formation, weakening the skeleton over time and raising fracture risk with aggressive manual loading.",
                             isCorrect: true,
-                            feedback: "Correct! The endocrine GL emphasizes that prolonged high cortisol directly suppresses osteoblast bone-forming activity, downregulates intestinal calcium absorption (counteracting vitamin D), and increases renal calcium excretion, driving rapid steroid-induced osteoporosis."
+                            feedback: "Correct! As shown in the metabolic GL's overview of cortisol's actions, cortisol reduces bone formation. Combined with his long-term, high-dose steroid use, this creates a substantial fracture risk that must be considered before any aggressive manual therapy."
                         },
                         {
                             text: "Prednisone binds directly to parathyroid hormone receptors, causing hyper-mineralization and brittle petrified bone.",
                             isCorrect: false,
-                            feedback: "Incorrect. Cortisol induces osteopenia and bone thinning, not petrified hyper-mineralization."
+                            feedback: "Incorrect. Cortisol reduces bone formation, causing thinning, not petrified hyper-mineralization."
                         },
                         {
                             text: "Glucocorticoids cause systemic calcification of synovial membranes, eliminating joint mobility entirely.",
                             isCorrect: false,
-                            feedback: "Incorrect. Cortisol reduces bone mineral density rather than causing widespread synovial calcification."
+                            feedback: "Incorrect. Cortisol reduces bone formation rather than causing widespread synovial calcification."
                         }
                     ],
                     implication: "PT Implication: High-velocity thrust manipulations (HVLA) of the spine and vigorous rib mobilizations are STRICTLY CONTRAINDICATED due to the extreme risk of insufficiency and wedge compression fractures."
+                },
+                {
+                    type: "diagram",
+                    prompt: "4. Build the Hypothalamic-Pituitary-Adrenal (HPA) axis that governs his body's own cortisol production:",
+                    segments: [
+                        { type: "blank", id: "n1", correct: "Hypothalamus", style: "node" },
+                        { type: "arrow" },
+                        { type: "blank", id: "h1", correct: "CRH", style: "hormone" },
+                        { type: "arrow" },
+                        { type: "blank", id: "n2", correct: "Anterior Pituitary", style: "node" },
+                        { type: "arrow" },
+                        { type: "blank", id: "h2", correct: "ACTH", style: "hormone" },
+                        { type: "arrow" },
+                        { type: "blank", id: "n3", correct: "Adrenal Cortex", style: "node" },
+                        { type: "arrow" },
+                        { type: "blank", id: "h3", correct: "Cortisol", style: "hormone" }
+                    ],
+                    wordBank: ["Hypothalamus", "CRH", "Anterior Pituitary", "ACTH", "Adrenal Cortex", "Cortisol", "TRH", "TSH", "Thyroid Gland", "T3/T4"],
+                    feedbackNote: "Negative feedback: elevated cortisol levels inhibit the release of CRH and ACTH, creating this feedback mechanism.",
+                    feedback: "Correct! As the endocrine GL describes, the hypothalamus produces CRH, which prompts the pituitary gland to release ACTH; ACTH then stimulates the adrenal glands to produce cortisol. Elevated cortisol levels normally inhibit further CRH and ACTH release, creating this negative feedback loop.",
+                    implication: "Clinical Insight: This is the same category of hormonal cascade as the HPT axis from Case 1 \u2014 a hypothalamic releasing hormone, a pituitary tropic hormone, and a target-gland hormone that feeds back to shut off its own drive. Recognizing this shared pattern makes it easier to reason through any endocrine axis you encounter in practice."
                 }
             ]
         },
         {
             title: "The Stiff Shoulder & Bioenergetics",
             system: "Type 2 Diabetes & Bioenergetics",
-            icon: "🔄",
             scenario: "A 55-year-old male with poorly controlled Type 2 Diabetes (HbA1c 9.6%) presents with stage-2 adhesive capsulitis of his right shoulder. During gait evaluation, you observe a painless blister over his 1st metatarsal head that he was unaware of. When prescribed therapeutic exercise, he is resistant, stating: 'My doctor told me my body doesn't process glucose correctly anyway, so what good does exercising my arms and legs do?'",
             questions: [
                 {
-                    prompt: "1. At the cellular level, what is the primary pathophysiological lesion in Type 2 Diabetes that impairs his resting glucose clearance?",
-                    options: [
-                        {
-                            text: "Autoimmune destruction of pancreatic beta cells, resulting in absolute insulin deficiency.",
-                            isCorrect: false,
-                            feedback: "Incorrect. Autoimmune beta cell destruction characterizes Type 1 Diabetes. Type 2 Diabetes is characterized by peripheral insulin resistance."
-                        },
-                        {
-                            text: "Insulin receptor insensitivity blunts intracellular signaling, preventing GLUT-4 vesicles from translocating to the sarcolemma.",
-                            isCorrect: true,
-                            feedback: "Correct! In Type 2 Diabetes, target tissues (skeletal muscle and adipocytes) demonstrate blunted receptor signaling cascades. Consequently, intracellular vesicles containing GLUT-4 glucose transporters fail to translocate to the plasma membrane, leaving glucose trapped in the bloodstream."
-                        },
-                        {
-                            text: "Pancreatic alpha cells overproduce glucagon, directly destroying GLUT-4 transporter proteins in muscle tissue.",
-                            isCorrect: false,
-                            feedback: "Incorrect. Glucagon acts primarily on hepatic tissue to mobilize fuel; it does not destroy muscular GLUT-4 proteins."
-                        }
+                    type: "sentence",
+                    prompt: "1. Fill in the blanks to complete the primary cellular lesion in Type 2 Diabetes:",
+                    segments: [
+                        { type: "text", value: "Insulin resistance means the signaling cascade that normally moves " },
+                        { type: "blank", id: "b1", correct: "GLUT-4", style: "hormone" },
+                        { type: "text", value: " transporters to the " },
+                        { type: "blank", id: "b2", correct: "cell surface", style: "hormone" },
+                        { type: "text", value: " breaks down." }
                     ],
+                    wordBank: ["GLUT-4", "cell surface", "insulin receptor", "mitochondrial membrane", "nucleus", "Golgi apparatus"],
+                    feedback: "Correct! As the metabolic GL explains, insulin normally binds its receptor on skeletal muscle and adipose cells, triggering a signaling cascade that moves GLUT-4 transporters to the cell surface so glucose can enter. In Type 2 Diabetes, the body's cells don't respond properly to insulin \u2014 this signaling breaks down, GLUT-4 stays trapped inside the cell, and glucose is left stranded in the bloodstream.",
                     implication: "PT Implication: Because his skeletal muscle cannot readily access circulating glucose at rest, his muscle cells experience relative energy starvation and impaired glycogen synthesis, explaining his rapid muscular fatigue."
                 },
                 {
@@ -279,7 +897,7 @@
                         {
                             text: "Repetitive muscle contractions stimulate GLUT-4 translocation to the cell membrane via an insulin-independent pathway.",
                             isCorrect: true,
-                            feedback: "Correct! This is a cornerstone physical therapy concept. Mechanical muscle contraction activates intracellular signaling pathways (such as AMPK and calcium/calmodulin-dependent kinases) that trigger GLUT-4 transporter migration to the sarcolemma completely independent of insulin. Exercise provides an organic bypass around defective insulin receptors!"
+                            feedback: "Correct! As the metabolic GL explains, exercise stimulates GLUT-4 translocation to the muscle cell membrane through contraction signals \u2014 completely independent of insulin. This means his muscles can take up glucose through physical activity even though his insulin signaling is impaired."
                         },
                         {
                             text: "Physical exertion prompts the liver to immediately convert all circulating blood glucose into structural protein.",
@@ -300,57 +918,63 @@
                         {
                             text: "Skeletal muscle upregulates total GLUT-4 transporter density and significantly expands mitochondrial density.",
                             isCorrect: true,
-                            feedback: "Correct! The metabolic GL highlights that regular aerobic and resistance training induce structural adaptations: muscle tissue synthesizes more GLUT-4 transport proteins and increases mitochondrial volume and enzyme density. This permanently expands the patient's 'glucose sink' and elevates insulin sensitivity for 24-48 hours post-exercise."
+                            feedback: "Correct! The metabolic GL highlights that regular aerobic and resistance training increase both the number and efficiency of GLUT-4 transporters and improve mitochondrial density, supporting better glucose handling. Muscle becomes an even larger glucose sink, and after a workout, muscles stay more sensitive to insulin for several hours \u2014 a key mechanism behind exercise as a treatment for insulin resistance and type 2 diabetes."
                         },
                         {
                             text: "Muscle fibers convert all energy metabolism to protein catabolism, eliminating cellular reliance on carbohydrates.",
                             isCorrect: false,
-                            feedback: "Incorrect. Protein is an emergency catabolic substrate; exercise training enhances carbohydrate and lipid handling (metabolic flexibility), not reliance on protein."
+                            feedback: "Incorrect. Protein is not a primary energy store; exercise training improves the muscle's handling of carbohydrate and fat, not reliance on protein."
                         },
                         {
-                            text: "Hypertrophied muscle permanently closes its sarcolemma to protect against Advanced Glycation End-products (AGEs).",
+                            text: "Hypertrophied muscle permanently closes its GLUT-4 pathway to protect against excess glucose uptake.",
                             isCorrect: false,
-                            feedback: "Incorrect. The sarcolemma must remain permeable to substrates; training prevents AGE accumulation by maintaining euglycemia, not by sealing cell walls."
+                            feedback: "Incorrect. Training increases GLUT-4 transporter number and efficiency \u2014 it doesn't close off glucose uptake."
                         }
                     ],
-                    implication: "PT Implication: Frame his exercise regimen as long-term tissue engineering. Increased mitochondrial mass will improve both his metabolic regulation and his connective tissue remodeling in his stiff shoulder."
+                    implication: "PT Implication: Frame his exercise regimen as more than joint mobility work \u2014 every session is also improving his glucose handling and post-exercise insulin sensitivity, directly addressing the metabolic barrier that's compounding his fatigue and slow progress."
+                },
+                {
+                    type: "sentence",
+                    prompt: "4. Fill in the blanks to complete this hormone interaction, as described in the endocrine GL:",
+                    segments: [
+                        { type: "text", value: "Insulin and glucagon exhibit " },
+                        { type: "blank", id: "b1", correct: "antagonistic", style: "hormone" },
+                        { type: "text", value: " actions on blood glucose: insulin lowers it by promoting cellular uptake, while glucagon " },
+                        { type: "blank", id: "b2", correct: "raises", style: "hormone" },
+                        { type: "text", value: " it by stimulating release from stored forms." }
+                    ],
+                    wordBank: ["antagonistic", "raises", "permissive", "synergistic", "lowers", "tropic"],
+                    feedback: "Correct! As the endocrine GL's section on hormonal interactions explains, insulin and glucagon exhibit antagonistic (opposing) actions on blood glucose: insulin reduces it by promoting cellular uptake, while glucagon raises it by stimulating glucose release from stored forms. His Type 2 Diabetes disrupts the insulin side of this balance, leaving glucagon's glucose-raising effect relatively unchecked.",
+                    implication: "PT Implication: Because his glucose-lowering pathway (insulin) is impaired while his glucose-raising pathway (glucagon) still functions normally, his blood sugar tends to run persistently high at rest \u2014 reinforcing why muscle contraction's insulin-independent glucose uptake (from Question 2) is such a valuable tool for him specifically."
                 }
             ]
         },
         {
             title: "The Calcium Drain",
             system: "Parathyroid & Calcium Balance",
-            icon: "🦴",
             scenario: "A 68-year-old female presents to your outpatient clinic with diffuse mid-thoracic ache and debilitating proximal weakness. She reports polyuria (excessive urination), constipation, constant fatigue, and a history of recurrent nephrolithiasis (calcium oxalate kidney stones). During gentle thoracic spine extension mobilization in prone, she feels an acute, sharp thoracic 'snap.' Urgent plain radiographs reveal an acute T8 vertebral wedge compression fracture and widespread osteopenia.",
             questions: [
                 {
-                    prompt: "1. In primary hyperparathyroidism, how does excessive Parathyroid Hormone (PTH) sacrifice skeletal integrity to elevate blood calcium?",
-                    options: [
-                        {
-                            text: "Excess PTH directly downregulates osteoclasts, causing old, brittle bone to accumulate without remodeling.",
-                            isCorrect: false,
-                            feedback: "Incorrect. PTH *stimulates* osteoclasts (via osteoblastic RANKL signaling). Downregulating osteoclasts would cause osteopetrosis, not the severe bone resorption and osteopenia seen here."
-                        },
-                        {
-                            text: "Excess PTH hyper-stimulates osteoclast-mediated bone resorption, continuously stripping calcium and phosphate from bone into the bloodstream.",
-                            isCorrect: true,
-                            feedback: "Correct! As detailed in the endocrine GL, parathyroid hormone acts to raise plasma calcium levels. Chronic excessive PTH shifts bone remodeling toward massive osteoclastic bone resorption, leaching structural calcium hydroxyapatite into the circulation and leaving the skeleton porous and fracture-prone."
-                        },
-                        {
-                            text: "PTH blocks vitamin D activation in the renal parenchyma, stopping dietary calcium absorption entirely.",
-                            isCorrect: false,
-                            feedback: "Incorrect. PTH actually stimulates renal 1-alpha-hydroxylase to convert Vitamin D into its active form (calcitriol), which *increases* gut calcium absorption. The hypercalcemia comes from both gut absorption and bone demineralization."
-                        }
+                    type: "sentence",
+                    prompt: "1. Fill in the blanks to complete the mechanism behind her skeletal fragility:",
+                    segments: [
+                        { type: "text", value: "Excess PTH continuously increases " },
+                        { type: "blank", id: "b1", correct: "osteoclast", style: "hormone" },
+                        { type: "text", value: " activity, releasing " },
+                        { type: "blank", id: "b2", correct: "calcium", style: "hormone" },
+                        { type: "text", value: " from bone into the bloodstream." }
                     ],
-                    implication: "PT Implication: High-velocity thrust manipulation and aggressive manual loading are strictly contraindicated. This patient possesses pathological chemical bone fragility until the parathyroid adenoma is surgically resected."
+                    wordBank: ["osteoclast", "calcium", "osteoblast", "sodium", "magnesium", "chondrocyte"],
+                    feedback: "Correct! As shown in the endocrine GL's appendix, PTH increases calcium concentration in the blood by increasing osteoclast activity. Chronic excessive PTH means this bone-resorbing process never turns off, continuously releasing calcium into circulation and leaving the skeleton porous and fracture-prone.",
+                    implication: "PT Implication: High-velocity thrust manipulation and aggressive manual loading are strictly contraindicated. This patient possesses pathological chemical bone fragility until her hyperparathyroidism is medically managed."
                 },
                 {
-                    prompt: "2. Why does elevated circulating calcium (hypercalcemia) cause this patient's profound muscle weakness and sluggish neuromuscular fatigue?",
+                    prompt: "2. Why does elevated circulating calcium (hypercalcemia) contribute to this patient's profound muscle weakness and sluggish neuromuscular fatigue?",
                     options: [
                         {
-                            text: "Excess calcium increases the threshold for nerve action potential generation, depressing overall neuromuscular excitability.",
+                            text: "Abnormal calcium concentrations disrupt normal neuromuscular signaling, which can manifest as weakness alongside other neuromuscular symptoms.",
                             isCorrect: true,
-                            feedback: "Correct! Extracellular calcium stabilizes neuronal and sarcolemmal membranes by binding to voltage-gated sodium channels, making it harder for membranes to depolarize. Consequently, hypercalcemia depresses neuromuscular excitability, manifesting clinically as proximal weakness, hypoactive reflexes, fatigue, and smooth muscle hypomotility (constipation)."
+                            feedback: "Correct! As the endocrine GL notes in its discussion of parathyroid-related calcium imbalance, abnormal calcium levels can manifest as neuromuscular symptoms \u2014 including weakness, tingling, numbness, or muscle twitching \u2014 all of which therapists should watch for during assessment and treatment."
                         },
                         {
                             text: "Extracellular calcium physically binds to troponin C and freezes the actin-myosin cross-bridge permanently.",
@@ -360,31 +984,120 @@
                         {
                             text: "Calcium calcifies the peripheral motor axons, preventing action potential propagation along the myelin sheath.",
                             isCorrect: false,
-                            feedback: "Incorrect. Motor nerves are not physically calcified; the weakness is an electrochemical gating impairment across the cell membrane."
+                            feedback: "Incorrect. Motor nerves are not physically calcified by circulating calcium."
                         }
                     ],
-                    implication: "PT Implication: Her weakness is not a simple 'deconditioning' presentation that can be powered through with heavy progressive overload. Neuromuscular transmission is electrochemically blunted; prioritize functional balance and fall prevention."
+                    implication: "PT Implication: Her weakness is not a simple 'deconditioning' presentation that can be powered through with heavy progressive overload. Until her calcium levels are medically corrected, prioritize functional balance and fall prevention over aggressive strengthening."
                 },
                 {
-                    prompt: "3. Under normal physiological conditions, how does the parathyroid negative feedback loop maintain homeostatic equilibrium?",
+                    type: "diagram",
+                    prompt: "3. Build the calcium-PTH feedback loop by placing each step in order:",
+                    segments: [
+                        { type: "blank", id: "n1", correct: "Low Blood Calcium", style: "node" },
+                        { type: "arrow" },
+                        { type: "blank", id: "n2", correct: "Parathyroid Gland", style: "node" },
+                        { type: "arrow" },
+                        { type: "blank", id: "h1", correct: "PTH", style: "hormone" },
+                        { type: "arrow" },
+                        { type: "blank", id: "n3", correct: "Bone Resorption", style: "node" },
+                        { type: "arrow" },
+                        { type: "blank", id: "n4", correct: "Blood Calcium Rises", style: "node" }
+                    ],
+                    wordBank: ["Low Blood Calcium", "Parathyroid Gland", "PTH", "Bone Resorption", "Blood Calcium Rises", "Calcitonin", "Thyroid Gland", "Vitamin D", "Osteoblast"],
+                    feedbackNote: "Negative feedback: PTH release is stimulated by low plasma calcium \u2014 once blood calcium rises, that stimulus is no longer present.",
+                    feedback: "Correct! As the endocrine GL's appendix table shows, PTH release is stimulated by low plasma calcium concentrations, and PTH acts on bone (increasing osteoclast activity), the kidneys, and the intestines (boosting calcium absorption and vitamin D production) to raise blood calcium. Normally, once calcium rises, the stimulus for PTH release goes away. In this patient's hyperparathyroidism, PTH keeps being released despite already-high calcium, so bone resorption continues unchecked.",
+                    implication: "Clinical Insight: Recognizing that her PTH is being released independent of the normal calcium-driven stimulus helps physical therapists identify red flags early \u2014 her thoracic ache, kidney stones, constipation, and fatigue are all downstream consequences of this unchecked hormone release, alongside her fracture risk."
+                },
+                {
+                    type: "sentence",
+                    prompt: "4. Fill in the blanks to complete how PTH and calcitonin act on blood calcium, per the endocrine GL:",
+                    segments: [
+                        { type: "text", value: "PTH and calcitonin act " },
+                        { type: "blank", id: "b1", correct: "oppositely", style: "hormone" },
+                        { type: "text", value: " on blood calcium: PTH raises it via bone resorption, while calcitonin " },
+                        { type: "blank", id: "b2", correct: "lowers", style: "hormone" },
+                        { type: "text", value: " it and inhibits bone resorption." }
+                    ],
+                    wordBank: ["oppositely", "lowers", "synergistically", "raises", "permissively", "together"],
+                    feedback: "Correct! As the endocrine GL states, calcitonin lowers blood calcium levels and inhibits bone resorption, while PTH acts oppositely \u2014 raising blood calcium and facilitating bone resorption. In this patient's hyperparathyroidism, PTH's bone-resorbing, calcium-raising effect is left unchecked, driving both her hypercalcemia and her skeletal fragility.",
+                    implication: "Clinical Insight: Calcitonin (from the thyroid) and PTH (from the parathyroid) are an antagonistic pair, just like insulin and glucagon from Case 3. Recognizing these opposing-hormone pairs helps you predict what happens when one side of the balance is disrupted, as it is here."
+                }
+            ]
+        },
+        {
+            title: "The Marathon Wall",
+            system: "Bioenergetics & Fuel Metabolism",
+            scenario: "A 34-year-old recreational marathon runner presents to outpatient sports physical therapy after 'hitting the wall' around mile 20 of her recent race. She felt strong and comfortable for the first 18 miles at a steady, conversational pace, then experienced sudden, overwhelming fatigue and an inability to maintain pace \u2014 despite adequate hydration and no musculoskeletal pain. She wants to understand what happened physiologically and how to train and fuel differently before her next race.",
+            questions: [
+                {
+                    type: "sentence",
+                    prompt: "1. Fill in the blanks to explain the fuel-availability problem behind 'hitting the wall':",
+                    segments: [
+                        { type: "text", value: "Muscle and liver glycogen represent a " },
+                        { type: "blank", id: "b1", correct: "limited", style: "hormone" },
+                        { type: "text", value: " fuel store that can sustain effort for only " },
+                        { type: "blank", id: "b2", correct: "hours", style: "hormone" },
+                        { type: "text", value: ", while fat stores are very large but mobilize more slowly." }
+                    ],
+                    wordBank: ["limited", "hours", "unlimited", "days", "minutes", "weeks"],
+                    feedback: "Correct! As the metabolic GL's fuel table shows, glucose is stored as glycogen in the liver and muscle with limited capacity (hours), while fat, stored as triglyceride in adipose tissue, has very large capacity but mobilizes slowly. Several hours into her race, she likely exhausted her glycogen stores while fat oxidation was still ramping up to compensate \u2014 this gap is what runners call 'the wall.'",
+                    implication: "PT Implication: Endurance performance isn't just about cardiovascular fitness \u2014 it's also about fuel logistics. Discussing pacing and fueling strategy (not just training volume) is directly relevant to preventing a repeat of this experience."
+                },
+                {
+                    type: "diagram",
+                    prompt: "2. Build the aerobic pathway her muscles rely on most during sustained, steady-pace running:",
+                    segments: [
+                        { type: "blank", id: "n1", correct: "Glucose", style: "node" },
+                        { type: "arrow" },
+                        { type: "blank", id: "n2", correct: "Glycolysis", style: "node" },
+                        { type: "arrow" },
+                        { type: "blank", id: "n3", correct: "Pyruvate", style: "node" },
+                        { type: "arrow" },
+                        { type: "blank", id: "n4", correct: "Krebs Cycle", style: "node" },
+                        { type: "arrow" },
+                        { type: "blank", id: "n5", correct: "Oxidative Phosphorylation", style: "node" },
+                        { type: "arrow" },
+                        { type: "blank", id: "n6", correct: "ATP", style: "hormone" }
+                    ],
+                    wordBank: ["Glucose", "Glycolysis", "Pyruvate", "Krebs Cycle", "Oxidative Phosphorylation", "ATP", "Lactate", "Glycogen", "Ketones"],
+                    feedbackNote: "Glycolysis is anaerobic and fast; the Krebs Cycle and Oxidative Phosphorylation are aerobic and supply the majority of ATP during sustained, lower-intensity activity like her marathon pace.",
+                    feedback: "Correct! As the metabolic GL describes, glycolysis is the anaerobic first step that breaks glucose down into pyruvate, producing a small amount of ATP directly. Pyruvate then enters the mitochondria, where the Krebs Cycle processes it into high-energy electron carriers that feed into Oxidative Phosphorylation \u2014 the aerobic pathway responsible for the majority of the body's ATP production, and the dominant pathway during sustained, lower-intensity activity like her steady marathon pace.",
+                    implication: "Clinical Insight: This aerobic pathway depends on a steady fuel supply reaching the mitochondria. Once her glycogen \u2014 the fast-access fuel \u2014 ran low around mile 20, her body had to lean more heavily on the slower process of fat oxidation, which is part of why her pace and effort tolerance dropped so suddenly."
+                },
+                {
+                    prompt: "3. Her sustained pace also triggers a rise in growth hormone (GH). What role does GH play in fueling her run, per the metabolic GL?",
                     options: [
                         {
-                            text: "Rising blood calcium concentrations bind to Calcium-Sensing Receptors (CaSR) on parathyroid chief cells, inhibiting further PTH release.",
+                            text: "GH supports lipolysis (fat mobilization) and tissue building over time, helping make fat available as fuel during her sustained effort.",
                             isCorrect: true,
-                            feedback: "Correct! The endocrine GL emphasizes negative feedback regulation. Parathyroid chief cells express calcium-sensing receptors. When ionized serum calcium returns to normal or rises, these receptors trigger intracellular signals that halt PTH synthesis and secretion. In this patient's pathology, an autonomous adenoma ignores this feedback loop."
+                            feedback: "Correct! As the metabolic GL's hormone summary states, GH supports lipolysis and tissue building over time. During sustained exercise, this helps mobilize fat stores \u2014 the far larger, if slower, fuel reserve \u2014 to help offset her limited glycogen supply."
                         },
                         {
-                            text: "Thyroid-stimulating hormone (TSH) directly binds parathyroid tissue to downregulate PTH secretion.",
+                            text: "GH directly triggers glycogen synthesis in the liver, replenishing her glycogen stores mid-run.",
                             isCorrect: false,
-                            feedback: "Incorrect. TSH selectively targets the thyroid gland's follicular cells; it does not regulate parathyroid calcium sensing."
+                            feedback: "Incorrect. Glycogen synthesis is primarily an insulin-driven, fed-state process \u2014 not GH's role during exercise."
                         },
                         {
-                            text: "Hypothalamic somatostatin travels through the portal vein to shut down parathyroid glands.",
+                            text: "GH is only relevant to childhood growth and plays no meaningful role in adult exercise physiology.",
                             isCorrect: false,
-                            feedback: "Incorrect. Somatostatin inhibits pituitary growth hormone and TSH, not parathyroid tissue."
+                            feedback: "Incorrect. The metabolic GL's hormone table shows GH rising during sustained exercise, where it supports lipolysis alongside its longer-term tissue-building roles."
                         }
                     ],
-                    implication: "Clinical Insight: Recognizing this broken feedback loop allows physical therapists to identify red flags early. The classic rhyme 'bones, stones, groans, and psychiatric overtones' points directly to parathyroid endocrinopathy."
+                    implication: "PT Implication: Because fat mobilization ramps up gradually rather than instantly, sudden increases in pace or intensity late in a long event \u2014 when glycogen is already low \u2014 can outstrip what fat oxidation alone can supply, contributing to the sharp fatigue she felt."
+                },
+                {
+                    type: "sentence",
+                    prompt: "4. Fill in the blanks to complete what's happening in her body in the hours right after the race:",
+                    segments: [
+                        { type: "text", value: "Oxygen use remains " },
+                        { type: "blank", id: "b1", correct: "higher", style: "hormone" },
+                        { type: "text", value: " as her body restores phosphocreatine and clears lactate, and her muscles become more sensitive to " },
+                        { type: "blank", id: "b2", correct: "insulin", style: "hormone" },
+                        { type: "text", value: ", priming them to rebuild glycogen stores." }
+                    ],
+                    wordBank: ["higher", "insulin", "lower", "glucagon", "cortisol", "unchanged"],
+                    feedback: "Correct! As the metabolic GL describes for the immediate recovery window, oxygen use remains higher as the body restores phosphocreatine and clears lactate, and muscles become more sensitive to insulin \u2014 making this a good window for fluids and, when appropriate, carbohydrate to support glycogen rebuilding.",
+                    implication: "PT Implication: A small post-session snack that includes carbohydrate can support recovery, and next-day training intensity should be set based on how she feels and performs \u2014 the same principle from Case 3's discussion of post-exercise insulin sensitivity applies here too."
                 }
             ]
         }
@@ -404,17 +1117,12 @@
             const isCompleted = completedCaseIndices.has(i);
 
             const tab = document.createElement('button');
-            tab.className = `flex items-center gap-2 px-3 sm:px-4 py-2 rounded-xl font-semibold text-xs sm:text-sm whitespace-nowrap transition-all border-2 
-                ${isCurrent 
-                    ? 'bg-blue-600 text-white border-blue-600 shadow-md' 
-                    : isCompleted 
-                        ? 'bg-emerald-50 text-emerald-700 border-emerald-300 hover:bg-emerald-100' 
-                        : 'bg-white text-slate-600 border-slate-200 hover:border-slate-300 hover:bg-slate-50'}`;
+            const modifier = isCurrent ? 'tab-current' : isCompleted ? 'tab-completed' : 'tab-default';
+            tab.className = `tab ${modifier}`;
 
             tab.innerHTML = `
-                <span class="text-base">${c.icon}</span>
                 <span>Case ${i + 1}</span>
-                ${isCompleted ? '<span class="text-emerald-500 font-bold ml-1">✓</span>' : ''}
+                ${isCompleted ? '<svg class="action-icon" fill="none" stroke="currentColor" stroke-width="3" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"></path></svg>' : ''}
             `;
             tab.onclick = () => switchCase(i);
             nav.appendChild(tab);
@@ -433,9 +1141,26 @@
     function updateFooterInfo() {
         const status = document.getElementById('footerCaseStatus');
         if (status) {
-            status.innerText = `Case ${currentCaseIdx + 1} of ${cases.length} • Question ${currentQuestionIdx + 1} of ${cases[currentCaseIdx].questions.length}`;
+            status.innerText = `Case ${currentCaseIdx + 1} of ${cases.length} \u2022 Question ${currentQuestionIdx + 1} of ${cases[currentCaseIdx].questions.length}`;
         }
     }
+
+    // Runtime state for the blank-fill engine (sentence-builder + diagram-builder questions)
+    let blankState = null;
+    // Runtime state holding the current question's MCQ options in their shuffled display order
+    let currentMCQOptions = [];
+
+    function shuffle(arr) {
+        const a = [...arr];
+        for (let i = a.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [a[i], a[j]] = [a[j], a[i]];
+        }
+        return a;
+    }
+
+    const ARROW_ICON = '<svg class="flow-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>';
+    const LOOP_ICON = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4 4v5h5M20 20v-5h-5M5.5 9a7 7 0 0112.6-2M18.5 15a7 7 0 01-12.6 2"/></svg>';
 
     function renderActiveQuestion() {
         const container = document.getElementById('activeCaseContent');
@@ -443,53 +1168,61 @@
         const question = activeCase.questions[currentQuestionIdx];
         const totalQ = activeCase.questions.length;
 
-        let html = `
-            <div class="animate-fade-in flex flex-col gap-5">
-                <!-- Badges Row -->
-                <div class="flex flex-wrap items-center justify-between gap-2">
-                    <div class="inline-flex items-center gap-2 text-xs sm:text-sm font-bold text-blue-700 tracking-wide uppercase bg-blue-50 px-3 py-1 rounded-lg border border-blue-200">
-                        <span>${activeCase.icon}</span>
+        const headerHtml = `
+                <div class="badges-row">
+                    <div class="system-badge">
                         <span>${activeCase.system}</span>
                     </div>
 
-                    <div class="flex items-center gap-1.5 text-xs font-bold text-slate-500 bg-slate-100 px-3 py-1 rounded-full border border-slate-200">
+                    <div class="progress-badge">
                         <span>Question ${currentQuestionIdx + 1} of ${totalQ}</span>
-                        <div class="flex gap-1 ml-1">
+                        <div class="progress-dots">
                             ${Array.from({ length: totalQ }).map((_, i) => `
-                                <div class="w-2.5 h-2.5 rounded-full ${i === currentQuestionIdx ? 'bg-blue-600' : i < currentQuestionIdx ? 'bg-emerald-500' : 'bg-slate-300'}"></div>
+                                <div class="dot ${i === currentQuestionIdx ? 'dot-current' : i < currentQuestionIdx ? 'dot-done' : 'dot-pending'}"></div>
                             `).join('')}
                         </div>
                     </div>
                 </div>
 
-                <h2 class="text-xl sm:text-2xl font-bold text-slate-900">${activeCase.title}</h2>
+                <h2 class="case-title">${activeCase.title}</h2>
 
-                <!-- Scenario Display Box -->
-                <div class="scenario-callout p-4 sm:p-5 rounded-r-xl text-slate-700 text-sm sm:text-base leading-relaxed shadow-sm">
-                    <div class="text-xs font-extrabold uppercase text-blue-800 tracking-wider mb-1">Clinical Case Presentation:</div>
+                <div class="scenario-callout">
+                    <div class="scenario-label">Clinical Case Presentation:</div>
                     ${activeCase.scenario}
                 </div>
+        `;
 
-                <!-- Active Question -->
-                <div class="text-base sm:text-lg font-bold text-slate-900 border-b border-slate-100 pb-2">
+        const bodyHtml = (question.type === 'sentence' || question.type === 'diagram')
+            ? renderBlankFillBody(question)
+            : renderMCQBody(question);
+
+        container.innerHTML = `<div class="content-wrap animate-fade-in">${headerHtml}${bodyHtml}</div>`;
+        updateFooterInfo();
+    }
+
+    // ---------- MCQ rendering (options re-shuffled on every render) ----------
+    function renderMCQBody(question) {
+        currentMCQOptions = shuffle(question.options);
+
+        let html = `
+                <div class="question-prompt">
                     ${question.prompt}
                 </div>
 
-                <!-- Option Buttons List -->
-                <div class="grid gap-3" id="optionsGroup">
+                <div class="options-grid" id="optionsGroup">
         `;
 
-        question.options.forEach((opt, idx) => {
+        currentMCQOptions.forEach((opt, idx) => {
             const isGuessedWrong = wrongGuesses.has(idx);
             const extraClasses = isGuessedWrong ? 'status-incorrect' : '';
             const isDisabled = isGuessedWrong ? 'disabled' : '';
 
             html += `
-                <button class="option-button w-full border-2 border-slate-200 bg-white p-4 rounded-xl text-left font-medium text-slate-700 flex items-start gap-3.5 shadow-sm ${extraClasses}"
+                <button class="option-button ${extraClasses}"
                         ${isDisabled}
                         onclick="processAnswer(${idx}, this)">
-                    <span class="font-bold text-blue-600 shrink-0 mt-0.5 bg-blue-50 border border-blue-200 w-7 h-7 rounded-lg flex items-center justify-center text-sm">${String.fromCharCode(65 + idx)}</span>
-                    <span class="text-sm sm:text-base leading-snug">${opt.text}</span>
+                    <span class="option-letter">${String.fromCharCode(65 + idx)}</span>
+                    <span class="option-text">${opt.text}</span>
                 </button>
             `;
         });
@@ -497,94 +1230,208 @@
         html += `
                 </div>
 
-                <!-- Feedback Display Box -->
-                <div id="dynamicFeedbackBox" class="mt-2 p-5 rounded-xl hidden transition-all"></div>
-            </div>
+                <div id="dynamicFeedbackBox" class="feedback-box"></div>
         `;
-
-        container.innerHTML = html;
-        updateFooterInfo();
+        return html;
     }
 
     function processAnswer(optIdx, btnEl) {
-        const activeCase = cases[currentCaseIdx];
-        const question = activeCase.questions[currentQuestionIdx];
-        const selected = question.options[optIdx];
-
-        const feedbackBox = document.getElementById('dynamicFeedbackBox');
+        const question = cases[currentCaseIdx].questions[currentQuestionIdx];
+        const selected = currentMCQOptions[optIdx];
         const optionsGroup = document.getElementById('optionsGroup');
         const buttons = optionsGroup.querySelectorAll('.option-button');
 
-        feedbackBox.classList.remove('hidden');
-        feedbackBox.className = 'mt-3 p-5 rounded-xl animate-fade-in block';
-
         if (selected.isCorrect) {
-            // Correct selection: lock buttons and offer forward navigation
             buttons.forEach(b => b.disabled = true);
             btnEl.classList.remove('status-incorrect');
             btnEl.classList.add('status-correct');
-
-            let nextActionMarkup = '';
-            if (currentQuestionIdx < activeCase.questions.length - 1) {
-                nextActionMarkup = `
-                    <button class="mt-4 bg-blue-600 hover:bg-blue-700 active:bg-blue-800 text-white font-bold py-2.5 px-6 rounded-xl shadow-md float-right transition-all flex items-center gap-2" onclick="advanceQuestion()">
-                        <span>Next Question</span>
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>
-                    </button>
-                `;
-            } else if (currentCaseIdx < cases.length - 1) {
-                completedCaseIndices.add(currentCaseIdx);
-                renderTabs();
-                nextActionMarkup = `
-                    <button class="mt-4 bg-indigo-600 hover:bg-indigo-700 active:bg-indigo-800 text-white font-bold py-2.5 px-6 rounded-xl shadow-md float-right transition-all flex items-center gap-2" onclick="switchCase(${currentCaseIdx + 1})">
-                        <span>Case Complete: Proceed to Case ${currentCaseIdx + 2}</span>
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6"></path></svg>
-                    </button>
-                `;
-            } else {
-                completedCaseIndices.add(currentCaseIdx);
-                renderTabs();
-                nextActionMarkup = `
-                    <div class="mt-5 pt-4 border-t border-emerald-300 text-center">
-                        <div class="inline-flex items-center gap-2 text-emerald-800 font-extrabold text-base sm:text-lg mb-2">
-                            <span>🎉</span> All 4 Clinical Physiology Cases Mastered!
-                        </div>
-                        <p class="text-xs text-emerald-700">You have successfully integrated endocrine pathways, receptor mechanics, and bioenergetic principles into physical therapy practice.</p>
-                    </div>
-                `;
-            }
-
-            feedbackBox.classList.add('bg-emerald-50', 'border-2', 'border-emerald-500', 'text-emerald-950');
-            feedbackBox.innerHTML = `
-                <div class="font-bold text-base sm:text-lg text-emerald-800 mb-2 flex items-center gap-2">
-                    <svg class="w-6 h-6 text-emerald-600 shrink-0" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
-                    <span>Mechanistic Insight Confirmed!</span>
-                </div>
-                <p class="text-sm sm:text-base leading-relaxed text-emerald-900">${selected.feedback}</p>
-                <div class="mt-3.5 pt-3.5 border-t border-emerald-200 text-xs sm:text-sm font-semibold text-emerald-900 bg-emerald-100/60 p-3 rounded-lg">
-                    ${question.implication}
-                </div>
-                ${nextActionMarkup}
-                <div class="clear-both"></div>
-            `;
+            showSuccess(selected.feedback, question.implication, 'Mechanistic Insight Confirmed');
         } else {
-            // Wrong selection: disable only the chosen button, DO NOT show the answer
             btnEl.disabled = true;
             btnEl.classList.add('status-incorrect');
             wrongGuesses.add(optIdx);
+            showIncorrect(selected.feedback);
+        }
+    }
 
-            feedbackBox.classList.add('bg-rose-50', 'border-2', 'border-rose-400', 'text-rose-950');
-            feedbackBox.innerHTML = `
-                <div class="font-bold text-sm sm:text-base text-rose-800 mb-1 flex items-center gap-2">
-                    <svg class="w-5 h-5 text-rose-600 shrink-0" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+    // ---------- Blank-fill rendering (sentence-builder + diagram-builder) ----------
+    function renderBlankFillBody(question) {
+        blankState = { placements: {}, locked: false, showValidation: false, armedWord: null };
+        question.segments.filter(s => s.type === 'blank').forEach(b => { blankState.placements[b.id] = null; });
+        blankState.bank = shuffle(question.wordBank);
+
+        const isDiagram = question.type === 'diagram';
+        const flowClass = isDiagram ? 'diagram-flow' : 'sentence-flow';
+
+        return `
+                <div class="question-prompt">
+                    ${question.prompt}
+                </div>
+
+                <div id="blankFlowArea" class="${flowClass}">${renderSegmentsHTML(question)}</div>
+                ${isDiagram ? `<div class="feedback-note">${LOOP_ICON}<span>${question.feedbackNote}</span></div>` : ''}
+                <div id="wordBankArea" class="word-bank">${renderWordBankHTML()}</div>
+                <div id="blankFillStatus" class="blankfill-status"></div>
+
+                <div id="dynamicFeedbackBox" class="feedback-box"></div>
+        `;
+    }
+
+    function renderSegmentsHTML(question) {
+        return question.segments.map(seg => {
+            if (seg.type === 'text') {
+                return `<span>${seg.value}</span>`;
+            }
+            if (seg.type === 'arrow') {
+                return ARROW_ICON;
+            }
+            // blank
+            const val = blankState.placements[seg.id];
+            const classes = ['blank-slot', seg.style === 'hormone' ? 'hormone' : ''];
+            if (blankState.showValidation) {
+                const result = blankState.results ? blankState.results.find(r => r.id === seg.id) : null;
+                classes.push(result ? (result.correct ? 'correct' : 'incorrect') : (val ? 'filled' : 'empty'));
+            } else {
+                classes.push(val ? 'filled' : 'empty');
+            }
+            return `<button type="button" class="${classes.join(' ')}" onclick="handleSlotClick('${seg.id}')">${val ? val : ''}</button>`;
+        }).join('');
+    }
+
+    function renderWordBankHTML() {
+        return blankState.bank.map(w => {
+            const used = Object.values(blankState.placements).includes(w);
+            const armed = blankState.armedWord === w;
+            const classes = ['word-chip'];
+            if (used) classes.push('used');
+            if (armed) classes.push('armed');
+            return `<button type="button" class="${classes.join(' ')}" onclick="handleChipClick('${w.replace(/'/g, "\\'")}')">${w}</button>`;
+        }).join('');
+    }
+
+    function rerenderBlankFill() {
+        const question = cases[currentCaseIdx].questions[currentQuestionIdx];
+        const flowEl = document.getElementById('blankFlowArea');
+        const bankEl = document.getElementById('wordBankArea');
+        if (flowEl) flowEl.innerHTML = renderSegmentsHTML(question);
+        if (bankEl) bankEl.innerHTML = renderWordBankHTML();
+    }
+
+    function handleChipClick(word) {
+        if (!blankState || blankState.locked) return;
+        blankState.showValidation = false;
+        blankState.armedWord = (blankState.armedWord === word) ? null : word;
+        rerenderBlankFill();
+    }
+
+    function handleSlotClick(blankId) {
+        if (!blankState || blankState.locked) return;
+        blankState.showValidation = false;
+
+        if (blankState.placements[blankId]) {
+            blankState.placements[blankId] = null;
+            rerenderBlankFill();
+            const statusEl = document.getElementById('blankFillStatus');
+            if (statusEl) { statusEl.textContent = ''; statusEl.className = 'blankfill-status'; }
+            return;
+        }
+
+        if (blankState.armedWord) {
+            blankState.placements[blankId] = blankState.armedWord;
+            blankState.armedWord = null;
+            rerenderBlankFill();
+            checkBlankFillCompletion();
+        }
+    }
+
+    function checkBlankFillCompletion() {
+        const question = cases[currentCaseIdx].questions[currentQuestionIdx];
+        const blanks = question.segments.filter(s => s.type === 'blank');
+        const allFilled = blanks.every(b => blankState.placements[b.id]);
+        const statusEl = document.getElementById('blankFillStatus');
+
+        if (!allFilled) {
+            if (statusEl) { statusEl.textContent = ''; statusEl.className = 'blankfill-status'; }
+            return;
+        }
+
+        const results = blanks.map(b => ({ id: b.id, correct: blankState.placements[b.id] === b.correct }));
+        const allCorrect = results.every(r => r.correct);
+        blankState.showValidation = true;
+        blankState.results = results;
+        rerenderBlankFill();
+
+        if (allCorrect) {
+            blankState.locked = true;
+            if (statusEl) { statusEl.textContent = ''; statusEl.className = 'blankfill-status'; }
+            showSuccess(question.feedback, question.implication, question.type === 'diagram' ? 'Feedback Loop Complete' : 'Mechanistic Insight Confirmed');
+        } else if (statusEl) {
+            statusEl.textContent = 'Not quite \u2014 tap the highlighted term(s) to try again.';
+            statusEl.className = 'blankfill-status partial';
+        }
+    }
+
+    // ---------- Shared feedback panel (used by MCQ + blank-fill paths) ----------
+    function showIncorrect(feedbackText) {
+        const feedbackBox = document.getElementById('dynamicFeedbackBox');
+        feedbackBox.className = 'feedback-box visible animate-fade-in feedback-incorrect';
+        feedbackBox.innerHTML = `
+                <div class="feedback-title incorrect">
+                    <svg class="feedback-icon-incorrect" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
                     <span>Incorrect Mechanism. Review the physiology:</span>
                 </div>
-                <p class="text-xs sm:text-sm text-rose-900 mb-2.5 leading-relaxed">${selected.feedback}</p>
-                <div class="inline-flex items-center gap-1.5 text-xs font-bold text-rose-700 bg-rose-100/80 px-2.5 py-1 rounded-md">
-                    <span>💡</span> Try another answer above without guessing.
-                </div>
+                <p class="feedback-body incorrect">${feedbackText}</p>
+                <div class="retry-note">Try another answer above.</div>
+        `;
+    }
+
+    function showSuccess(explanationText, implicationText, title) {
+        const activeCase = cases[currentCaseIdx];
+        let nextActionMarkup = '';
+        if (currentQuestionIdx < activeCase.questions.length - 1) {
+            nextActionMarkup = `
+                    <button class="action-btn next-btn" onclick="advanceQuestion()">
+                        <span>Next Question</span>
+                        <svg class="action-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>
+                    </button>
+            `;
+        } else if (currentCaseIdx < cases.length - 1) {
+            completedCaseIndices.add(currentCaseIdx);
+            renderTabs();
+            nextActionMarkup = `
+                    <button class="action-btn case-complete-btn" onclick="switchCase(${currentCaseIdx + 1})">
+                        <span>Case Complete: Proceed to Case ${currentCaseIdx + 2}</span>
+                        <svg class="action-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6"></path></svg>
+                    </button>
+            `;
+        } else {
+            completedCaseIndices.add(currentCaseIdx);
+            renderTabs();
+            nextActionMarkup = `
+                    <div class="mastery-box">
+                        <div class="mastery-title">
+                            <svg class="mastery-icon" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                            All 5 Clinical Physiology Cases Complete
+                        </div>
+                        <p class="mastery-text">You have successfully integrated endocrine pathways, receptor mechanics, and bioenergetic principles into physical therapy practice.</p>
+                    </div>
             `;
         }
+
+        const feedbackBox = document.getElementById('dynamicFeedbackBox');
+        feedbackBox.className = 'feedback-box visible animate-fade-in feedback-correct';
+        feedbackBox.innerHTML = `
+                <div class="feedback-title correct">
+                    <svg class="feedback-icon-correct" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                    <span>${title}</span>
+                </div>
+                <p class="feedback-body correct">${explanationText}</p>
+                <div class="implication-box">
+                    ${implicationText}
+                </div>
+                ${nextActionMarkup}
+                <div class="clear-both"></div>
+        `;
     }
 
     function advanceQuestion() {
