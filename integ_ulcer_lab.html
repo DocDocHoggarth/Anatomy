@@ -1,0 +1,2559 @@
+<!DOCTYPE html>
+<!--
+  Normal to Wound: Ulcer Physiology Lab (DPTD 733, Integumentary System)
+  Self-contained activity: no internet connection or external files needed.
+  HOW TO EDIT: all student-facing content is in the ACTIVITY CONTENT block
+  in the first <script> tag below. The models and logic come after it.
+-->
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Normal to Wound</title>
+<script>
+/* ======================================================================
+   ACTIVITY CONTENT — EDIT HERE
+   ----------------------------------------------------------------------
+   Everything students read lives in this block. The four physiology
+   models (arterial, venous, pressure, diabetic) are defined in code
+   further down, but every question, option, and explanation is here.
+
+   Each case runs through four stages:
+     Normal → Break it → Read the signs → Debrief
+
+   normal.points   Short explanations of the healthy physiology.
+   breakIntro      What fails in this condition.
+   challenges      stage: "normal" or "break"
+                   type "predict":  students predict, then run the model
+                     with the preset settings. measure = which model
+                     output is compared. options[].value must match a
+                     model output (listed in the comment for each case).
+                   type "question": multiple choice. answer = index of
+                     the correct option (0 = first option).
+   signs           Findings from the case, each with mechanism options.
+   map             Debrief rows: normal → what breaks → what you see.
+   readings        Free sources beyond the handout. Use more: "key" on a
+                   challenge or sign to link one beneath its explanation.
+   ====================================================================== */
+window.ACTIVITY = {
+  title: "Normal to Wound",
+  subtitle: "Ulcer physiology lab",
+  course: "DPTD 733 Foundational Movement Science III",
+  unit: "Integumentary System",
+  objectives: [
+    "Describe the role of the integumentary system in protection, sensation, and thermoregulation.",
+    "Describe the process of normal wound healing."
+  ],
+
+  cases: [
+    /* ============================================================ ARTERIAL
+       Model outputs: symptom = none | claudication | rest-pain
+                      color   = pink | pale | rubor                      */
+    {
+      id: "arterial",
+      model: "arterial",
+      title: "Arterial ulcer",
+      tagline: "When supply can't meet demand",
+      vignette: "A 72-year-old with a 50-pack-year smoking history reports calf cramping after walking about a block that eases when they stop. For the past month, foot pain has woken them at night, and they now sleep with the leg hanging off the bed. There's a small, painful, punched-out wound on the tip of the second toe. The foot is cool, pale, and hairless, and pedal pulses are hard to feel.",
+      readings: {
+        pad: { title: "Peripheral Arterial Disease", source: "StatPearls (NCBI Bookshelf), free",
+          url: "https://www.ncbi.nlm.nih.gov/books/NBK430745/",
+          note: "How progressive narrowing leads from claudication to rest pain, and why gravity helps perfusion." }
+      },
+      normal: {
+        intro: "Before looking at what went wrong, explore how a healthy leg keeps skin and muscle supplied.",
+        points: [
+          { title: "Arteries feed the skin from below",
+            text: "Arterioles branch from deeper arteries into the cutaneous vascular plexus between the dermis and hypodermis. Capillaries supply the dermis, and oxygen diffuses up to the living layers of the epidermis.",
+            ref: "Guided learning p. 9" },
+          { title: "Flow rises to match demand",
+            text: "When muscle works harder, local arterioles dilate and resistance falls, so blood flow can rise several-fold. A healthy artery has plenty of reserve." },
+          { title: "Oxygen fuels maintenance and repair",
+            text: "Hair follicles, the nail matrix, and dividing keratinocytes are metabolically busy, and every healing phase needs oxygen, especially collagen synthesis and new vessel growth.",
+            ref: "Guided learning pp. 13 and 19" }
+        ]
+      },
+      breakIntro: "Atherosclerosis narrows the arteries supplying the leg. Resistance to flow rises steeply as the lumen narrows, so the reserve for exercise disappears first. In severe disease, even resting flow falls short of what the tissue needs.",
+      challenges: [
+        { stage: "normal", type: "predict", title: "A healthy leg walks",
+          preset: { activity: "walk" }, measure: "symptom",
+          question: "Walking roughly triples the calf muscle's oxygen demand. In a healthy leg, predict what happens.",
+          options: [
+            { value: "none", label: "Supply rises to meet demand, with no pain" },
+            { value: "claudication", label: "The calf cramps" },
+            { value: "rest-pain", label: "The toes become painful" }
+          ],
+          explanation: "Arterioles in working muscle dilate, lowering resistance so flow rises to match demand. A healthy artery has far more capacity than walking requires." },
+        { stage: "normal", type: "question", title: "Raising a healthy leg",
+          question: "When a healthy person lies down and raises their leg, their foot stays pink. Why?",
+          options: [
+            "Veins stop draining the foot when it's raised",
+            "Arterial pressure is far higher than the small pressure drop from raising the foot, so perfusion continues",
+            "Skin stores enough oxygen to last until the leg is lowered"
+          ], answer: 1,
+          explanation: "Raising the foot above heart level lowers the pressure reaching it a little, but a healthy arterial system still pushes plenty of blood through." },
+        { stage: "break", type: "predict", title: "Moderate narrowing, walking",
+          preset: { stenosis: 75, activity: "walk" }, measure: "symptom",
+          question: "The artery is 75% narrowed. Predict what happens when the patient walks.",
+          options: [
+            { value: "none", label: "No symptoms" },
+            { value: "claudication", label: "Calf pain that develops with walking" },
+            { value: "rest-pain", label: "Foot pain even before walking" }
+          ],
+          explanation: "At rest, the arterioles downstream dilate enough to keep flow adequate. Walking raises demand, but there's no reserve left, so the calf muscle becomes ischemic and hurts until demand falls again.",
+          more: "pad" },
+        { stage: "break", type: "predict", title: "Severe narrowing, lying flat",
+          preset: { stenosis: 90, activity: "rest", position: "flat" }, measure: "symptom",
+          question: "The artery is 90% narrowed and the patient is lying flat in bed. Predict what happens.",
+          options: [
+            { value: "none", label: "No symptoms while resting" },
+            { value: "claudication", label: "Calf cramping" },
+            { value: "rest-pain", label: "Pain in the foot and toes at rest" }
+          ],
+          explanation: "Now flow can't meet even resting demand. The toes, at the end of the arterial tree, run short first. After you run it, try hanging the leg down and raising it to see how position changes supply.",
+          more: "pad" },
+        { stage: "break", type: "question", title: "Why hanging the leg helps",
+          question: "Why does hanging the leg off the bed ease this patient's rest pain?",
+          options: [
+            "Hanging the leg lowers the foot's oxygen demand",
+            "It stretches the calf and opens the narrowed artery",
+            "Gravity adds hydrostatic pressure to the arterial column, pushing a little more blood past the narrowing"
+          ], answer: 2,
+          explanation: "With the foot below the heart, gravity adds to perfusion pressure. The trade-off is dependent rubor: arterioles downstream are already maximally dilated from chronic ischemia, so blood pools and the foot turns dusky red. Raised, the foot blanches (elevation pallor).",
+          more: "pad" }
+      ],
+      signs: [
+        { feature: "Wound on the tip of the second toe",
+          options: [
+            "The toe tip bears the most body weight when standing",
+            "Distal tissue sits at the end of the arterial tree, where perfusion pressure is lowest",
+            "Venous blood pools in the toes when standing"
+          ], answer: 1,
+          explanation: "Arterial ulcers favor the most distal sites (toe tips, lateral malleolus) and sites that get bumped or rubbed, where marginal supply can't cover even small injuries." },
+        { feature: "Punched-out edges with a pale, dry base and little granulation tissue",
+          options: [
+            "Without enough oxygen, the proliferative phase can't build granulation tissue or new vessels",
+            "Heavy fluid filtration keeps the wound base moist",
+            "Callus around the wound stops it from contracting"
+          ], answer: 0,
+          explanation: "Granulation tissue is new collagen and capillaries. Fibroblasts and angiogenesis both depend on oxygen delivery, so an ischemic wound stalls before proliferation." },
+        { feature: "Shiny, hairless skin and thickened nails",
+          options: [
+            "Hemosiderin deposits replace the hair follicles",
+            "Overactive sweat glands soften and thicken the nails",
+            "Hair follicles and the nail matrix are metabolically active, and chronic low supply stunts their normal growth"
+          ], answer: 2,
+          explanation: "These trophic changes show that the skin's appendages have been underperfused for a long time, not just the wound site." },
+        { feature: "Foot pain at night, eased by hanging the leg down",
+          options: [
+            "Gravity adds hydrostatic pressure to arterial flow when the foot is below the heart",
+            "Hanging the leg drains edema away from the wound",
+            "Lying flat presses the heel and closes its capillaries"
+          ], answer: 0,
+          explanation: "This is the opposite of venous disease, where raising the leg eases symptoms. Which way position helps tells you which side of the circulation has failed.",
+          more: "pad" },
+        { feature: "Calf cramping after walking a block that stops with rest",
+          options: [
+            "Walking raises venous pressure until the calf swells",
+            "Loss of protective sensation changes the gait",
+            "Muscle demand rises with walking, but the narrowed artery has no reserve to match it"
+          ], answer: 2,
+          explanation: "Claudication is reversible, exercise-induced muscle ischemia. It usually comes before rest pain and ulceration as narrowing progresses." },
+        { feature: "Cool, pale foot with weak pedal pulses",
+          options: [
+            "Autonomic neuropathy stops sweating and cools the skin",
+            "Less warm arterial blood reaches the skin, and the narrowing dampens the pulse beyond it",
+            "Edema fluid insulates the pulses so they can't be felt"
+          ], answer: 1,
+          explanation: "Skin temperature and pulses reflect arterial inflow. Compare a venous or neuropathic foot, which is usually warm with palpable pulses." }
+      ],
+      explainPrompt: "Why is this wound painful, on the toe tip, and worse when the leg is raised? Use supply and demand in your answer.",
+      map: [
+        { normal: "Arterioles dilate to raise flow when demand rises", breaks: "A narrowed artery has little reserve", see: "Calf pain with walking that stops with rest" },
+        { normal: "Arterial pressure perfuses the foot in any position", breaks: "Resting flow falls short, so gravity becomes necessary", see: "Rest pain eased by dangling, elevation pallor, dependent rubor" },
+        { normal: "Oxygen supports appendages and every healing phase", breaks: "Chronic low oxygen and nutrient delivery", see: "Hairless, shiny skin, thick nails, pale wound with no granulation" },
+        { normal: "Toes are supplied at the end of the arterial tree", breaks: "The lowest perfusion pressure reaches the most distal tissue", see: "Wounds on toe tips and the lateral malleolus" }
+      ]
+    },
+
+    /* ============================================================ VENOUS
+       Model outputs: pressure = low | moderate | high
+                      edema    = none | mild | accumulates                */
+    {
+      id: "venous",
+      model: "venous",
+      title: "Venous ulcer",
+      tagline: "When blood can't get back uphill",
+      vignette: "A 64-year-old who stands for long shifts had a deep vein thrombosis in the left leg 10 years ago. Their legs ache and swell by evening and feel better after lying down with the legs up. Above the left medial malleolus is a shallow, irregular, weeping wound. The surrounding skin is brown and firm, the ankle has pitting edema, and the foot is warm with easily felt pulses.",
+      readings: {
+        vlu: { title: "Venous Leg Ulcer", source: "StatPearls (NCBI Bookshelf), free",
+          url: "https://www.ncbi.nlm.nih.gov/books/NBK567802/",
+          note: "How venous reflux and obstruction lead to venous hypertension, skin changes, and ulceration." },
+        cviBook: { title: "Chronic Venous Insufficiency and Leg Ulceration: Principles and Vascular Biology", source: "Mechanisms of Vascular Disease (NCBI Bookshelf), free",
+          url: "https://www.ncbi.nlm.nih.gov/books/NBK534282/",
+          note: "A deeper look at the calf muscle pump, ambulatory venous pressure, and the inflammatory changes in the skin." },
+        edema: { title: "Physiology, Edema", source: "StatPearls (NCBI Bookshelf), free",
+          url: "https://www.ncbi.nlm.nih.gov/books/NBK537065/",
+          note: "Starling forces, capillary filtration, and why lymphatic drainage matters." }
+      },
+      normal: {
+        intro: "Before looking at what went wrong, explore how a healthy leg returns blood to the heart.",
+        points: [
+          { title: "Blood has to go uphill",
+            text: "Standing still, the column of blood between the heart and ankle creates roughly 80 to 100 mmHg of pressure in ankle veins." },
+          { title: "The calf pump and one-way valves",
+            text: "Each calf contraction squeezes deep veins toward the heart, and valves stop blood from falling back. With walking, ankle venous pressure normally falls by more than half.",
+            more: "cviBook" },
+          { title: "Filtration and lymph drainage",
+            text: "Capillary pressure pushes fluid into the tissue, and lymphatic vessels in the dermis carry the excess away. When venous pressure stays high, capillary pressure rises and filtration outpaces drainage.",
+            ref: "Guided learning p. 5 (lymphatic vessels)", more: "edema" }
+        ]
+      },
+      breakIntro: "A deep vein thrombosis can scar the valves so they no longer close. Blood the calf pushes upward falls back between contractions, so ankle venous pressure stays high even while walking. This is ambulatory venous hypertension.",
+      challenges: [
+        { stage: "normal", type: "predict", title: "A healthy leg walks",
+          preset: { activity: "walk" }, measure: "pressure",
+          question: "A healthy person who has been standing still starts walking. Predict what happens to ankle venous pressure.",
+          options: [
+            { value: "low", label: "Falls to well under half of the standing pressure" },
+            { value: "moderate", label: "Falls somewhat" },
+            { value: "high", label: "Stays about the same" }
+          ],
+          explanation: "Each calf contraction empties the deep veins, and closed valves break the blood column into short segments, so pressure at the ankle drops sharply.",
+          more: "cviBook" },
+        { stage: "normal", type: "question", title: "Standing still",
+          question: "Even healthy people's ankles swell after standing still for hours. Why?",
+          options: [
+            "With no pump action, the full blood column raises capillary pressure, so filtration outpaces lymph drainage",
+            "Valves stop working after an hour of standing",
+            "Arteries deliver extra blood to the feet when standing"
+          ], answer: 0,
+          explanation: "Standing still is venous hypertension without disease. It resolves as soon as the calf pump starts working or the leg is raised.",
+          more: "edema" },
+        { stage: "break", type: "predict", title: "Leaking valves, walking",
+          preset: { valves: "incompetent", pump: "normal", activity: "walk" }, measure: "pressure",
+          question: "The valves now leak. Predict ankle venous pressure while the patient walks.",
+          options: [
+            { value: "low", label: "Falls to a normal walking level" },
+            { value: "moderate", label: "Falls about halfway" },
+            { value: "high", label: "Stays high" }
+          ],
+          explanation: "The calf still pumps, but blood falls back through the leaking valves between contractions, so the column refills and ankle pressure barely drops.",
+          more: "vlu" },
+        { stage: "break", type: "predict", title: "Leaking valves, leg raised",
+          preset: { valves: "incompetent", pump: "normal", activity: "elevated" }, measure: "pressure",
+          question: "Same leaking valves, but the patient lies down with the leg raised. Predict ankle venous pressure.",
+          options: [
+            { value: "low", label: "Low" },
+            { value: "moderate", label: "Moderate" },
+            { value: "high", label: "Still high" }
+          ],
+          explanation: "Raising the leg removes the hydrostatic column, so pressure falls even though the valves still leak. That's why this patient feels better lying with the legs up." },
+        { stage: "break", type: "question", title: "A weak pump",
+          question: "Why does a weak calf pump (for example, from a stiff ankle) keep walking venous pressure higher, even with normal valves?",
+          options: [
+            "A stiff ankle compresses the arteries",
+            "Weaker contractions empty the deep veins less, so the column isn't broken up as well",
+            "Weak muscles use more oxygen"
+          ], answer: 1,
+          explanation: "Valves and the pump work as a pair. Try the weak pump setting with normal valves, then with leaking valves, to see how the two problems add up." }
+      ],
+      signs: [
+        { feature: "Wound above the medial malleolus",
+          options: [
+            "Pressure from shoes concentrates over the inner ankle",
+            "Distal tissue receives the least arterial flow",
+            "The ankle sits at the bottom of the venous column, and perforating veins there can transmit high pressure to the skin"
+          ], answer: 2,
+          explanation: "The medial gaiter area is the classic site. Pressure is highest at the bottom of the column, and leaking perforating veins pass deep-vein pressure to the skin's microcirculation.",
+          more: "vlu" },
+        { feature: "Pitting edema that worsens through the day",
+          options: [
+            "High venous pressure raises capillary pressure, so filtration outpaces lymphatic drainage",
+            "Narrowed arteries leak plasma into the tissue",
+            "Inflammation from callus traps fluid"
+          ], answer: 0,
+          explanation: "Edema builds with each hour upright and drains overnight when the leg is level, tracking venous pressure.",
+          more: "edema" },
+        { feature: "Brown staining of the skin around the ankle",
+          options: [
+            "Melanocytes overproduce melanin after sun exposure",
+            "Red blood cells leak into the dermis, and macrophages break down their hemoglobin, leaving iron-containing hemosiderin",
+            "Dead tissue from pressure turns the skin brown"
+          ], answer: 1,
+          explanation: "Stretched, damaged capillaries let red blood cells escape. The iron left behind stays in the dermis, so the staining is long-lasting.",
+          more: "vlu" },
+        { feature: "Firm, woody skin above the ankle",
+          options: [
+            "Callus spreads up the leg from friction",
+            "Muscle beneath the skin has died from ischemia",
+            "Chronic inflammation drives fibrosis of the dermis and subcutaneous fat (lipodermatosclerosis)"
+          ], answer: 2,
+          explanation: "Sustained venous hypertension creates a chronic inflammatory environment. White blood cell activation and abnormal fibroblast activity lay down fibrous tissue, which stiffens the skin and makes it more fragile.",
+          more: "cviBook" },
+        { feature: "Shallow, irregular wound with heavy drainage",
+          options: [
+            "Fluid forced out of capillaries keeps weeping from the open tissue",
+            "Damage started next to bone, so the wound is deep",
+            "Poor arterial supply keeps the wound base dry"
+          ], answer: 0,
+          explanation: "Venous ulcers are usually shallow and wet, the opposite of the dry, punched-out arterial ulcer." },
+        { feature: "Warm foot with easily felt pulses, and aching eased by lying with the legs up",
+          options: [
+            "Narrowed arteries are relieved by gravity when the leg is raised",
+            "Arterial inflow is intact, and symptoms come from pooled blood and swelling, which elevation drains",
+            "Nerve damage blocks pain when the leg is raised"
+          ], answer: 1,
+          explanation: "Position works in the opposite direction from arterial disease. Raising the leg helps venous disease and worsens arterial ischemia." }
+      ],
+      explainPrompt: "How does a leaking valve in a deep vein end up as a wound in the skin above the ankle? Trace the steps.",
+      map: [
+        { normal: "The calf pump and valves lower ankle venous pressure with walking", breaks: "Valves leak, so blood falls back between contractions", see: "Ankle venous pressure stays high while walking" },
+        { normal: "Lymph drainage keeps up with capillary filtration", breaks: "High capillary pressure makes filtration outpace drainage", see: "Pitting edema and a heavily draining wound" },
+        { normal: "Capillaries keep red blood cells inside and tissue calm", breaks: "Red blood cells leak and chronic inflammation develops", see: "Hemosiderin staining and lipodermatosclerosis" },
+        { normal: "Pressure is highest at the bottom of the venous column", breaks: "Perforating veins pass high pressure to the skin", see: "Wound in the medial gaiter area" }
+      ]
+    },
+
+    /* ============================================================ PRESSURE
+       Model outputs: outcome = blanchable | deep | full                  */
+    {
+      id: "pressure",
+      model: "pressure",
+      title: "Pressure injury",
+      tagline: "When load stays on the same tissue",
+      vignette: "A 67-year-old spent 9 hours in cardiac surgery and 2 days sedated in the ICU. On day 3 you find a deep purple, intact area on the right posterior heel that doesn't blanch, and the tissue feels boggy. There's also a red area over the sacrum that blanches when pressed and fades within an hour after the patient is turned.",
+      readings: {
+        pressure: { title: "Pressure Injury", source: "StatPearls (NCBI Bookshelf), free",
+          url: "https://www.ncbi.nlm.nih.gov/books/NBK553107/",
+          note: "Capillary closing pressures, why deep tissue over bone is injured before the skin, and how deep tissue pressure injury presents." }
+      },
+      normal: {
+        intro: "Before looking at what went wrong, explore why lying in bed all night doesn't injure a healthy person.",
+        points: [
+          { title: "Capillaries need open lumens",
+            text: "External pressure greater than capillary pressure (roughly 32 mmHg at the arteriolar end) flattens capillaries and stops flow. Lying in bed routinely exceeds that over bony areas.",
+            more: "pressure" },
+          { title: "Sensation drives movement",
+            text: "Free nerve endings and mechanoreceptors signal discomfort from sustained load, prompting frequent small position changes, even during sleep.",
+            ref: "Guided learning p. 9" },
+          { title: "Soft tissue spreads load",
+            text: "The hypodermis cushions and spreads load. Deep tissue next to bone, especially muscle, is less tolerant of ischemia and deformation than skin.",
+            ref: "Guided learning p. 7" },
+          { title: "Reactive hyperemia",
+            text: "When load is removed, vessels dilate to repay the oxygen debt. The brief redness blanches because pressing pushes blood out of intact capillaries." }
+        ]
+      },
+      breakIntro: "Sedation, spinal cord injury, dementia, or weakness can remove the discomfort signal or the ability to act on it. The same load then stays on the same tissue for hours.",
+      challenges: [
+        { stage: "normal", type: "predict", title: "A healthy night's sleep",
+          preset: { site: "sacrum", shift: "yes", hours: 8 }, measure: "outcome",
+          question: "A healthy person lies in bed for 8 hours. Predict the state of the skin over the sacrum in the morning.",
+          options: [
+            { value: "blanchable", label: "At most, brief redness that blanches and fades" },
+            { value: "deep", label: "Purple skin that doesn't blanch" },
+            { value: "full", label: "An open wound" }
+          ],
+          explanation: "A healthy sleeper shifts position many times. Each shift reopens capillaries long before tissue is damaged, and any redness afterward is reactive hyperemia." },
+        { stage: "normal", type: "question", title: "Pressure above capillary pressure",
+          question: "Interface pressure over the sacrum is higher than capillary closing pressure. Why isn't every healthy sleeper injured?",
+          options: [
+            "Sacral capillaries have thicker walls",
+            "Skin stores enough oxygen to last the whole night",
+            "Discomfort signals prompt frequent position changes, so no site stays loaded long enough to be damaged"
+          ], answer: 2,
+          explanation: "Injury depends on both how much load and for how long. Normal sensation and mobility keep the duration short.",
+          more: "pressure" },
+        { stage: "break", type: "predict", title: "Sedated, heel, 4 hours",
+          preset: { site: "heel", shift: "no", hours: 4 }, measure: "outcome",
+          question: "The sedated patient's heel rests on the mattress for 4 hours without moving. Predict the result.",
+          options: [
+            { value: "blanchable", label: "Redness that blanches and fades" },
+            { value: "deep", label: "Intact, purple skin that doesn't blanch" },
+            { value: "full", label: "An open, full-thickness wound right away" }
+          ],
+          explanation: "Tissue next to the calcaneus passes its tolerance first. The skin above is still intact, but damaged vessels have leaked blood into the tissue, so pressing can't blanch it.",
+          more: "pressure" },
+        { stage: "break", type: "predict", title: "Sedated, sacrum, 4 hours",
+          preset: { site: "sacrum", shift: "no", hours: 4 }, measure: "outcome",
+          question: "Same patient, same 4 hours, but now look at the sacrum. Predict the result.",
+          options: [
+            { value: "blanchable", label: "Redness that blanches and fades" },
+            { value: "deep", label: "Intact, purple skin that doesn't blanch" },
+            { value: "full", label: "An open wound" }
+          ],
+          explanation: "Lower interface pressure over a larger, better-padded area means the tissue tolerates the load longer. Site matters as much as time. Try longer durations to find where the sacrum crosses the deep tissue threshold." },
+        { stage: "break", type: "question", title: "Why the heel",
+          question: "Why do the heel and ischial tuberosities reach damage faster than the sacrum?",
+          options: [
+            "Body weight concentrates on a small bony area with little soft tissue to spread the load",
+            "They have more capillaries to compress",
+            "They are farther from the heart"
+          ], answer: 0,
+          explanation: "The same force over a smaller area with a thinner cushion produces higher pressure and more deformation in the tissue next to bone.",
+          more: "pressure" }
+      ],
+      signs: [
+        { feature: "Deep purple, intact skin on the heel that doesn't blanch",
+          options: [
+            "Friction bruised the epidermis",
+            "Tissue next to the calcaneus was damaged first, and blood has leaked out of damaged vessels, so pressing can't empty them",
+            "Venous pressure in the heel is highest when lying down"
+          ], answer: 1,
+          explanation: "This is a deep tissue pressure injury: the skin is the last layer to show damage that began next to bone.",
+          more: "pressure" },
+        { feature: "Redness over the sacrum that blanches and fades within an hour",
+          options: [
+            "Reactive hyperemia: vessels dilate to repay the oxygen debt, and intact capillaries empty when pressed",
+            "Deep tissue injury that hasn't reached the skin yet",
+            "Dependent rubor from narrowed arteries"
+          ], answer: 0,
+          explanation: "Blanching means the capillaries are intact. Non-blanchable color means blood has left the vessels or vessels are damaged." },
+        { feature: "Injury on the heel rather than the calf",
+          options: [
+            "The heel has fewer sweat glands",
+            "The calf muscle pump protects the heel",
+            "Body weight concentrates over a small bony area with little soft tissue to spread the load"
+          ], answer: 2,
+          explanation: "The posterior heel has a thin layer of soft tissue over the calcaneus, so load reaches deep tissue with little cushioning." },
+        { feature: "Boggy tissue that feels different from the surrounding skin",
+          options: [
+            "Inflammation and fluid collect around damaged deep tissue",
+            "Callus over the heel has softened",
+            "Edema from venous hypertension"
+          ], answer: 0,
+          explanation: "Changes in texture and temperature can appear before color changes, and they matter especially in darker skin, where discoloration is harder to see.",
+          more: "pressure" },
+        { feature: "No complaints of pain while the injury developed",
+          options: [
+            "Muscle has no pain receptors",
+            "Sedation blocked the discomfort signal that normally prompts a position change",
+            "Ischemia permanently numbs the skin within minutes"
+          ], answer: 1,
+          explanation: "The injury developed because the protective loop between sensation and movement was switched off, not because the tissue was unusually weak." },
+        { feature: "The heel opens into a deeper wound several days later, even after pressure is relieved",
+          options: [
+            "A second episode of pressure caused a new injury",
+            "The epidermis turns over every 4 to 6 weeks",
+            "Damage already present in deep tissue works its way to the surface, and restoring blood flow can add reperfusion injury"
+          ], answer: 2,
+          explanation: "Deep tissue injury can evolve into an open wound even when everything is done right after it's found.",
+          more: "pressure" }
+      ],
+      explainPrompt: "Why does the heel have purple skin that doesn't blanch while the sacrum's redness does? Use capillary pressure and tissue depth in your answer.",
+      map: [
+        { normal: "Capillaries stay open under light load", breaks: "Load above capillary closing pressure", see: "Ischemia in the loaded tissue" },
+        { normal: "Discomfort prompts frequent position changes", breaks: "Sedation removes the signal or the ability to move", see: "Hours of unrelieved load on one site" },
+        { normal: "Soft tissue spreads load; muscle and deep tissue are least tolerant", breaks: "Small, thinly padded bony sites concentrate load", see: "Injury starts deep, over the heel, sacrum, or ischium" },
+        { normal: "Reactive hyperemia after relief, with intact capillaries", breaks: "Damaged vessels leak blood into tissue", see: "Blanchable red versus non-blanchable purple skin" }
+      ]
+    },
+
+    /* ============================================================ DIABETIC
+       Model outputs: outcome = none | callus | bleeding | ulcer
+                      barrier = intact | fissured                        */
+    {
+      id: "diabetic",
+      model: "diabetic",
+      title: "Diabetic foot ulcer",
+      tagline: "When the foot's protection fails",
+      vignette: "A 61-year-old has had type 2 diabetes for 15 years with poor glucose control. They were surprised to find blood on their sock. Under the first metatarsal head is a painless ulcer rimmed with thick callus. The toes are clawed, the skin of the sole is dry and cracked, a monofilament isn't felt on most of the sole, and the foot is warm with palpable pedal pulses.",
+      readings: {
+        dfu: { title: "Diabetic Foot Ulceration and Complications", source: "StatPearls (NCBI Bookshelf), free",
+          url: "https://www.ncbi.nlm.nih.gov/books/NBK499887/",
+          note: "Neuropathic versus ischemic ulcers, how callus and plantar pressure lead to ulceration, and why healing is impaired." },
+        neuroUlcer: { title: "Neuropathic Ulcer", source: "StatPearls (NCBI Bookshelf), free",
+          url: "https://www.ncbi.nlm.nih.gov/books/NBK559214/",
+          note: "How sensory, motor, and autonomic neuropathy each contribute, including foot deformity from intrinsic muscle weakness." },
+        footCare: { title: "Diabetic Foot Care", source: "StatPearls (NCBI Bookshelf), free",
+          url: "https://www.ncbi.nlm.nih.gov/books/NBK553110/",
+          note: "See the sections on toe deformity, fat pad displacement, and plantar pressure." }
+      },
+      normal: {
+        intro: "Before looking at what went wrong, explore the layers of protection a healthy foot has.",
+        points: [
+          { title: "Protective sensation",
+            text: "Mechanoreceptors and free nerve endings in plantar skin signal pressure and pain, prompting a change in gait or footwear before tissue is damaged.",
+            ref: "Guided learning p. 9" },
+          { title: "Sweat keeps the sole supple",
+            text: "Eccrine glands, dense on the soles and controlled by sympathetic fibers, keep the stratum corneum hydrated and flexible.",
+            ref: "Guided learning pp. 6 and 12" },
+          { title: "Structure spreads load",
+            text: "Intrinsic foot muscles help keep the toes aligned, which holds the plantar fat pad under the metatarsal heads to cushion them.",
+            more: "footCare" },
+          { title: "Skin adapts to friction",
+            text: "Repeated friction speeds keratinocyte turnover and thickens the stratum corneum into callus, which protects the skin in small amounts.",
+            ref: "Guided learning p. 17" }
+        ]
+      },
+      breakIntro: "Chronic hyperglycemia damages sensory, motor, and autonomic nerves. Each type of nerve damage removes a different layer of the foot's normal protection.",
+      challenges: [
+        { stage: "normal", type: "predict", title: "A long walk in tight shoes",
+          preset: { load: "high", weeks: 8 }, measure: "outcome",
+          question: "A person with healthy feet takes long walks in tight shoes several times a week for 8 weeks. Predict the result under the first metatarsal head.",
+          options: [
+            { value: "none", label: "No lasting damage" },
+            { value: "callus", label: "Thick callus builds up" },
+            { value: "ulcer", label: "An ulcer develops" }
+          ],
+          explanation: "High plantar pressure hurts. Pain and pressure signals prompt a change in gait, pace, or footwear before tissue is damaged. This is the protective sensation loop." },
+        { stage: "normal", type: "question", title: "How callus forms",
+          question: "Why does skin on the sole thicken into callus with repeated friction?",
+          options: [
+            "Keratinocytes divide faster, building a thicker stratum corneum",
+            "Fat pad cells migrate to the surface",
+            "Sweat glands deposit keratin on the skin"
+          ], answer: 0,
+          explanation: "A little callus protects. A thick callus is hard, though, and it acts like a stone in the shoe, raising pressure on the tissue beneath it." },
+        { stage: "break", type: "predict", title: "Same walks, sensation lost",
+          preset: { sensation: "lost", toes: "aligned", sweat: "normal", load: "high", weeks: 8 }, measure: "outcome",
+          question: "Same long walks in tight shoes, but protective sensation is lost. Predict the result after 8 weeks.",
+          options: [
+            { value: "none", label: "No lasting damage" },
+            { value: "callus", label: "Callus only" },
+            { value: "ulcer", label: "An ulcer develops" }
+          ],
+          explanation: "Without the alarm, the same spot is loaded week after week. Callus forms and raises pressure further, bleeding develops under it, and the tissue breaks down.",
+          more: "dfu" },
+        { stage: "break", type: "predict", title: "Sensation lost, usual walking",
+          preset: { sensation: "lost", toes: "aligned", sweat: "normal", load: "normal", weeks: 8 }, measure: "outcome",
+          question: "Protective sensation is still lost, but now it's usual walking in well-fitting shoes, with aligned toes. Predict the result after 8 weeks.",
+          options: [
+            { value: "none", label: "No lasting damage" },
+            { value: "callus", label: "Callus only" },
+            { value: "ulcer", label: "An ulcer develops" }
+          ],
+          explanation: "Loss of sensation alone doesn't create high pressure; it removes the alarm. An ulcer needs a source of high or repeated pressure, such as a deformity, callus, or a high-load activity. Now try clawed toes." },
+        { stage: "break", type: "question", title: "Clawed toes",
+          question: "Clawed toes raise pressure under the metatarsal heads. Which mechanism links motor neuropathy to that pressure?",
+          options: [
+            "Clawed toes make the foot sweat less",
+            "Clawing pulls the fat pad forward, leaving the metatarsal heads with less cushioning",
+            "Motor nerves carry pain signals from the sole"
+          ], answer: 1,
+          explanation: "Weakness of the intrinsic foot muscles is thought to contribute to clawing, although its exact role is still debated. Either way, clawed toes are linked to a displaced fat pad and higher forefoot pressure.",
+          more: "footCare" }
+      ],
+      signs: [
+        { feature: "Painless ulcer",
+          options: [
+            "Loss of protective sensation means pressure and pain signals never reach awareness",
+            "Ischemic nerves stop firing once a wound is deep",
+            "Callus contains no nerve endings, so the ulcer under it can't hurt"
+          ], answer: 0,
+          explanation: "Compare the arterial ulcer, which is painful because sensation is intact and the tissue is ischemic.",
+          more: "neuroUlcer" },
+        { feature: "Ulcer under the first metatarsal head",
+          options: [
+            "Distal tissue sits at the end of the arterial tree",
+            "The metatarsal heads are the lowest point of the venous column",
+            "It's a high-pressure point, loaded thousands of times a day without the discomfort that would shift weight off it"
+          ], answer: 2,
+          explanation: "Neuropathic ulcers form where load is highest, which on the sole means the metatarsal heads and heel.",
+          more: "dfu" },
+        { feature: "Thick callus rimming the wound",
+          options: [
+            "Hemosiderin has hardened the skin",
+            "Keratinocytes respond to repeated friction by thickening the stratum corneum, and the hard callus then raises pressure beneath it",
+            "Scar tissue from lipodermatosclerosis"
+          ], answer: 1,
+          explanation: "A normal adaptation becomes part of the problem when there's no pain to limit loading.",
+          more: "dfu" },
+        { feature: "Blood on the sock",
+          options: [
+            "Repeated loading under the callus caused bleeding in the tissue beneath it before the skin broke down",
+            "High venous pressure ruptured a varicose vein",
+            "Narrowed arteries made the vessels fragile"
+          ], answer: 0,
+          explanation: "Bleeding beneath a callus is a late step in the sequence from callus to ulcer.",
+          more: "dfu" },
+        { feature: "Clawed toes with prominent metatarsal heads",
+          options: [
+            "Sensory neuropathy stiffens the toe joints",
+            "Reduced sweating shortens the tendons",
+            "Motor neuropathy weakens intrinsic foot muscles, which contributes to clawing, and clawing pulls the fat pad forward off the metatarsal heads"
+          ], answer: 2,
+          explanation: "Deformity supplies the high pressure, and sensory loss removes the warning.",
+          more: "footCare" },
+        { feature: "Dry, cracked skin on the sole",
+          options: [
+            "Autonomic neuropathy reduces eccrine sweating, so the stratum corneum dries and fissures",
+            "Pressure closes the capillaries in the sole",
+            "Callus draws moisture out of the surrounding skin"
+          ], answer: 0,
+          explanation: "Fissures break the barrier and give bacteria a way in.",
+          more: "neuroUlcer" },
+        { feature: "Warm foot with palpable pedal pulses",
+          options: [
+            "Autonomic neuropathy has increased arterial narrowing",
+            "Large-artery inflow is intact, so this ulcer is driven mainly by neuropathy rather than ischemia",
+            "Venous hypertension keeps the foot warm"
+          ], answer: 1,
+          explanation: "Healing can still be slow: hyperglycemia impairs inflammatory cells, fibroblasts, and small-vessel responses. If pulses were absent, you'd suspect a neuroischemic ulcer.",
+          more: "dfu" }
+      ],
+      explainPrompt: "Why is this ulcer painless and on the sole, while an arterial ulcer is painful and on the toe tip?",
+      map: [
+        { normal: "Protective sensation prompts weight shifts before damage", breaks: "Sensory neuropathy removes the alarm", see: "Painless, unnoticed repeated loading" },
+        { normal: "Aligned toes keep the fat pad under the metatarsal heads", breaks: "Clawing displaces the fat pad", see: "High pressure under prominent metatarsal heads" },
+        { normal: "Callus forms a small protective layer", breaks: "Unlimited loading builds thick callus that raises pressure", see: "Callus rim and bleeding beneath it" },
+        { normal: "Sweating keeps the stratum corneum supple", breaks: "Autonomic neuropathy reduces sweating", see: "Dry, fissured skin that lets bacteria in" }
+      ]
+    }
+  ],
+
+  /* ============================================================ COMPARE */
+  compare: {
+    intro: "Now put the four ulcers side by side. Each feature points back to the physiology that failed.",
+    columns: [
+      { id: "arterial", label: "Arterial" },
+      { id: "venous", label: "Venous" },
+      { id: "pressure", label: "Pressure injury" },
+      { id: "diabetic", label: "Diabetic (neuropathic)" }
+    ],
+    chips: [
+      { text: "Tips of the toes or over the lateral malleolus", column: "arterial", why: "The most distal tissue has the lowest perfusion pressure." },
+      { text: "Pale, dry base with punched-out edges", column: "arterial", why: "Without oxygen, granulation tissue can't form." },
+      { text: "Pain worse with the leg raised", column: "arterial", why: "Elevation removes gravity's help with arterial perfusion." },
+      { text: "Cool foot with weak or absent pulses", column: "arterial", why: "Less warm arterial blood reaches the foot." },
+      { text: "Above the medial malleolus", column: "venous", why: "The bottom of the venous column, near perforating veins." },
+      { text: "Shallow, irregular, and heavily draining", column: "venous", why: "High capillary pressure pushes fluid out of the tissue." },
+      { text: "Brown staining, edema, and firm skin around it", column: "venous", why: "Leaked red blood cells, excess filtration, and chronic inflammation." },
+      { text: "Aching eased by raising the leg", column: "venous", why: "Elevation removes the hydrostatic column of venous blood." },
+      { text: "Over the sacrum, heel, or ischial tuberosity", column: "pressure", why: "Load concentrates over bony prominences." },
+      { text: "Can begin as intact purple skin that doesn't blanch", column: "pressure", why: "Damage starts in deep tissue and reaches the skin last." },
+      { text: "Damage starts deepest, next to bone", column: "pressure", why: "Deep tissue is compressed hardest and tolerates ischemia least." },
+      { text: "Develops during prolonged immobility", column: "pressure", why: "Duration of load matters as much as its size." },
+      { text: "Under the metatarsal heads on the sole", column: "diabetic", why: "The highest-pressure points during walking." },
+      { text: "Surrounded by thick callus", column: "diabetic", why: "Keratinocytes respond to repeated, unlimited loading." },
+      { text: "Painless despite its depth", column: "diabetic", why: "Sensory neuropathy removes the pain signal." },
+      { text: "Warm foot with palpable pulses, unless arterial disease coexists", column: "diabetic", why: "Neuropathy, not large-artery inflow, drives the classic neuropathic ulcer." }
+    ],
+    typeOptions: [
+      "Arterial ulcer",
+      "Venous ulcer",
+      "Pressure injury",
+      "Neuropathic diabetic ulcer",
+      "Neuroischemic diabetic ulcer (neuropathy plus arterial disease)",
+      "Mixed arterial and venous ulcer"
+    ],
+    mysteries: [
+      { text: "A 70-year-old smoker has a painful, dry, punched-out wound over the lateral malleolus. The skin of the lower leg is shiny and hairless. They've started sleeping in a recliner with their feet on the floor.",
+        type: 0,
+        mechQuestion: "Which physiology best explains sleeping with the feet down?",
+        mechOptions: [
+          "Keeping the feet low drains edema from the wound",
+          "Gravity adds pressure to arterial perfusion when the feet are below the heart",
+          "Sitting takes pressure off the heels"
+        ], mechAnswer: 1,
+        explanation: "Distal location, a dry punched-out base, trophic skin changes, and relief with dependency all point to arterial insufficiency." },
+      { text: "A wheelchair user with a complete T10 spinal cord injury has an open wound over the ischial tuberosity. The surrounding skin is intact, pedal pulses are strong, and they report no pain.",
+        type: 2,
+        mechQuestion: "Which physiology best explains this wound?",
+        mechOptions: [
+          "Seated weight concentrates over a small bony area, and without sensation there's no signal to shift weight",
+          "Sitting raises venous pressure in the buttocks",
+          "Loss of sweating dries the skin until it cracks"
+        ], mechAnswer: 0,
+        explanation: "A wound over a bony prominence in someone who can't sense sustained load is a pressure injury, even though it's painless like a neuropathic ulcer." },
+      { text: "A 58-year-old with varicose veins who works long shifts standing has a weeping wound on the inner lower leg. The ankle swells by evening, and the skin around it is brown and hard. Foot pulses are easy to feel.",
+        type: 1,
+        mechQuestion: "Which physiology best explains this wound?",
+        mechOptions: [
+          "Arterial narrowing starves the skin of oxygen",
+          "Sustained pressure against a bony prominence closes capillaries",
+          "Leaking valves keep ankle venous pressure high during walking, increasing capillary filtration and chronic inflammation"
+        ], mechAnswer: 2,
+        explanation: "Location in the gaiter area, heavy drainage, edema, hemosiderin, lipodermatosclerosis, and intact pulses point to venous hypertension." },
+      { text: "A 66-year-old with diabetes has a callus-rimmed wound under the first metatarsal head. The foot is cool, pedal pulses are absent, and the wound hasn't changed in 3 months.",
+        type: 4,
+        mechQuestion: "Which physiology best explains this wound?",
+        mechOptions: [
+          "Neuropathy explains the location and callus, while arterial disease limits the oxygen that healing needs",
+          "Venous hypertension explains the callus",
+          "It's purely neuropathic because it's on the sole"
+        ], mechAnswer: 0,
+        explanation: "The location and callus fit neuropathy, but a cool foot without pulses means ischemia is present too, which explains why the wound isn't healing." }
+    ]
+  }
+};
+/* ======================= END ACTIVITY CONTENT ======================= */
+</script>
+<style>
+:root{
+  --red:#C8102E; --red-deep:#8F0C21; --red-wash:#FBECEF;
+  --ink:#1E2226; --ink-soft:#535A62; --rule:#D3D8DD; --paper:#F0F2F4; --surface:#FFFFFF;
+  --slate:#44546A; --slate-wash:#E6EAF0;
+  --ok:#1F6E45; --ok-wash:#E4F1E9;
+  --hint:#6E4A00; --hint-wash:#FFF2D2;
+  --strand-0:#2B63A8; --strand-1:#6A4A98; --strand-2:#A84E17;
+  --display:"Bahnschrift","DIN Alternate","Avenir Next Condensed","Roboto Condensed","Arial Narrow",sans-serif;
+  --text:"Segoe UI","Avenir Next","Helvetica Neue",system-ui,-apple-system,sans-serif;
+  --gap:16px;
+}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--text);font-size:16px;line-height:1.5}
+button,textarea,input{font:inherit;color:inherit}
+button{cursor:pointer}
+:focus-visible{outline:3px solid var(--slate);outline-offset:2px}
+.sr-only{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+h1,h2,h3{font-family:var(--display);font-weight:600;line-height:1.15;margin:0;letter-spacing:.005em}
+
+/* ---------- header + nav ---------- */
+.top{background:var(--surface);border-top:5px solid var(--red);border-bottom:1px solid var(--rule)}
+.top-inner{max-width:1180px;margin:0 auto;padding:14px 20px 0}
+.brand{font-size:13px;color:var(--ink-soft)}
+.brand b{color:var(--red);font-weight:700}
+.top h1{font-size:30px;margin:2px 0 12px}
+.tabs{position:sticky;top:0;z-index:20;background:var(--surface);border-bottom:1px solid var(--rule)}
+.tabs-inner{max-width:1180px;margin:0 auto;padding:0 12px;display:flex;gap:2px;overflow-x:auto;scrollbar-width:thin}
+.tab{position:relative;flex:0 0 auto;border:0;background:none;padding:12px 12px 10px;border-bottom:3px solid transparent;display:flex;align-items:center;gap:8px;font-size:15px;color:var(--ink-soft);white-space:nowrap}
+.tab:hover{color:var(--ink)}
+.tab[aria-current="page"]{color:var(--ink);border-bottom-color:var(--red);font-weight:600}
+.tab .num{font-family:var(--display);font-weight:600;font-size:17px}
+.dot{width:10px;height:10px;border-radius:50%;border:2px solid var(--rule);display:inline-block}
+.dot.progress{border-color:var(--red)}
+.dot.solved{border-color:var(--red);background:linear-gradient(90deg,var(--red) 50%,transparent 50%)}
+.dot.complete{border-color:var(--red);background:var(--red)}
+
+main{max-width:1180px;margin:0 auto;padding:24px 20px 96px}
+
+/* ---------- intro ---------- */
+.intro-grid{display:grid;grid-template-columns:minmax(0,1.1fr) minmax(0,1fr);gap:40px;align-items:start}
+.lede{font-size:21px;line-height:1.45;max-width:34em;margin:0 0 18px}
+.objective{border-left:4px solid var(--red);background:var(--surface);padding:12px 16px;margin:0 0 24px;max-width:36em}
+.objective span{display:block;font-size:13px;color:var(--ink-soft)}
+.steps{margin:0;padding-left:1.3em;max-width:36em}
+.steps li{margin:0 0 10px;padding-left:4px}
+.legend{background:var(--surface);border:1px solid var(--rule);padding:20px 20px 8px}
+.legend h2{font-size:22px;margin-bottom:14px}
+.legend ol{list-style:none;margin:0;padding:0}
+.legend li{display:grid;grid-template-columns:30px 1fr;gap:12px;position:relative;padding-bottom:16px}
+.legend li:not(:last-child)::before{content:"";position:absolute;left:14px;top:22px;bottom:-2px;width:3px;background:var(--red)}
+.legend .lnode{width:30px;height:30px;border-radius:50%;background:var(--red);color:#fff;display:grid;place-items:center;font-family:var(--display);font-weight:600;position:relative;z-index:1}
+.legend strong{display:block}
+.legend p{margin:0;color:var(--ink-soft);font-size:15px}
+.case-list{margin-top:32px}
+.case-list h2{font-size:22px;margin-bottom:10px}
+.case-row{display:grid;grid-template-columns:44px 1fr auto;gap:14px;align-items:center;padding:14px 0;border-top:1px solid var(--rule)}
+.case-row:last-child{border-bottom:1px solid var(--rule)}
+.case-row .n{font-family:var(--display);font-size:32px;font-weight:600;color:var(--red);line-height:1}
+.case-row h3{font-size:19px}
+.case-row p{margin:2px 0 0;font-size:14px;color:var(--ink-soft)}
+
+/* ---------- buttons ---------- */
+.btn{white-space:nowrap;border:2px solid var(--ink);background:var(--surface);padding:9px 18px;border-radius:4px;font-weight:600}
+.btn:hover{background:var(--paper)}
+.btn.primary{background:var(--red);border-color:var(--red);color:#fff}
+.btn.primary:hover{background:var(--red-deep);border-color:var(--red-deep)}
+.btn:disabled{opacity:.45;cursor:not-allowed}
+.btn.small{padding:5px 12px;font-size:14px}
+.btn.link{border:0;background:none;padding:4px 0;text-decoration:underline;text-underline-offset:3px;font-weight:600;color:var(--slate)}
+
+/* ---------- case header ---------- */
+.case-head{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:20px;align-items:end;margin-bottom:16px}
+.case-head .kicker{font-size:15px;color:var(--ink-soft);margin:0 0 2px}
+.case-head h2{font-size:36px}
+.vignette{background:var(--surface);border-left:5px solid var(--red);padding:16px 20px;font-size:18px;line-height:1.55;max-width:52em;margin:0 0 8px}
+.task-note{color:var(--ink-soft);margin:0 0 22px;max-width:52em}
+
+/* ---------- workspace ---------- */
+.work{display:grid;grid-template-columns:minmax(0,1.25fr) minmax(0,1fr);gap:36px;align-items:start}
+.side{min-width:0}
+.panel-title{font-size:20px;margin-bottom:4px}
+.panel-sub{font-size:14px;color:var(--ink-soft);margin:0 0 12px}
+
+/* chain spine */
+.chain{list-style:none;margin:0;padding:0}
+.link{display:grid;grid-template-columns:40px minmax(0,1fr);gap:12px;position:relative;padding-bottom:18px}
+.link:last-child{padding-bottom:0}
+.marker{position:relative}
+.node{position:absolute;left:8px;top:45px;width:24px;height:24px;border-radius:50%;border:3px solid var(--rule);background:var(--paper);z-index:2;transition:background .2s,border-color .2s}
+.link.placed .node{border-color:var(--red)}
+.link.set .node{border-color:var(--red);background:var(--red)}
+.rail{position:absolute;left:18px;top:69px;width:4px;height:calc(100% - 24px);background:var(--rule);z-index:1;overflow:hidden}
+.rail i{position:absolute;inset:0;background:var(--red);transform:scaleY(0);transform-origin:top;transition:transform .45s ease-out;transition-delay:var(--d,0s)}
+.link.conducting .rail i{transform:scaleY(1)}
+.link:last-child .rail{display:none}
+.slot-label{font-size:14px;font-weight:600;color:var(--ink-soft);margin:0 0 4px;display:flex;justify-content:space-between;gap:8px}
+.slot-label em{font-style:normal;font-weight:400}
+
+/* slots */
+.slot{min-height:62px;border-radius:6px;position:relative}
+.slot-empty{width:100%;min-height:62px;border:2px dashed var(--rule);border-radius:6px;background:transparent;color:var(--ink-soft);text-align:left;padding:10px 14px;font-size:15px}
+.selecting .slot-empty{border-color:var(--red);color:var(--red-deep);background:var(--red-wash)}
+.slot-empty:hover{border-color:var(--ink-soft)}
+.drop-hover .slot-empty,.slot.drop-hover .card{outline:3px solid var(--red);outline-offset:2px}
+.slot-filled{display:grid;grid-template-columns:minmax(0,1fr) 40px;gap:6px}
+.return{border:1px solid var(--rule);background:var(--surface);border-radius:6px;width:40px;font-size:20px;line-height:1;color:var(--ink-soft)}
+.return:hover{color:var(--red);border-color:var(--red)}
+
+/* cards */
+.card{display:block;width:100%;text-align:left;background:var(--surface);border:1px solid var(--rule);border-bottom-width:3px;border-radius:6px;padding:11px 14px;font-size:15.5px;line-height:1.35;min-height:62px;touch-action:manipulation;user-select:none;-webkit-user-select:none}
+button.card{cursor:grab}
+button.card:hover{border-color:var(--ink-soft)}
+.card.selected{border-color:var(--red);border-width:2px 2px 3px;background:var(--red-wash);box-shadow:0 4px 0 -1px var(--red)}
+.card.dragging{opacity:.4}
+.card.given{background:var(--slate-wash);border-color:transparent;border-left:4px solid var(--slate);cursor:default}
+.card.locked{border-color:var(--ok);border-left:4px solid var(--ok);cursor:default;display:flex;gap:10px;align-items:flex-start}
+.card.locked svg{flex:0 0 18px;margin-top:2px;color:var(--ok)}
+.tag{font-size:12px;font-weight:600;color:var(--slate)}
+
+/* bank */
+.bank{border:1px solid var(--rule);background:#E7EAED;border-radius:8px;padding:12px;min-height:120px;display:grid;gap:10px}
+.bank.drop-hover{outline:3px solid var(--red);outline-offset:2px}
+.bank-empty{color:var(--ink-soft);font-size:14px;align-self:center;text-align:center;margin:0}
+.actions{display:flex;flex-wrap:wrap;gap:12px;align-items:center;margin-top:14px}
+.status-line{font-size:14px;color:var(--ink-soft)}
+
+/* feedback */
+.feedback{margin-top:18px;background:var(--surface);border:1px solid var(--rule);border-radius:8px;padding:14px 16px}
+.feedback h3{font-size:18px;margin-bottom:6px}
+.feedback .summary{margin:0 0 10px}
+.fb-item{border-top:1px solid var(--rule);padding:10px 0 2px}
+.fb-item q{display:block;font-weight:600;quotes:"\201C" "\201D";margin-bottom:2px}
+.fb-item p{margin:0;font-size:15px}
+.fb-kind{font-size:13px;color:var(--ink-soft)}
+.hint{margin-top:14px;background:var(--hint-wash);border-left:4px solid var(--hint);padding:12px 16px;border-radius:0 6px 6px 0}
+.hint h3{font-size:17px;color:var(--hint);margin-bottom:4px}
+.hint p{margin:0 0 6px;font-size:15px}
+
+/* grid scenario */
+.grid-wrap{margin-bottom:26px}
+.given-bar{max-width:560px;margin:0 auto}
+.fan{display:block;width:100%;height:36px}
+.fan path{fill:none;stroke:var(--rule);stroke-width:4;transition:stroke .4s}
+.fan.lit path{stroke:var(--red)}
+.cols{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:18px}
+.col{background:var(--surface);border:1px solid var(--rule);border-top:5px solid var(--rule);border-radius:6px;padding:10px 12px 12px}
+.col h3{font-size:17px;margin-bottom:8px;color:var(--ink-soft)}
+.col.solved h3{color:var(--ink)}
+.col[data-strand="0"]{border-top-color:var(--strand-0)}
+.col[data-strand="1"]{border-top-color:var(--strand-1)}
+.col[data-strand="2"]{border-top-color:var(--strand-2)}
+.col .cell{position:relative;padding-bottom:12px}
+.col .cell:last-child{padding-bottom:0}
+.col .cell:not(:last-child)::after{content:"";position:absolute;left:50%;bottom:0;width:3px;height:12px;background:var(--rule);transform:translateX(-50%)}
+.col .cell.conducting::after{background:var(--red)}
+.bank.wide{grid-template-columns:repeat(auto-fill,minmax(230px,1fr))}
+.grid-lower{display:grid;grid-template-columns:minmax(0,1.6fr) minmax(0,1fr);gap:28px;align-items:start}
+
+/* explain + debrief */
+.write-box{margin-top:6px;background:var(--surface);border:2px solid var(--ink);border-radius:8px;padding:18px 20px;max-width:780px}
+.explain{margin-top:30px}
+.write-box h3{font-size:22px;margin-bottom:6px}
+.write-box label{display:block;font-size:17px;margin-bottom:10px}
+.write-box textarea{width:100%;min-height:130px;border:1px solid var(--ink-soft);border-radius:6px;padding:10px 12px;line-height:1.5;resize:vertical;background:#fff}
+.write-box .err{color:var(--red-deep);font-size:14px;margin:6px 0 0}
+.debrief{margin-top:30px}
+.debrief > h3{font-size:26px;margin-bottom:14px}
+.deb-grid{display:grid;grid-template-columns:minmax(0,1.3fr) minmax(0,1fr);gap:32px;align-items:start}
+.deb-chain{list-style:none;margin:0;padding:0}
+.deb-chain li{display:grid;grid-template-columns:30px 1fr;gap:12px;position:relative;padding-bottom:16px}
+.deb-chain li:not(:last-child)::before{content:"";position:absolute;left:13px;top:24px;bottom:0;width:3px;background:var(--red)}
+.deb-chain .dn{width:28px;height:28px;border-radius:50%;background:var(--red);color:#fff;font-family:var(--display);font-weight:600;display:grid;place-items:center;font-size:14px;position:relative;z-index:1}
+.deb-chain strong{display:block;font-size:13px;color:var(--ink-soft);font-weight:600}
+.deb-chain .dt{font-weight:600;margin:0}
+.deb-chain .dnote{margin:2px 0 0;color:var(--ink-soft);font-size:15px}
+.deb-strands{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:18px;margin:6px 0 16px}
+.deb-strand{border-top:5px solid var(--rule);background:var(--surface);padding:10px 12px}
+.deb-strand h4{margin:0 0 8px;font-family:var(--display);font-size:17px}
+.deb-strand .ds{margin:0 0 10px}
+.deb-strand .ds strong{display:block;font-size:13px;color:var(--ink-soft)}
+.deb-strand .ds p{margin:0;font-size:14.5px}
+.deb-strand .ds .dnote{color:var(--ink-soft)}
+.deb-given{background:var(--slate-wash);border-left:4px solid var(--slate);padding:10px 14px;margin:0 0 6px}
+.deb-given strong{font-size:13px;color:var(--slate)}
+.deb-given p{margin:0}
+.deb-given .dnote{color:var(--ink-soft);font-size:15px}
+.pt{background:var(--surface);border-left:4px solid var(--slate);border-radius:0 6px 6px 0;padding:12px 16px;max-width:52em}
+.pt h4{font-family:var(--display);font-size:18px;margin:0 0 6px}
+.pt p{margin:0 0 8px;color:var(--ink-soft);font-size:15px}
+.pt p:last-child{margin-bottom:0}
+.your-expl{margin-top:16px;border-left:4px solid var(--rule);padding:4px 0 4px 14px}
+.your-expl strong{font-size:13px;color:var(--ink-soft)}
+.your-expl p{margin:2px 0 0;white-space:pre-wrap}
+.next-row{margin-top:24px;display:flex;gap:14px;flex-wrap:wrap;align-items:center}
+
+/* selection toast (mobile) */
+.toast{position:fixed;left:12px;right:12px;bottom:12px;z-index:40;background:var(--ink);color:#fff;border-radius:8px;padding:10px 14px;display:none;align-items:center;justify-content:space-between;gap:12px;font-size:15px}
+.toast button{background:none;border:1px solid #fff;color:#fff;border-radius:4px;padding:4px 10px}
+
+/* summary */
+.sum-head{display:flex;flex-wrap:wrap;gap:20px;align-items:end;justify-content:space-between;margin-bottom:20px}
+.sum-head h2{font-size:36px}
+.name-field label{display:block;font-size:14px;font-weight:600;margin-bottom:4px}
+.name-field input{border:1px solid var(--ink-soft);border-radius:4px;padding:8px 10px;width:260px;max-width:100%;background:#fff}
+.sum-case{background:var(--surface);border:1px solid var(--rule);border-left:5px solid var(--rule);padding:16px 20px;margin-bottom:16px;break-inside:avoid}
+.sum-case.done{border-left-color:var(--red)}
+.sum-case h3{font-size:22px}
+.sum-meta{font-size:14px;color:var(--ink-soft);margin:2px 0 10px}
+.sum-chain{margin:0 0 10px;padding-left:1.4em}
+.sum-chain li{margin-bottom:2px}
+.sum-chain li span{color:var(--ink-soft);font-size:14px}
+.sum-q{font-weight:600;margin:10px 0 2px}
+.sum-a{margin:0;white-space:pre-wrap}
+.muted{color:var(--ink-soft)}
+.print-note{font-size:14px;color:var(--ink-soft);margin:6px 0 0}
+.print-only{display:none}
+
+@media (max-width:900px){
+  .intro-grid,.work,.deb-grid,.grid-lower{grid-template-columns:1fr}
+  .side{position:static}
+  .cols,.deb-strands{grid-template-columns:1fr}
+  .case-head{grid-template-columns:1fr}
+  .case-head h2,.sum-head h2{font-size:30px}
+  .toast.show{display:flex}
+}
+@media (max-width:560px){
+  main{padding:18px 14px 96px}
+  .top h1{font-size:25px}
+  .lede{font-size:18px}
+  .vignette{font-size:16.5px;padding:14px 16px}
+  .case-row{grid-template-columns:34px 1fr}
+  .case-row .btn{grid-column:2;justify-self:start}
+}
+@media (prefers-reduced-motion:reduce){
+  *{transition:none!important;animation:none!important}
+}
+@media print{
+  body{background:#fff;font-size:12pt}
+  .tabs,.btn,.no-print,.toast,.print-note{display:none!important}
+  .top{border-bottom:0}
+  .top-inner{padding:0 0 8px;max-width:none}
+  :focus,:focus-visible{outline:none!important}
+  main{padding:0;max-width:none}
+  .print-only{display:block}
+  .name-field input{border:0;border-bottom:1px solid #000;border-radius:0;padding-left:0}
+  .sum-case{border:1px solid #999;border-left:4px solid #000}
+}
+
+/* solve reveal: spine conducts top to bottom */
+.kicker{font-size:15px;color:var(--ink-soft);margin:0 0 2px}
+.animating .rail i{transform:scaleY(0)!important}
+.col .cell::after{transition:background .35s;transition-delay:var(--d,0s)}
+.fan path{transition-delay:var(--d,0s)}
+.animating .cell::after{background:var(--rule)!important}
+.animating .fan path{stroke:var(--rule)!important}
+.deb-given .dt{margin:0}
+.pt + .your-expl{margin-top:16px}
+@media (max-width:900px){.fan{height:18px}}
+.col .cell:has(.slot-filled)::after{left:calc(50% - 23px)}
+
+/* =================== version 2 additions =================== */
+.tab-save{margin-left:auto;color:var(--slate);font-weight:600}
+.sub-h{font-size:21px;margin:0 0 10px}
+.small{font-size:14px}
+.notice{background:var(--slate-wash);border-left:4px solid var(--slate);padding:10px 14px;margin:0 0 18px;max-width:52em}
+textarea[readonly]{background:var(--paper);color:var(--ink-soft)}
+
+/* stage stepper: the case's sequence */
+.stepper{margin:0 0 18px;scroll-margin-top:64px}
+.stepper ol{list-style:none;margin:0;padding:0;display:flex;flex-wrap:wrap;gap:0}
+.stepper li{display:flex;align-items:center}
+.stepper li:not(:last-child)::after{content:"";width:22px;height:3px;background:var(--rule);margin:0 2px}
+.step{position:relative;display:flex;align-items:center;gap:8px;border:0;background:none;padding:6px 8px 6px 4px;border-radius:20px;color:var(--ink-soft);font-size:15px}
+.step .sn{width:28px;height:28px;border-radius:50%;display:grid;place-items:center;border:2px solid var(--rule);font-family:var(--display);font-weight:600;font-size:15px;background:var(--surface)}
+.step.open .sn{border-color:var(--red);color:var(--red)}
+.step.done .sn{background:var(--red);border-color:var(--red);color:#fff}
+.step.done .sn svg{width:15px;height:15px}
+.step.current{color:var(--ink);font-weight:700;background:var(--surface);box-shadow:inset 0 0 0 2px var(--red)}
+.step.locked{cursor:not-allowed;opacity:.7}
+.step:not(:disabled):hover{color:var(--ink)}
+
+.stage-panel{margin-top:6px}
+.stage-title{font-size:28px;margin:0 0 6px}
+.stage-lede{max-width:48em;margin:0 0 16px;color:var(--ink-soft)}
+.stage-next{margin:28px 0 0;padding-top:18px;border-top:1px solid var(--rule)}
+.vignette{margin-bottom:20px}
+
+.count-big{font-size:18px;margin:0 0 6px}
+.count-big b{font-family:var(--display);font-size:30px;color:var(--red);margin-right:2px}
+
+/* radio options */
+fieldset{border:0;margin:0;padding:0;min-width:0}
+legend{padding:0}
+.opts{display:flex;flex-wrap:wrap;gap:8px;margin-top:8px}
+.opt{position:relative;display:flex;align-items:center;gap:8px;border:1px solid var(--rule);background:var(--surface);border-radius:6px;padding:8px 12px;cursor:pointer;font-size:15px;line-height:1.3}
+.opt input{margin:0;accent-color:var(--slate);width:16px;height:16px;flex:0 0 16px}
+.opt:hover{border-color:var(--ink-soft)}
+.opt.on{border-color:var(--slate);box-shadow:inset 0 0 0 1px var(--slate);background:var(--slate-wash)}
+.opt:has(input:disabled){cursor:default}
+.opt.answer{border-color:var(--ok);box-shadow:inset 0 0 0 2px var(--ok);background:var(--ok-wash)}
+.opt:has(input:focus-visible){outline:3px solid var(--slate);outline-offset:2px}
+.opts.compact .opt{padding:6px 10px;font-size:14.5px}
+
+/* what if */
+.change-card{font-family:var(--display);font-size:22px;line-height:1.3;margin:4px 0 14px;padding:14px 18px;background:var(--ink);color:#fff;border-radius:6px;max-width:40em}
+.wi-list{list-style:none;margin:0;padding:0;counter-reset:wi;display:grid;gap:12px;max-width:900px}
+.wi-item{background:var(--surface);border:1px solid var(--rule);border-left:5px solid var(--rule);border-radius:6px;padding:12px 16px}
+.wi-item.right{border-left-color:var(--ok)}
+.wi-item.wrong{border-left-color:var(--red)}
+.wi-about{display:block;font-size:13.5px;font-weight:600;color:var(--ink-soft)}
+.wi-ctx{font-weight:400}
+.wi-q{display:block;font-size:17px;font-weight:600;margin-top:2px}
+.wi-expl{margin:10px 0 0;font-size:15px}
+.wi-expl .mark svg{vertical-align:-3px;margin-right:4px}
+.mark.ok svg{color:var(--ok)}
+.mark.no svg{color:var(--red)}
+.score-line{font-size:18px;margin:16px 0 0}
+.score-line b{font-family:var(--display);font-size:24px;color:var(--red)}
+
+/* simulator */
+.sim-grid{display:grid;grid-template-columns:minmax(0,.9fr) minmax(0,1.4fr);gap:28px;align-items:start;background:var(--surface);border:1px solid var(--rule);border-radius:8px;padding:18px}
+.ctl{margin-bottom:14px}
+.ctl legend{font-weight:600;font-size:15px}
+.range-row{display:flex;align-items:center;gap:12px;margin-top:6px}
+.range-row input{flex:1;accent-color:var(--red)}
+.range-row output{font-variant-numeric:tabular-nums;min-width:110px;font-size:15px}
+.sim-out{display:grid;grid-template-columns:150px minmax(0,1fr);gap:18px;align-items:start}
+.sim-out figure{margin:0}
+.sim-out figcaption{font-size:14px;margin-top:6px;line-height:1.45}
+.body{width:100%;max-width:150px;display:block}
+.reg-full{fill:#2A8C8C}
+.reg-part{fill:#9ACFCB}
+.reg-dry{fill:#CFD4D9}
+.lesion{stroke:var(--red);stroke-width:2;stroke-dasharray:4 3}
+.lesion-t{font-size:11px;fill:var(--red-deep);font-family:var(--text);font-weight:700}
+.sw-key{display:inline-block;width:11px;height:11px;border-radius:2px;flex:0 0 11px}
+.sw-legend{list-style:none;margin:0 0 6px;padding:0}
+.sw-legend li{display:flex;align-items:center;gap:6px}
+.sw-key.full{background:#2A8C8C}.sw-key.part{background:#9ACFCB}.sw-key.dry{background:#CFD4D9}
+.chart{width:100%;display:block}
+.chart .strain{fill:var(--red-wash)}
+.chart .strain-t{font-size:11px;fill:var(--red-deep);font-family:var(--text)}
+.chart .grid{stroke:var(--rule);stroke-width:1}
+.chart .ax{font-size:11px;fill:var(--ink-soft);font-family:var(--text)}
+.chart .line{fill:none;stroke-width:3;stroke-linejoin:round;stroke-linecap:round}
+.chart .line.cur{stroke:var(--red)}
+.chart .line.prev{stroke:#8A9199;stroke-width:2;stroke-dasharray:5 4}
+.chart .line.draw{stroke-dasharray:1;stroke-dashoffset:1;animation:draw 1.1s ease-out forwards}
+.chart .end{fill:var(--red)}
+@keyframes draw{to{stroke-dashoffset:0}}
+.chal-h{margin-top:26px}
+.chals{list-style:none;margin:10px 0 0;padding:0;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px}
+.chal{background:var(--surface);border:1px solid var(--rule);border-top:5px solid var(--rule);border-radius:6px;padding:12px 14px}
+.chal.done{border-top-color:var(--ok)}
+.chal h4{font-family:var(--display);font-size:18px;margin:0 0 4px}
+.chal p{margin:0 0 6px}
+.chal .opts{flex-direction:column}
+.goal-met{display:flex;align-items:center;gap:6px;color:var(--ok);font-weight:600}
+.goal-met svg{color:var(--ok)}
+
+/* intervene */
+.iv-grid{display:grid;grid-template-columns:minmax(0,1.5fr) minmax(0,1fr);gap:28px;align-items:start}
+.iv-targets{display:grid;gap:12px}
+.iv-chain .iv-target:not(.iv-none){position:relative}
+.iv-chain .iv-target:not(.iv-none):not(:nth-last-child(2))::after{content:"";position:absolute;left:24px;bottom:-12px;width:3px;height:12px;background:var(--red)}
+.iv-target{background:var(--surface);border:1px solid var(--rule);border-left:5px solid var(--red);border-radius:6px;padding:10px 14px}
+.iv-target.iv-none{border-left-color:var(--ink-soft);border-style:dashed;border-left-style:solid;margin-top:10px;background:transparent}
+.iv-target.drop-hover{outline:3px solid var(--red);outline-offset:2px}
+.iv-head strong{display:block;font-size:14px;color:var(--ink-soft)}
+.iv-head p{margin:0;font-weight:600;font-size:15px}
+.iv-head p.iv-strand{font-weight:400;font-size:14px;color:var(--ink-soft)}
+.iv-chips{display:grid;gap:8px;margin-top:10px}
+.chip{display:grid;grid-template-columns:minmax(0,1fr) 40px;gap:6px}
+.token{display:block;width:100%;text-align:left;background:#FFF9E8;border:1px solid #D9C48A;border-bottom-width:3px;border-radius:6px;padding:9px 12px;font-size:15px;line-height:1.35;cursor:grab;user-select:none;-webkit-user-select:none;touch-action:manipulation}
+.token:hover{border-color:#A88C3A}
+.token.selected{border-color:var(--red);border-width:2px 2px 3px;background:var(--red-wash)}
+.iv-tray .bank .token{min-height:54px}
+.chip.right,.chip.wrong{display:block;background:var(--surface);border:1px solid var(--rule);border-radius:6px;padding:8px 12px}
+.chip.right{border-left:4px solid var(--ok)}
+.chip.wrong{border-left:4px solid var(--red)}
+.chip-t{display:flex;gap:8px;align-items:flex-start;margin:0;font-weight:600}
+.chip.right .chip-t svg{color:var(--ok);flex:0 0 18px;margin-top:2px}
+.chip.wrong .chip-t svg{color:var(--red);flex:0 0 18px;margin-top:2px}
+.chip-x{margin:4px 0 0 26px;font-size:14.5px;color:var(--ink-soft)}
+.chip-x b{color:var(--ink)}
+.iv-place{margin-top:10px;width:100%;border:2px dashed var(--red);background:var(--red-wash);color:var(--red-deep);border-radius:6px;padding:8px 12px;text-align:left;font-size:15px}
+
+/* debrief */
+.deb-h{font-family:var(--display);font-size:20px;margin:0 0 8px}
+.deb-compare{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.3fr);gap:32px;align-items:start}
+.deb-compare > div:first-child .deb-h:not(:first-child){margin-top:22px}
+.pred-quote{margin:0 0 12px;padding:12px 16px;background:var(--surface);border-left:4px solid var(--slate);white-space:pre-wrap}
+.deb-compare .opts{flex-direction:column;align-items:stretch}
+.deb-cols{display:grid;grid-template-columns:minmax(0,1.2fr) minmax(0,1fr);gap:32px;align-items:start;margin-top:30px;padding-top:24px;border-top:1px solid var(--rule)}
+.results{margin:0 0 20px;display:grid;grid-template-columns:auto 1fr;gap:6px 14px}
+.results dt{font-weight:700}
+.results dd{margin:0}
+.revisit{list-style:none;margin:8px 0 0;padding:0;display:grid;gap:10px}
+.revisit li{background:var(--surface);border:1px solid var(--rule);border-left:4px solid var(--red);border-radius:0 6px 6px 0;padding:10px 14px}
+.revisit q{display:block;font-weight:600;quotes:"\201C" "\201D"}
+.revisit p{margin:4px 0 0;font-size:15px}
+.revisit-all{border-left-color:var(--red)}
+.deb-chain .dt,.deb-strand .dt,.deb-given .dt{font-weight:600;margin:0}
+
+@media (max-width:1000px){
+  .chals{grid-template-columns:1fr}
+  .sim-grid{grid-template-columns:1fr}
+}
+@media (max-width:900px){
+  .iv-grid,.deb-compare,.deb-cols{grid-template-columns:1fr}
+  .iv-tray{order:-1}
+  .stepper li:not(:last-child)::after{width:10px}
+  .step .sl{font-size:14px}
+}
+@media (max-width:560px){
+  .sim-out{grid-template-columns:1fr}
+  .sim-body{display:grid;grid-template-columns:96px 1fr;gap:14px;align-items:center}
+  .change-card{font-size:19px}
+  .step{padding:4px 6px 4px 2px}
+  .step:not(.current) .sl{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
+}
+@media print{
+  .stepper,.tab-save{display:none!important}
+}
+@media (prefers-reduced-motion:reduce){
+  .chart .line.draw{stroke-dasharray:none;stroke-dashoffset:0}
+}
+
+/* clinical connection: optional, secondary */
+.deb-cols{grid-template-columns:minmax(0,1fr) minmax(0,1.2fr)}
+.clinical{margin-top:30px;padding:16px 18px;border:1px dashed var(--ink-soft);border-radius:8px;background:rgba(255,255,255,.5)}
+.clinical-head{display:flex;flex-wrap:wrap;gap:12px;align-items:center;justify-content:space-between}
+.clinical-head .deb-h{margin:0}
+.clinical-head p{margin:2px 0 0}
+.clin-task{margin:16px 0 12px;max-width:48em}
+.clinical .pt{margin-top:14px}
+.clinical .iv-grid{grid-template-columns:minmax(0,1.5fr) minmax(0,1fr)}
+@media (max-width:900px){.clinical .iv-grid{grid-template-columns:1fr}}
+@media print{.clinical{display:none}}
+
+/* readings beyond the handout */
+.more-row{display:block;margin-top:6px}
+.more-link{display:inline-flex;align-items:center;gap:6px;flex-wrap:wrap;color:var(--slate);font-size:14px;font-weight:600;text-decoration:none;line-height:1.3}
+.more-link .more-t{text-decoration:underline;text-underline-offset:3px}
+.more-link:hover .more-t{color:var(--ink)}
+.more-link svg{flex:0 0 14px}
+.more-tag{font-size:12px;font-weight:700;color:var(--slate);background:var(--slate-wash);border-radius:10px;padding:1px 8px}
+.readings{margin-top:22px;max-width:52em}
+.hint .readings{margin-top:10px}
+.clinical .readings{margin-top:14px}
+.readings-h{font-family:var(--display);font-size:18px;margin:0 0 4px}
+.hint .readings-h{font-size:15px;color:var(--hint)}
+.readings ul{list-style:none;margin:6px 0 0;padding:0;display:grid;gap:10px}
+.readings li{background:var(--surface);border:1px solid var(--rule);border-left:4px solid var(--slate);border-radius:0 6px 6px 0;padding:8px 12px}
+.readings li a{display:inline-flex;gap:6px;align-items:baseline;font-weight:600;color:var(--slate);text-underline-offset:3px}
+.readings li a svg{align-self:center;flex:0 0 14px}
+.readings li a span{text-decoration:underline}
+.readings-src{display:block;font-size:13px;color:var(--ink-soft)}
+.readings-note{display:block;font-size:14.5px;margin-top:2px}
+@media print{.more-tag{background:none;padding:0}}
+
+/* =================== Normal to Wound additions =================== */
+.sim-out{display:block}
+.model-panel .sim-grid{grid-template-columns:minmax(0,.72fr) minmax(0,1.7fr)}
+.fig.chart text,.fig.bars text{paint-order:stroke;stroke:#fff;stroke-width:3px;stroke-linejoin:round}
+@media (max-width:1000px){.model-panel .sim-grid{grid-template-columns:1fr}}
+.placeholder{color:var(--ink-soft);border:2px dashed var(--rule);border-radius:8px;padding:28px;text-align:center;margin:0}
+.model-panel{margin-top:24px}
+.model-out.two{display:grid;grid-template-columns:190px minmax(0,1fr);gap:18px;align-items:start}
+.model-out figure{margin:0}
+.fig{width:100%;display:block}
+.fig.leg,.fig.vein,.fig.sole{max-width:190px}
+.fig.section{max-width:220px}
+.lock-note{font-weight:400;font-size:13px;color:var(--ink-soft);margin-left:4px}
+.ctl.locked .opt{background:var(--paper)}
+.opts.stack{flex-direction:column;align-items:stretch}
+.q-legend{font-weight:600;font-size:16px;margin-bottom:2px}
+.readout{margin:10px 0 0;display:grid;grid-template-columns:minmax(120px,auto) 1fr;gap:6px 14px;font-size:15px}
+.readout dt{font-weight:700}
+.readout dd{margin:0}
+.loop{display:flex;gap:8px;align-items:flex-start;margin:10px 0 0;padding:8px 12px;border-radius:6px;font-size:15px}
+.loop svg{flex:0 0 18px;margin-top:2px}
+.loop.ok{background:var(--ok-wash);color:var(--ok)}
+.loop.ok span{color:var(--ink)}
+.loop.broken{background:var(--red-wash);color:var(--red)}
+.loop.broken span{color:var(--ink)}
+
+/* normal physiology cards */
+.points{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:14px;margin:4px 0 8px}
+.point{background:var(--surface);border:1px solid var(--rule);border-top:4px solid var(--ok);border-radius:6px;padding:12px 14px}
+.point h4{font-family:var(--display);font-size:18px;margin:0 0 4px}
+.point p{margin:0;font-size:15px}
+.point .point-ref{margin-top:6px;font-size:13px;color:var(--ink-soft)}
+.chals{grid-template-columns:repeat(auto-fit,minmax(280px,1fr))}
+.chal .opts{flex-direction:column}
+
+/* SVG vocabulary */
+.svg-label{font:600 12px var(--text);fill:var(--ink)}
+.svg-small{font:11px var(--text);fill:var(--ink-soft)}
+.svg-alert{font:700 12px var(--text);fill:var(--red-deep)}
+.svg-zone{font:11px var(--text);fill:var(--red-deep)}
+.limb{fill:#F3EDE9;stroke:#C9BFB8;stroke-width:1.5}
+.artery{fill:#C8102E}
+.plaque{fill:#E9C46A}
+.artery-line{fill:none;stroke:#C8102E;stroke-linecap:round}
+.foot{stroke:#B9A9A0;stroke-width:1}
+.ache{fill:rgba(200,16,46,.22);stroke:#C8102E;stroke-width:2;stroke-dasharray:4 3}
+.ache-ring{fill:none;stroke:#C8102E;stroke-width:3}
+.bar-ok{fill:var(--ok)}
+.bar-bad{fill:var(--red)}
+.bar-demand{fill:var(--slate)}
+.demand-line{stroke:var(--ink);stroke-width:1.5;stroke-dasharray:4 3}
+.tick{stroke:var(--ink-soft)}
+.zone-bad{fill:var(--red-wash)}
+.marker-line{stroke:var(--ink-soft);stroke-dasharray:3 3}
+.calf{fill:rgba(190,110,100,.3);stroke:#B07A70;stroke-width:1.5}
+.calf.weak{fill:rgba(190,110,100,.12);stroke-dasharray:4 3}
+.vein-tube{fill:#3F5F91}
+.valve{fill:none;stroke:#fff;stroke-width:3;stroke-linecap:round}
+.reflux{fill:none;stroke:#C8102E;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.filter-arrow{fill:none;stroke:#2B63A8;stroke-width:1.6;stroke-linecap:round}
+.zone-deep{fill:rgba(106,74,152,.13)}
+.zone-skin{fill:rgba(106,74,152,.22)}
+.thresh{fill:none;stroke-width:2}
+.thresh.deep{stroke:#6A4A98}
+.thresh.skin{stroke:#3E2A5E;stroke-dasharray:6 3}
+.thresh-h{stroke:var(--ink-soft);stroke-dasharray:4 3}
+.cap-line{stroke:#2B63A8;stroke-width:1.5;stroke-dasharray:5 3}
+.trace{stroke:var(--ink-soft);stroke-dasharray:2 3}
+.pt-blanchable{fill:#E07B39;stroke:#fff;stroke-width:2}
+.pt-deep{fill:#6A4A98;stroke:#fff;stroke-width:2}
+.pt-full{fill:#3E1030;stroke:#fff;stroke-width:2}
+.pt-callus{fill:#C9A66B;stroke:#fff;stroke-width:1.5}
+.bone{fill:#D9D4CC;stroke:#B8B1A6}
+.deep-tissue{fill:#D99A8E}
+.fat{fill:#F2DB9A}
+.x-skin{fill:#EDBFAE}
+.dmg-deep{fill:rgba(92,52,130,.55)}
+.dmg-skin-tint{fill:rgba(106,74,152,.45)}
+.dmg-full{fill:rgba(62,16,48,.65)}
+.crater{fill:#fff;stroke:#3E1030;stroke-width:1.5}
+.hyperemia{fill:rgba(224,82,82,.45)}
+.surface{stroke:var(--ink);stroke-width:3}
+.load-arrow{fill:none;stroke:var(--ink);stroke-width:2.5;stroke-linecap:round;stroke-linejoin:round}
+.toe{fill:#F1E3DA;stroke:#B9A9A0;stroke-width:1.5}
+.claw{fill:none;stroke:#8C7B72;stroke-width:1.5}
+.sole-outline{fill:#F1E3DA;stroke:#B9A9A0;stroke-width:1.5}
+.fatpad{fill:rgba(233,196,106,.45);stroke:rgba(180,140,60,.5);stroke-dasharray:3 3}
+.methead{stroke:#fff;stroke-width:2}
+.callus{fill:none;stroke:#C9A66B;stroke-width:7;opacity:.9}
+.bleed{fill:#7A1020}
+.ulcer{fill:#4A0C18;stroke:#E9B949;stroke-width:2}
+.fissure{fill:none;stroke:#8C5A4A;stroke-width:1.6;stroke-linecap:round}
+
+/* debrief map */
+.map{display:grid;gap:8px;margin:6px 0 10px}
+.map-row{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:0;background:var(--surface);border:1px solid var(--rule);border-radius:6px;overflow:hidden}
+.map-row span{padding:10px 14px;font-size:15px;position:relative}
+.map-row span + span{border-left:1px solid var(--rule)}
+.map-head{background:none;border:0}
+.map-head span{font-family:var(--display);font-weight:600;font-size:16px;padding:0 14px 2px;border:0!important}
+.m-normal{border-top:4px solid var(--ok)}
+.m-break{border-top:4px solid var(--red)}
+.m-see{border-top:4px solid var(--slate)}
+.map-head span:nth-child(1){color:var(--ok)}
+.map-head span:nth-child(2){color:var(--red-deep)}
+.map-head span:nth-child(3){color:var(--slate)}
+
+/* compare */
+.tray-wrap{margin-bottom:16px}
+.sort-cols{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px}
+.sort-col{background:var(--surface);border:1px solid var(--rule);border-top:5px solid var(--slate);border-radius:6px;padding:10px 12px;min-height:140px}
+.sort-col h4{font-family:var(--display);font-size:17px;margin:0 0 8px}
+.sort-col.drop-hover{outline:3px solid var(--red);outline-offset:2px}
+.sort-col .token{font-size:14px}
+.mystery .myst-text{margin:0 0 10px;font-size:16px}
+.sum-list{margin:4px 0 0;padding-left:1.2em}
+.sum-list li{margin-bottom:3px}
+
+@media (max-width:1000px){
+  .sort-cols{grid-template-columns:repeat(2,minmax(0,1fr))}
+}
+@media (max-width:900px){
+  .model-out.two{grid-template-columns:150px minmax(0,1fr)}
+}
+@media (max-width:640px){
+  .model-out.two{grid-template-columns:1fr}
+  .fig.leg,.fig.vein,.fig.sole,.fig.section{margin:0 auto;max-width:180px}
+  .map-row{grid-template-columns:1fr}
+  .map-row span + span{border-left:0;border-top:1px solid var(--rule)}
+  .map-head{display:none}
+  .m-normal::before{content:"Normal: ";font-weight:700;color:var(--ok)}
+  .m-break::before{content:"Breaks: ";font-weight:700;color:var(--red-deep)}
+  .m-see::before{content:"You see: ";font-weight:700;color:var(--slate)}
+  .sort-cols{grid-template-columns:1fr}
+  .readout{grid-template-columns:1fr}
+  .readout dd{margin-bottom:4px}
+}
+@media print{.model-panel,.chals,.sim-grid{display:none!important}}
+
+/* =================== UI polish =================== */
+.lock-banner{display:flex;gap:8px;align-items:flex-start;margin:0 0 14px;padding:8px 12px;background:var(--slate-wash);border-radius:6px;font-size:14px;color:var(--slate)}
+.lock-banner svg{flex:0 0 14px;margin-top:3px}
+.lock-tag{display:inline-flex;vertical-align:-2px;color:var(--ink-soft);margin-left:2px}
+.ctl.locked legend{color:var(--ink-soft)}
+.ctl.locked .opt.on{background:var(--paper);box-shadow:none;border-color:var(--rule);font-weight:600}
+.muted-ctl legend{color:var(--ink-soft)}
+.live-note{font-size:13.5px;color:var(--ink-soft);margin:4px 0 0}
+/* segmented controls for short options */
+.opts.seg{display:grid;gap:0;margin-top:6px}
+.opts.seg .opt{justify-content:center;text-align:center;border-radius:0;margin-left:-1px;padding:7px 6px;font-size:14.5px}
+.opts.seg .opt:first-child{border-radius:6px 0 0 6px;margin-left:0}
+.opts.seg .opt:last-child{border-radius:0 6px 6px 0}
+.opts.seg .opt input{position:absolute;opacity:0;pointer-events:none}
+.opts.seg .opt.on{background:var(--slate);border-color:var(--slate);color:#fff;box-shadow:none;z-index:1;font-weight:600}
+.ctl.locked .opts.seg .opt.on{background:var(--slate-wash);color:var(--slate);border-color:var(--slate)}
+.opts.seg .opt:has(input:disabled):not(.on){color:#9AA1A8}
+.opts.stack .opt{padding:7px 12px}
+.sim-controls .ctl{margin-bottom:12px}
+.opts.grid2{display:grid;grid-template-columns:repeat(2,minmax(0,1fr))}
+/* challenge feedback */
+.chal .wi-expl.fb{background:var(--paper);border-radius:6px;padding:10px 12px;margin-top:10px}
+.chal .wi-expl.fb p{margin:0 0 6px}
+.chal .wi-expl.fb p:last-of-type{margin-bottom:0}
+.see-model{margin-top:6px;font-size:14px}
+.wi-expl.fb:focus{outline:none}
+.wi-expl.fb:focus-visible{outline:3px solid var(--slate);outline-offset:2px}
+.model-panel{scroll-margin-top:64px}
+.model-panel:focus{outline:none}
+.stage-progress{margin:24px 0 0;padding:12px 16px;border-top:1px solid var(--rule);color:var(--ink-soft)}
+/* collapsible vignette */
+div.vignette p{margin:0}
+.vignette.clamped p{display:-webkit-box;-webkit-line-clamp:1;-webkit-box-orient:vertical;overflow:hidden}
+.vig-toggle{font-size:14px;margin-top:4px}
+/* sort board */
+.sort-board{display:grid;grid-template-columns:minmax(250px,.8fr) minmax(0,2fr);gap:18px;align-items:start}
+.sort-board.submitted{grid-template-columns:1fr}
+.sort-board .tray-wrap{position:sticky;top:64px;margin:0}
+.sort-board .bank.wide{grid-template-columns:1fr;gap:8px}
+.sort-board .bank .token{padding:7px 10px;font-size:14px;min-height:0}
+.sort-board:not(.submitted) .sort-cols{grid-template-columns:repeat(2,minmax(0,1fr))}
+@media (max-width:900px){
+  .sort-board{grid-template-columns:1fr}
+  .sort-board .tray-wrap{position:static}
+  .sort-board .bank.wide{grid-template-columns:repeat(auto-fill,minmax(200px,1fr))}
+  .opts.grid2{grid-template-columns:1fr}
+}
+@media (max-width:640px){
+  .sort-board:not(.submitted) .sort-cols{grid-template-columns:1fr}
+}
+
+.model-out.two{grid-template-columns:210px minmax(0,1fr)}
+.fig.bars{max-width:430px}
+.model-out .fig.chart{max-width:540px}
+.fig.leg,.fig.vein,.fig.sole{max-width:210px}
+.sort-board .tray-wrap .panel-title{margin-top:0}
+@media (max-width:900px){.model-out.two{grid-template-columns:160px minmax(0,1fr)}}
+@media (max-width:640px){.model-out.two{grid-template-columns:1fr}}
+.opts .opt:has(input:disabled):hover{border-color:var(--rule)}
+.opts.seg .opt:has(input:disabled){cursor:not-allowed}
+</style>
+</head>
+<body>
+<header class="top">
+  <div class="top-inner">
+    <div class="brand"><b>North Central College</b> Doctor of Physical Therapy</div>
+    <h1 id="app-title">Mechanism Chain Builder</h1>
+  </div>
+</header>
+<nav class="tabs" aria-label="Activity sections"><div class="tabs-inner" id="tabs"></div></nav>
+<main id="app"></main>
+<input type="file" id="loadfile" accept=".json,application/json" hidden>
+<div class="toast" id="toast"><span>Feature selected. Choose a column to place it.</span><button type="button" data-action="cancel-select">Cancel</button></div>
+<div id="live" class="sr-only" aria-live="polite"></div>
+<script>
+(function () {
+  'use strict';
+
+  var A = window.ACTIVITY;
+  var CASES = A.cases;
+  var CMP = A.compare;
+  var SAVE_APP = 'normal-to-wound';
+  var SAVE_VERSION = 1;
+
+  /* ---------------- helpers ---------------- */
+  function esc(v) {
+    return String(v == null ? '' : v).replace(/[&<>"']/g, function (ch) {
+      return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[ch];
+    });
+  }
+  function plural(n, word, pl) { return n === 1 ? word : (pl || word + 's'); }
+  function words(t) { return String(t || '').trim().split(/\s+/).filter(Boolean).length; }
+  function clamp(v, lo, hi) { return Math.max(lo, Math.min(hi, v)); }
+  function fmt(n, d) { return Number(n).toFixed(d == null ? 0 : d); }
+  var CHECK_SVG = '<svg viewBox="0 0 20 20" width="18" height="18" aria-hidden="true" focusable="false"><path d="M4 10.5l4 4 8-9" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+  var CROSS_SVG = '<svg viewBox="0 0 20 20" width="18" height="18" aria-hidden="true" focusable="false"><path d="M5 5l10 10M15 5L5 15" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"/></svg>';
+  var EXT_SVG = '<svg viewBox="0 0 20 20" width="14" height="14" aria-hidden="true" focusable="false"><path d="M11 3h6v6M17 3l-8 8M15 12v4a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V6a1 1 0 0 1 1-1h4" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+
+  /* ---------------- readings ---------------- */
+  function reading(ci, key) { return (key && CASES[ci] && CASES[ci].readings && CASES[ci].readings[key]) || null; }
+  function moreLink(ci, key) {
+    var r = reading(ci, key);
+    if (!r) return '';
+    return '<span class="more-row"><a class="more-link" href="' + esc(r.url) + '" target="_blank" rel="noopener noreferrer">' +
+      '<span class="more-tag">Beyond the handout</span>' + EXT_SVG + '<span class="more-t">' + esc(r.title) + '</span><span class="sr-only"> (opens in a new tab)</span></a></span>';
+  }
+  function readingList(ci, heading, intro) {
+    var rd = CASES[ci].readings || {}, keys = Object.keys(rd);
+    if (!keys.length) return '';
+    return '<div class="readings"><h4 class="readings-h">' + esc(heading) + '</h4>' + (intro ? '<p class="small muted">' + esc(intro) + '</p>' : '') + '<ul>' +
+      keys.map(function (k) {
+        var r = rd[k];
+        return '<li><a href="' + esc(r.url) + '" target="_blank" rel="noopener noreferrer">' + EXT_SVG + '<span>' + esc(r.title) + '</span><span class="sr-only"> (opens in a new tab)</span></a>' +
+          '<span class="readings-src">' + esc(r.source) + '</span>' + (r.note ? '<span class="readings-note">' + esc(r.note) + '</span>' : '') + '</li>';
+      }).join('') + '</ul></div>';
+  }
+
+  /* =====================================================================
+     PHYSIOLOGY MODELS
+     Each model: controls, compute(ctrl) -> { cats, ... }, render(run, prev, animate)
+     All numbers are simplified teaching values, not clinical thresholds.
+     ===================================================================== */
+  function opt(value, label) { return { value: String(value), label: label }; }
+  function optLabel(ctl, value) {
+    var o = (ctl.options || []).filter(function (x) { return x.value === String(value); })[0];
+    return o ? o.label : String(value);
+  }
+  function svgText(x, y, text, cls, anchor) {
+    return '<text x="' + x + '" y="' + y + '" class="' + (cls || 'svg-label') + '"' + (anchor ? ' text-anchor="' + anchor + '"' : '') + '>' + esc(text) + '</text>';
+  }
+
+  var MODELS = {};
+
+  /* ---------- Arterial: supply versus demand ---------- */
+  MODELS.arterial = {
+    note: 'Simplified teaching model. Flow is shown in relative units, where 1 equals the tissue\'s resting demand.',
+    controls: [
+      { id: 'stenosis', label: 'Artery narrowing', kind: 'radio', role: 'break', normal: '0',
+        options: [opt(0, 'None'), opt(50, '50%'), opt(75, '75%'), opt(90, '90%')] },
+      { id: 'activity', label: 'Activity', kind: 'radio', role: 'context', def: 'rest',
+        options: [opt('rest', 'Resting'), opt('walk', 'Walking')] },
+      { id: 'position', label: 'Leg position at rest', kind: 'radio', role: 'context', def: 'flat',
+        options: [opt('elevated', 'Raised'), opt('flat', 'Lying flat'), opt('dependent', 'Hanging down')],
+        disabledWhen: function (c) { return c.activity === 'walk'; }, disabledNote: 'Upright while walking' }
+    ],
+    compute: function (c) {
+      var st = parseInt(c.stenosis, 10) || 0;
+      var capacity = { 0: 4.0, 50: 3.4, 75: 1.6, 90: 0.8 }[st];
+      var walking = c.activity === 'walk';
+      var pos = walking ? 'upright' : c.position;
+      var adj = { elevated: -0.35, flat: 0, dependent: 0.3, upright: 0.3 }[pos];
+      var supply = Math.max(0.05, capacity + adj);
+      var demand = walking ? 3.0 : 1.0;
+      var ratio = supply / demand;
+      var symptom = ratio >= 1 ? 'none' : (walking ? 'claudication' : 'rest-pain');
+      var color = 'pink';
+      if (!walking && c.position === 'dependent' && st >= 90) color = 'rubor';
+      else if (!walking && ratio < 1) color = 'pale';
+      else if (!walking && c.position === 'elevated' && st >= 75) color = 'pale';
+      return {
+        st: st, supply: supply, demand: demand, ratio: ratio, walking: walking, pos: pos,
+        reserve: capacity >= 2 ? 'ample' : capacity >= 1.2 ? 'reduced' : 'insufficient',
+        pulses: { 0: 'Strong', 50: 'Present', 75: 'Weak', 90: 'Weak or absent' }[st],
+        temp: st >= 75 ? 'Cool' : 'Warm',
+        cats: { symptom: symptom, color: color }
+      };
+    },
+    labels: {
+      symptom: { none: 'No ischemic pain', claudication: 'Calf pain while walking (claudication)', 'rest-pain': 'Pain in the forefoot and toes at rest' },
+      color: { pink: 'Pink', pale: 'Pale (pallor)', rubor: 'Dusky red (dependent rubor)' }
+    },
+    render: function (r) {
+      var L = this.labels;
+      var foot = { pink: '#E9AFA5', pale: '#EFE6E0', rubor: '#A5465E' }[r.cats.color];
+      var wn = 6 * (1 - 0.85 * r.st / 100);
+      var leg = '<svg class="fig leg" viewBox="0 0 210 280" role="img" aria-label="' + esc('Leg diagram: artery ' + (r.st ? r.st + '% narrowed' : 'not narrowed') + '. ' + L.symptom[r.cats.symptom] + '. Foot color ' + L.color[r.cats.color] + '.') + '">' +
+        svgText(100, 12, 'From the heart', 'svg-label', 'middle') +
+        '<path d="M70 20 H130 V200 Q130 214 142 221 L188 239 Q199 246 191 257 H80 Q66 257 66 244 V200 Z" class="limb"/>' +
+        (r.cats.symptom === 'claudication' ? '<ellipse cx="100" cy="150" rx="27" ry="38" class="ache"/>' + svgText(134, 150, 'Calf', 'svg-alert') : '') +
+        '<rect x="94" y="20" width="12" height="70" class="artery"/>' +
+        '<polygon points="94,90 ' + (100 - wn) + ',106 ' + (100 - wn) + ',114 94,130 106,130 ' + (100 + wn) + ',114 ' + (100 + wn) + ',106 106,90" class="artery"/>' +
+        (r.st ? '<polygon points="94,90 ' + (100 - wn) + ',106 ' + (100 - wn) + ',114 94,130" class="plaque"/><polygon points="106,90 ' + (100 + wn) + ',106 ' + (100 + wn) + ',114 106,130" class="plaque"/>' + svgText(112, 112, r.st + '%', 'svg-small') : '') +
+        '<rect x="94" y="130" width="12" height="80" class="artery" style="opacity:' + clamp(0.35 + r.ratio * 0.45, 0.35, 1) + '"/>' +
+        '<path d="M80 222 L188 240 Q198 246 191 257 H80 Q67 257 67 244 Z" fill="' + foot + '" class="foot"/>' +
+        '<path d="M100 210 Q112 232 176 246" class="artery-line" style="stroke-width:' + clamp(2 + r.ratio * 2.5, 2, 7) + '"/>' +
+        (r.cats.symptom === 'rest-pain' ? '<circle cx="183" cy="249" r="11" class="ache-ring"/>' + svgText(150, 272, 'Toes', 'svg-alert', 'middle') : '') +
+        '</svg>';
+      var max = 4.5, W = 200, x0 = 112;
+      function bw(v) { return Math.max(2, v / max * W); }
+      var bars = '<svg class="fig bars" viewBox="0 0 350 140" role="img" aria-label="' + esc('Flow available ' + fmt(r.supply, 1) + ', tissue demand ' + fmt(r.demand, 1) + ' (relative units).') + '">' +
+        svgText(0, 34, 'Flow available', 'svg-label') + '<rect x="' + x0 + '" y="20" height="22" width="' + bw(r.supply) + '" class="' + (r.ratio >= 1 ? 'bar-ok' : 'bar-bad') + '"/>' + svgText(x0 + bw(r.supply) + 6, 36, fmt(r.supply, 1), 'svg-small') +
+        svgText(0, 82, 'Tissue demand', 'svg-label') + '<rect x="' + x0 + '" y="68" height="22" width="' + bw(r.demand) + '" class="bar-demand"/>' + svgText(x0 + bw(r.demand) + 6, 84, fmt(r.demand, 1), 'svg-small') +
+        '<line x1="' + (x0 + bw(r.demand)) + '" x2="' + (x0 + bw(r.demand)) + '" y1="12" y2="98" class="demand-line"/>' +
+        [0, 1, 2, 3, 4].map(function (v) { return '<line x1="' + (x0 + v / max * W) + '" x2="' + (x0 + v / max * W) + '" y1="100" y2="105" class="tick"/>' + svgText(x0 + v / max * W, 118, v, 'svg-small', 'middle'); }).join('') +
+        svgText(x0, 136, '1 = resting demand', 'svg-small') + '</svg>';
+      return '<div class="model-out two"><figure>' + leg + '</figure><div><figure>' + bars + '</figure>' +
+        '<dl class="readout"><dt>Symptom</dt><dd>' + esc(L.symptom[r.cats.symptom]) + '</dd>' +
+        '<dt>Skin</dt><dd>' + esc(L.color[r.cats.color]) + ', ' + esc(r.temp.toLowerCase()) + '</dd>' +
+        '<dt>Pedal pulses</dt><dd>' + esc(r.pulses) + '</dd>' +
+        '<dt>Reserve for healing</dt><dd>' + esc({ ample: 'Ample', reduced: 'Reduced', insufficient: 'Not enough even at rest' }[r.reserve]) + '</dd></dl></div></div>';
+    }
+  };
+
+  /* ---------- Venous: ankle venous pressure ---------- */
+  MODELS.venous = {
+    showsPrev: true,
+    note: 'Simplified teaching model based on typical ambulatory venous pressure values. Edema is rare below about 20 to 30 mmHg and builds consistently above about 50 mmHg.',
+    controls: [
+      { id: 'valves', label: 'Valves', kind: 'radio', role: 'break', normal: 'competent',
+        options: [opt('competent', 'Close normally'), opt('incompetent', 'Leak (after DVT)')] },
+      { id: 'pump', label: 'Calf muscle pump', kind: 'radio', role: 'break', normal: 'normal',
+        options: [opt('normal', 'Strong'), opt('weak', 'Weak (stiff ankle)')] },
+      { id: 'activity', label: 'Activity', kind: 'radio', role: 'context', def: 'stand',
+        options: [opt('stand', 'Standing still'), opt('walk', 'Walking'), opt('elevated', 'Lying, leg raised')] }
+    ],
+    compute: function (c) {
+      var target;
+      if (c.activity === 'elevated') target = 12;
+      else if (c.activity === 'stand') target = 90;
+      else target = { competent: { normal: 25, weak: 50 }, incompetent: { normal: 72, weak: 82 } }[c.valves][c.pump];
+      var pts = [];
+      for (var i = 0; i <= 240; i++) {
+        var t = i / 4, p;
+        if (c.activity === 'walk') {
+          if (t < 10) p = 90;
+          else {
+            var amp = c.valves === 'incompetent' ? 3 : 2;
+            p = target + (90 - target) * Math.exp(-(t - 10) / 5) + amp * Math.sin((t - 10) * Math.PI * 2 / 3);
+          }
+        } else p = target;
+        pts.push([t, p]);
+      }
+      return {
+        pts: pts, target: target, activity: c.activity, valves: c.valves, pump: c.pump,
+        cats: { pressure: target < 35 ? 'low' : target < 60 ? 'moderate' : 'high', edema: target < 30 ? 'none' : target < 50 ? 'mild' : 'accumulates' }
+      };
+    },
+    labels: {
+      pressure: { low: 'Low', moderate: 'Moderate', high: 'High' },
+      edema: { none: 'Lymph drainage keeps up; no edema', mild: 'Filtration slightly exceeds drainage; mild swelling', accumulates: 'Filtration outpaces drainage; edema builds' }
+    },
+    render: function (r, prev, animate) {
+      var L = this.labels;
+      var x0 = 42, x1 = 340, y0 = 26, y1 = 190;
+      function X(t) { return x0 + (x1 - x0) * t / 60; }
+      function Y(p) { return y1 - (y1 - y0) * clamp(p, 0, 100) / 100; }
+      function path(run) { return run.pts.map(function (d, i) { return (i ? 'L' : 'M') + fmt(X(d[0]), 1) + ' ' + fmt(Y(d[1]), 1); }).join(' '); }
+      var chart = '<svg class="fig chart" viewBox="0 0 360 220" role="img" aria-label="' + esc('Ankle venous pressure over 60 seconds, settling at about ' + r.target + ' mmHg.') + '">' +
+        '<rect x="' + x0 + '" y="' + y0 + '" width="' + (x1 - x0) + '" height="' + (Y(50) - y0) + '" class="zone-bad"/>' +
+        svgText(x0 + 6, y0 + 13, 'Edema builds (above about 50 mmHg)', 'svg-zone') +
+        [0, 25, 50, 75, 100].map(function (v) { return '<line class="grid" x1="' + x0 + '" x2="' + x1 + '" y1="' + Y(v) + '" y2="' + Y(v) + '"/>' + svgText(x0 - 6, Y(v) + 4, v, 'svg-small', 'end'); }).join('') +
+        [0, 20, 40, 60].map(function (t) { return svgText(X(t), y1 + 16, t + (t === 60 ? ' s' : ''), 'svg-small', 'middle'); }).join('') +
+        svgText(x0 - 6, 12, 'mmHg', 'svg-small', 'end') +
+        (r.activity === 'walk' ? '<line class="marker-line" x1="' + X(10) + '" x2="' + X(10) + '" y1="' + y0 + '" y2="' + y1 + '"/>' + svgText(X(10) + 4, y1 - 6, 'Starts walking', 'svg-small') : '') +
+        (prev && prev.pts ? '<path class="line prev" d="' + path(prev) + '"/>' : '') +
+        '<path class="line cur' + (animate ? ' draw' : '') + '" pathLength="1" d="' + path(r) + '"/></svg>';
+      var valveY = [70, 128, 186];
+      var leak = r.valves === 'incompetent';
+      var arrows = { low: 1, moderate: 2, high: 4 }[r.cats.pressure];
+      var vein = '<svg class="fig vein" viewBox="0 0 170 285" role="img" aria-label="' + esc('Vein diagram: valves ' + (leak ? 'leaking' : 'closing normally') + ', calf pump ' + (r.pump === 'weak' ? 'weak' : 'strong') + '.') + '">' +
+        svgText(85, 12, 'Toward the heart', 'svg-label', 'middle') +
+        '<path d="M55 20 H115 V240 Q115 256 100 258 H70 Q55 256 55 240 Z" class="limb"/>' +
+        (r.activity !== 'elevated' ? '<ellipse cx="85" cy="160" rx="36" ry="42" class="' + (r.pump === 'weak' ? 'calf weak' : 'calf') + '"/>' + svgText(124, 200, r.pump === 'weak' ? 'Weak' : 'Calf', 'svg-small') + svgText(124, 212, 'pump', 'svg-small') : svgText(124, 150, 'Leg', 'svg-small') + svgText(124, 162, 'raised', 'svg-small')) +
+        '<rect x="76" y="20" width="18" height="215" class="vein-tube"/>' +
+        valveY.map(function (y) {
+          return leak
+            ? '<path d="M76 ' + (y + 10) + ' L82 ' + (y + 1) + ' M94 ' + (y + 10) + ' L88 ' + (y + 1) + '" class="valve"/><path d="M104 ' + (y - 8) + ' V ' + (y + 12) + ' M100 ' + (y + 7) + ' L104 ' + (y + 12) + ' L108 ' + (y + 7) + '" class="reflux"/>'
+            : '<path d="M76 ' + (y + 10) + ' L85 ' + y + ' L94 ' + (y + 10) + '" class="valve"/>';
+        }).join('') +
+        (leak ? svgText(112, 52, 'Backflow', 'svg-alert') : svgText(112, 52, 'Valves', 'svg-small') + svgText(112, 64, 'closed', 'svg-small')) +
+        Array.apply(null, Array(arrows)).map(function (_, k) { return '<path d="M96 ' + (238 + k * 5) + ' H' + (110 + k * 2) + ' M' + (106 + k * 2) + ' ' + (235 + k * 5) + ' L' + (110 + k * 2) + ' ' + (238 + k * 5) + ' L' + (106 + k * 2) + ' ' + (241 + k * 5) + '" class="filter-arrow"/>'; }).join('') +
+        svgText(85, 280, 'Filtration at the ankle', 'svg-small', 'middle') + '</svg>';
+      return '<div class="model-out two"><figure>' + vein + '</figure><div><figure>' + chart + '</figure>' +
+        '<dl class="readout"><dt>Ankle venous pressure</dt><dd>About ' + r.target + ' mmHg (' + esc(L.pressure[r.cats.pressure].toLowerCase()) + ')</dd>' +
+        '<dt>Fluid balance</dt><dd>' + esc(L.edema[r.cats.edema]) + '</dd></dl></div></div>';
+    }
+  };
+
+  /* ---------- Pressure: load versus time ---------- */
+  MODELS.pressure = {
+    note: 'Illustrative model. Interface pressures and thresholds are simplified. Real tolerance depends on how much tissue deforms internally, not just surface pressure, and varies between people.',
+    sites: {
+      sacrum: { P: 60, label: 'sacrum', deep: 26, fat: 26, deepLabel: 'Deep soft tissue' },
+      heel: { P: 90, label: 'heel', deep: 20, fat: 10, deepLabel: 'Heel fat pad' },
+      ischium: { P: 120, label: 'ischial tuberosity', deep: 34, fat: 18, deepLabel: 'Muscle' }
+    },
+    controls: [
+      { id: 'site', label: 'Site', kind: 'radio', role: 'context', def: 'sacrum',
+        options: [opt('sacrum', 'Sacrum, lying on back'), opt('heel', 'Heel, lying on back'), opt('ischium', 'Ischial tuberosities, sitting')] },
+      { id: 'shift', label: 'Sensation and movement', kind: 'radio', role: 'break', normal: 'yes',
+        options: [opt('yes', 'Senses discomfort and shifts'), opt('no', 'Can\'t sense or move (sedated)')] },
+      { id: 'hours', label: 'Time lying or sitting', kind: 'range', role: 'context', def: 2, min: 0.5, max: 8, step: 0.5, unit: 'hours' }
+    ],
+    compute: function (c) {
+      var s = this.sites[c.site], P = s.P;
+      var Tm = 180 / (P - 32), Ts = 2.2 * Tm;
+      var hours = Number(c.hours);
+      var t = c.shift === 'yes' ? 0.25 : hours;
+      var outcome = t < Tm ? 'blanchable' : t < Ts ? 'deep' : 'full';
+      return { site: c.site, P: P, Tm: Tm, Ts: Ts, t: t, hours: hours, shift: c.shift, cats: { outcome: outcome } };
+    },
+    labels: {
+      outcome: { blanchable: 'Redness that blanches and fades (reactive hyperemia)', deep: 'Intact, purple skin that doesn\'t blanch (deep tissue injury)', full: 'Skin and deep tissue damaged; an open wound is likely' }
+    },
+    render: function (r) {
+      var L = this.labels, s = this.sites[r.site];
+      var x0 = 46, x1 = 344, y0 = 26, y1 = 194;
+      function X(t) { return x0 + (x1 - x0) * clamp(t, 0, 8) / 8; }
+      function Y(p) { return y1 - (y1 - y0) * clamp(p, 0, 140) / 140; }
+      function curve(k) {
+        var pts = [], tStart = k / (140 - 32);
+        for (var t = tStart; t <= 8.0001; t += 0.1) pts.push([t, 32 + k / t]);
+        return pts;
+      }
+      function area(pts) {
+        return 'M' + X(pts[0][0]) + ' ' + Y(140) + ' ' + pts.map(function (d) { return 'L' + fmt(X(d[0]), 1) + ' ' + fmt(Y(d[1]), 1); }).join(' ') + ' L' + X(8) + ' ' + Y(140) + ' Z';
+      }
+      function line(pts) { return pts.map(function (d, i) { return (i ? 'L' : 'M') + fmt(X(d[0]), 1) + ' ' + fmt(Y(d[1]), 1); }).join(' '); }
+      var deep = curve(180), skin = curve(396);
+      var ptClass = 'pt-' + r.cats.outcome;
+      var chart = '<svg class="fig chart" viewBox="0 0 360 230" role="img" aria-label="' + esc('Pressure-time chart. ' + fmt(r.P) + ' mmHg for ' + fmt(r.t, 2) + ' hours without relief: ' + L.outcome[r.cats.outcome] + '.') + '">' +
+        '<path d="' + area(deep) + '" class="zone-deep"/><path d="' + area(skin) + '" class="zone-skin"/>' +
+        [0, 35, 70, 105, 140].map(function (v) { return '<line class="grid" x1="' + x0 + '" x2="' + x1 + '" y1="' + Y(v) + '" y2="' + Y(v) + '"/>' + svgText(x0 - 6, Y(v) + 4, v, 'svg-small', 'end'); }).join('') +
+        [0, 2, 4, 6, 8].map(function (t) { return svgText(X(t), y1 + 16, t + (t === 8 ? ' h' : ''), 'svg-small', 'middle'); }).join('') +
+        svgText(x0 - 6, 12, 'mmHg', 'svg-small', 'end') +
+        '<path d="' + line(deep) + '" class="thresh deep"/><path d="' + line(skin) + '" class="thresh skin"/>' +
+        svgText(X(7.9), Y(32 + 180 / 7.9) - 6, 'Deep tissue damage', 'svg-small', 'end') +
+        svgText(X(7.9), Y(32 + 396 / 7.9) - 6, 'Skin damage', 'svg-small', 'end') +
+        '<line class="cap-line" x1="' + x0 + '" x2="' + x1 + '" y1="' + Y(32) + '" y2="' + Y(32) + '"/>' + svgText(x0 + 4, Y(32) + 14, 'Capillary closing pressure (about 32 mmHg)', 'svg-small') +
+        '<line class="trace" x1="' + x0 + '" x2="' + X(r.t) + '" y1="' + Y(r.P) + '" y2="' + Y(r.P) + '"/>' +
+        '<circle cx="' + X(r.t) + '" cy="' + Y(r.P) + '" r="6" class="' + ptClass + '"/>' +
+        (r.shift === 'yes' ? svgText(X(r.t) + 10, Y(r.P) - 8, 'Shifts every ~15 min', 'svg-small') : '') + '</svg>';
+      // cross-section: bone at top, surface at bottom
+      var yb = 20, bone = 34, skinH = 12;
+      var yDeep = yb + bone, yFat = yDeep + s.deep, ySkin = yFat + s.fat, ySurf = ySkin + skinH;
+      var o = r.cats.outcome, dmg = '';
+      if (o === 'deep') dmg = '<polygon points="30,' + yDeep + ' 170,' + yDeep + ' 135,' + (ySkin - 2) + ' 65,' + (ySkin - 2) + '" class="dmg-deep"/><rect x="72" y="' + ySkin + '" width="56" height="' + skinH + '" class="dmg-skin-tint"/>';
+      else if (o === 'full') dmg = '<polygon points="30,' + yDeep + ' 170,' + yDeep + ' 128,' + ySurf + ' 72,' + ySurf + '" class="dmg-full"/><path d="M84 ' + ySurf + ' Q100 ' + (ySkin - 6) + ' 116 ' + ySurf + '" class="crater"/>';
+      else if (r.t > 0.2) dmg = '<rect x="60" y="' + ySkin + '" width="80" height="' + skinH + '" class="hyperemia"/>';
+      var section = '<svg class="fig section" viewBox="0 0 200 ' + (ySurf + 40) + '" role="img" aria-label="' + esc('Tissue cross-section over the ' + s.label + '. ' + L.outcome[o] + '.') + '">' +
+        '<rect x="10" y="' + yb + '" width="180" height="' + bone + '" class="bone"/>' + svgText(16, yb + 21, 'Bone', 'svg-label') +
+        '<rect x="10" y="' + yDeep + '" width="180" height="' + s.deep + '" class="deep-tissue"/>' +
+        '<rect x="10" y="' + yFat + '" width="180" height="' + s.fat + '" class="fat"/>' +
+        '<rect x="10" y="' + ySkin + '" width="180" height="' + skinH + '" class="x-skin"/>' + dmg +
+        svgText(186, yDeep + s.deep / 2 + 4, s.deepLabel, 'svg-small', 'end') +
+        (s.fat >= 14 ? svgText(186, yFat + s.fat / 2 + 4, 'Subcutaneous tissue', 'svg-small', 'end') : '') +
+        svgText(186, ySkin + 10, 'Skin', 'svg-small', 'end') +
+        '<line x1="4" x2="196" y1="' + ySurf + '" y2="' + ySurf + '" class="surface"/>' +
+        '<path d="M100 ' + (ySurf + 30) + ' V' + (ySurf + 8) + ' M94 ' + (ySurf + 14) + ' L100 ' + (ySurf + 8) + ' L106 ' + (ySurf + 14) + '" class="load-arrow"/>' +
+        svgText(110, ySurf + 28, r.site === 'ischium' ? 'Seat' : 'Mattress', 'svg-small') + '</svg>';
+      var blanch = { blanchable: 'Blanches: capillaries intact', deep: 'Doesn\'t blanch, skin still intact', full: 'Doesn\'t blanch; tissue breaking down' }[o];
+      return '<div class="model-out two"><figure>' + section + '</figure><div><figure>' + chart + '</figure>' +
+        '<dl class="readout"><dt>Interface pressure</dt><dd>About ' + r.P + ' mmHg over the ' + esc(s.label) + ', above capillary closing pressure</dd>' +
+        '<dt>Unrelieved load</dt><dd>' + (r.shift === 'yes' ? 'In position for ' + fmt(r.hours, 1) + ' hours, but shifts about every 15 minutes, so no site stays loaded longer than that' : fmt(r.hours, 1) + ' hours without a change') + '</dd>' +
+        '<dt>Blanch test</dt><dd>' + esc(blanch) + '</dd>' +
+        '<dt>Tissue state</dt><dd>' + esc(L.outcome[o]) + '</dd></dl></div></div>';
+    }
+  };
+
+  /* ---------- Diabetic: the protective loop ---------- */
+  MODELS.diabetic = {
+    showsPrev: true,
+    note: 'Simplified teaching model. Damage builds when pressure under the metatarsal head stays high week after week, and heals slowly when it falls.',
+    controls: [
+      { id: 'sensation', label: 'Protective sensation', kind: 'radio', role: 'break', normal: 'intact',
+        options: [opt('intact', 'Intact'), opt('lost', 'Lost (sensory neuropathy)')] },
+      { id: 'toes', label: 'Toes', kind: 'radio', role: 'break', normal: 'aligned',
+        options: [opt('aligned', 'Aligned'), opt('clawed', 'Clawed (motor neuropathy)')] },
+      { id: 'sweat', label: 'Sweating', kind: 'radio', role: 'break', normal: 'normal',
+        options: [opt('normal', 'Normal'), opt('reduced', 'Reduced (autonomic neuropathy)')] },
+      { id: 'load', label: 'Walking', kind: 'radio', role: 'context', def: 'normal',
+        options: [opt('normal', 'Usual walking, well-fitting shoes'), opt('high', 'Long walks in tight shoes')] },
+      { id: 'weeks', label: 'Duration', kind: 'range', role: 'context', def: 8, min: 1, max: 12, step: 1, unit: 'weeks' }
+    ],
+    compute: function (c) {
+      var base = 1 + (c.toes === 'clawed' ? 0.35 : 0) + (c.load === 'high' ? 0.45 : 0);
+      var ulcerT = c.sweat === 'reduced' ? 1.8 : 2.1;
+      var damage = 0, callusWeek = null, bleedWeek = null, ulcerWeek = null, alarmUsed = false, lastP = base, series = [0];
+      var weeks = Number(c.weeks);
+      for (var w = 1; w <= weeks; w++) {
+        var P = base + (callusWeek !== null ? 0.3 : 0);
+        var alarm = c.sensation === 'intact' && (P > 1.2 || damage > 0.25);
+        if (alarm) alarmUsed = true;
+        var Peff = alarm ? Math.min(P, 0.95) : P;
+        var delta = Peff - 1.05;
+        damage = delta > 0 ? damage + delta : Math.max(0, damage + delta * 0.8);
+        damage = Math.min(damage, 3.2);
+        if (damage >= 0.6 && callusWeek === null) callusWeek = w;
+        if (damage >= 1.3 && bleedWeek === null) bleedWeek = w;
+        if (damage >= ulcerT && ulcerWeek === null) ulcerWeek = w;
+        lastP = Peff;
+        series.push(damage);
+      }
+      var outcome = damage >= ulcerT ? 'ulcer' : damage >= 1.3 ? 'bleeding' : callusWeek !== null ? 'callus' : 'none';
+      return {
+        series: series, weeks: weeks, ulcerT: ulcerT, callusWeek: callusWeek, bleedWeek: bleedWeek, ulcerWeek: ulcerWeek,
+        base: base, lastP: lastP, alarmUsed: alarmUsed, sensation: c.sensation, toes: c.toes, sweat: c.sweat,
+        cats: { outcome: outcome, barrier: c.sweat === 'reduced' ? 'fissured' : 'intact' }
+      };
+    },
+    labels: {
+      outcome: { none: 'No lasting damage', callus: 'Callus has formed', bleeding: 'Bleeding beneath the callus', ulcer: 'Ulcer' },
+      barrier: { intact: 'Supple and intact', fissured: 'Dry and fissured; bacteria can enter' }
+    },
+    render: function (r, prev, animate) {
+      var L = this.labels;
+      var x0 = 42, x1 = 300, y0 = 26, y1 = 190;
+      function X(w) { return x0 + (x1 - x0) * w / 12; }
+      function Y(d) { return y1 - (y1 - y0) * clamp(d, 0, 3.2) / 3.2; }
+      function path(run) { return run.series.map(function (d, i) { return (i ? 'L' : 'M') + fmt(X(i), 1) + ' ' + fmt(Y(d), 1); }).join(' '); }
+      var th = [{ v: 0.6, t: 'Callus' }, { v: 1.3, t: 'Bleeding' }, { v: r.ulcerT, t: 'Ulcer' }];
+      var chart = '<svg class="fig chart" viewBox="0 0 360 220" role="img" aria-label="' + esc('Tissue stress over ' + r.weeks + ' weeks. Result: ' + L.outcome[r.cats.outcome] + '.') + '">' +
+        '<rect x="' + x0 + '" y="' + y0 + '" width="' + (x1 - x0) + '" height="' + (Y(r.ulcerT) - y0) + '" class="zone-bad"/>' +
+        th.map(function (h) { return '<line class="thresh-h" x1="' + x0 + '" x2="' + x1 + '" y1="' + Y(h.v) + '" y2="' + Y(h.v) + '"/>' + svgText(x1 + 6, Y(h.v) + 4, h.t, 'svg-small'); }).join('') +
+        [0, 3, 6, 9, 12].map(function (w) { return svgText(X(w), y1 + 16, w + (w === 12 ? ' wk' : ''), 'svg-small', 'middle'); }).join('') +
+        '<line class="grid" x1="' + x0 + '" x2="' + x1 + '" y1="' + y1 + '" y2="' + y1 + '"/>' + svgText(x0, 14, 'Tissue stress', 'svg-small') +
+        (prev && prev.series ? '<path class="line prev" d="' + path(prev) + '"/>' : '') +
+        '<path class="line cur' + (animate ? ' draw' : '') + '" pathLength="1" d="' + path(r) + '"/>' +
+        (r.callusWeek ? '<circle cx="' + X(r.callusWeek) + '" cy="' + Y(r.series[r.callusWeek]) + '" r="4" class="pt-callus"/>' : '') +
+        (r.ulcerWeek ? '<circle cx="' + X(r.ulcerWeek) + '" cy="' + Y(r.series[r.ulcerWeek]) + '" r="5" class="pt-full"/>' : '') + '</svg>';
+      var clawed = r.toes === 'clawed', o = r.cats.outcome;
+      var heat = r.lastP >= 1.6 ? '#C8102E' : r.lastP >= 1.25 ? '#E07B39' : r.lastP >= 1.0 ? '#E9B949' : '#F1DFA0';
+      var toes = [[64, 42, 13], [89, 35, 9], [107, 39, 8], [122, 47, 7], [134, 57, 6]].map(function (t) {
+        return clawed ? '<ellipse cx="' + t[0] + '" cy="' + (t[1] + 10) + '" rx="' + (t[2] - 2) + '" ry="' + (t[2] - 4) + '" class="toe"/><path d="M' + (t[0] - t[2] + 3) + ' ' + (t[1] + 4) + ' q' + (t[2] - 3) + ' -6 ' + (2 * t[2] - 6) + ' 0" class="claw"/>'
+          : '<circle cx="' + t[0] + '" cy="' + t[1] + '" r="' + t[2] + '" class="toe"/>';
+      }).join('');
+      var sole = '<svg class="fig sole" viewBox="0 0 180 290" role="img" aria-label="' + esc('Plantar view of the foot. Toes ' + (clawed ? 'clawed' : 'aligned') + '. ' + L.outcome[o] + ' under the first metatarsal head.') + '">' +
+        toes +
+        '<path d="M88 52 C135 50 152 92 146 150 C141 205 132 255 98 272 C62 280 46 250 43 200 C40 145 36 58 88 52 Z" class="sole-outline"/>' +
+        '<ellipse cx="' + (clawed ? 92 : 94) + '" cy="' + (clawed ? 62 : 92) + '" rx="46" ry="14" class="fatpad"/>' +
+        svgText(clawed ? 140 : 142, clawed ? 58 : 118, clawed ? 'Fat pad pulled forward' : 'Fat pad', 'svg-small', 'end') +
+        '<circle cx="74" cy="92" r="15" fill="' + heat + '" class="methead"/>' +
+        (r.callusWeek ? '<circle cx="74" cy="92" r="21" class="callus"/>' : '') +
+        (o === 'bleeding' ? '<circle cx="74" cy="92" r="6" class="bleed"/>' : '') +
+        (o === 'ulcer' ? '<circle cx="74" cy="92" r="10" class="ulcer"/>' : '') +
+        (r.sweat === 'reduced' ? '<path d="M70 228 l6 8 l-5 7 l7 9 M96 232 l-4 9 l6 6 l-3 10 M118 214 l5 7 l-4 8" class="fissure"/>' : '') +
+        svgText(90, 288, '1st metatarsal head', 'svg-small', 'middle') + '</svg>';
+      var loop = r.sensation === 'intact'
+        ? '<p class="loop ok">' + CHECK_SVG + '<span><b>Protective loop working.</b> ' + (r.alarmUsed ? 'Discomfort prompted a change in loading.' : 'Pressure never rose enough to cause discomfort.') + '</span></p>'
+        : '<p class="loop broken">' + CROSS_SVG + '<span><b>Protective loop broken.</b> No discomfort signal reaches awareness, so loading never changes.</span></p>';
+      return '<div class="model-out two"><figure>' + sole + '</figure><div><figure>' + chart + '</figure>' + loop +
+        '<dl class="readout"><dt>Pressure under 1st metatarsal head</dt><dd>' + fmt(r.lastP, 2) + ' times normal' + (r.callusWeek ? ', including callus' : '') + '</dd>' +
+        '<dt>Result after ' + r.weeks + ' ' + plural(r.weeks, 'week') + '</dt><dd>' + esc(L.outcome[o]) + (r.callusWeek ? ' (callus from week ' + r.callusWeek + ')' : '') + '</dd>' +
+        '<dt>Skin barrier</dt><dd>' + esc(L.barrier[r.cats.barrier]) + '</dd></dl></div></div>';
+    }
+  };
+
+  function modelOf(ci) { return MODELS[CASES[ci].model]; }
+
+  /* =====================================================================
+     STATE
+     ===================================================================== */
+  var STAGES = ['normal', 'break', 'signs', 'debrief'];
+  var STAGE_NAMES = { normal: 'Normal', 'break': 'Break it', signs: 'Read the signs', debrief: 'Debrief' };
+
+  function defaultCtrl(ci) {
+    var c = {};
+    modelOf(ci).controls.forEach(function (ctl) {
+      c[ctl.id] = ctl.role === 'break' ? ctl.normal : (ctl.kind === 'range' ? Number(ctl.def) : String(ctl.def));
+    });
+    return c;
+  }
+  function freshCase(ci) {
+    return {
+      stage: 'normal', ctrl: defaultCtrl(ci), run: null, prev: null,
+      preds: {}, results: {}, qAnswers: {}, qDone: {},
+      signs: { answers: {}, submitted: false },
+      explanation: '', explained: false, explainError: '', resetArmed: false
+    };
+  }
+  function freshCompare() { return { placed: {}, sortSubmitted: false, mType: {}, mMech: {}, mSubmitted: false }; }
+  var S = CASES.map(function (_, ci) { return freshCase(ci); });
+  var CS = freshCompare();
+
+  /* effective settings: in the Normal stage, "break" controls are locked to healthy values */
+  function effCtrl(ci, stage) {
+    var s = S[ci], c = {};
+    modelOf(ci).controls.forEach(function (ctl) {
+      c[ctl.id] = (stage === 'normal' && ctl.role === 'break') ? ctl.normal : s.ctrl[ctl.id];
+    });
+    return c;
+  }
+  function sameCtrl(a, b) {
+    if (!a || !b) return false;
+    return Object.keys(b).every(function (k) { return String(a[k]) === String(b[k]); });
+  }
+
+  function challengesFor(ci, stage) {
+    return CASES[ci].challenges.map(function (ch, i) { return { ch: ch, i: i }; }).filter(function (x) { return x.ch.stage === stage; });
+  }
+  function challengeDone(ci, i) {
+    var s = S[ci], ch = CASES[ci].challenges[i];
+    return ch.type === 'predict' ? !!s.results[i] : !!s.qDone[i];
+  }
+  function challengeCorrect(ci, i) {
+    var s = S[ci], ch = CASES[ci].challenges[i];
+    if (ch.type === 'predict') return !!s.results[i] && s.results[i].pred === s.results[i].actual;
+    return !!s.qDone[i] && s.qAnswers[i] === ch.answer;
+  }
+  function stageDone(ci, st) {
+    var s = S[ci];
+    if (st === 'normal' || st === 'break') return challengesFor(ci, st).every(function (x) { return challengeDone(ci, x.i); });
+    if (st === 'signs') return s.signs.submitted && s.explained;
+    if (st === 'debrief') return stageDone(ci, 'signs');
+    return false;
+  }
+  function stageUnlocked(ci, st) {
+    var i = STAGES.indexOf(st);
+    if (i < 0) return false;
+    for (var k = 0; k < i; k++) if (!stageDone(ci, STAGES[k])) return false;
+    return true;
+  }
+  function caseStatus(ci) {
+    var s = S[ci];
+    if (stageDone(ci, 'signs')) return 'complete';
+    if (Object.keys(s.results).length || Object.keys(s.qDone).length || Object.keys(s.signs.answers).length) return 'progress';
+    return 'none';
+  }
+  function compareStatus() {
+    if (CS.sortSubmitted && CS.mSubmitted) return 'complete';
+    if (CS.sortSubmitted || CS.mSubmitted || Object.keys(CS.placed).length || Object.keys(CS.mType).length) return 'progress';
+    return 'none';
+  }
+  function scoreStage(ci, st) {
+    var list = challengesFor(ci, st);
+    return { right: list.filter(function (x) { return challengeCorrect(ci, x.i); }).length, total: list.length };
+  }
+  function signsScore(ci) {
+    var s = S[ci], items = CASES[ci].signs;
+    return items.filter(function (it, i) { return s.signs.answers[i] === it.answer; }).length;
+  }
+  function sortScore() { return CMP.chips.filter(function (c, i) { return CS.placed['c' + i] === c.column; }).length; }
+  function mysteryScores() {
+    var t = 0, m = 0;
+    CMP.mysteries.forEach(function (my, i) { if (CS.mType[i] === my.type) t++; if (CS.mMech[i] === my.mechAnswer) m++; });
+    return { type: t, mech: m };
+  }
+  function revisitCase(ci) {
+    var s = S[ci], sc = CASES[ci], out = [];
+    sc.challenges.forEach(function (ch, i) {
+      if (!challengeDone(ci, i) || challengeCorrect(ci, i)) return;
+      out.push({ kind: ch.type === 'predict' ? 'Prediction' : 'Concept check', text: ch.title + ': ' + ch.question, why: ch.explanation, more: ch.more });
+    });
+    if (s.signs.submitted) sc.signs.forEach(function (it, i) {
+      if (s.signs.answers[i] === it.answer) return;
+      out.push({ kind: 'Sign', text: it.feature, why: it.options[it.answer] + '. ' + it.explanation, more: it.more });
+    });
+    return out;
+  }
+
+  /* =====================================================================
+     UI STATE
+     ===================================================================== */
+  var view = 'intro';          // 'intro' | case index | 'compare' | 'summary'
+  var selected = null;         // chip id on the compare board
+  var focusKey = null;
+  var dragChip = null;
+  var animateRun = false;
+  var studentName = '';
+  var notice = '';
+
+  var elApp = document.getElementById('app');
+  var elTabs = document.getElementById('tabs');
+  var elLive = document.getElementById('live');
+  var elToast = document.getElementById('toast');
+
+  function announce(msg) { elLive.textContent = ''; setTimeout(function () { elLive.textContent = msg; }, 40); }
+  var STATUS_TEXT = { none: 'not started', progress: 'in progress', complete: 'complete' };
+  function noticeHtml() { return notice ? '<p class="notice" role="status">' + esc(notice) + '</p>' : ''; }
+
+  /* =====================================================================
+     TABS
+     ===================================================================== */
+  function tabBtn(target, inner) {
+    var cur = String(view) === target;
+    return '<button type="button" class="tab" data-action="nav" data-target="' + target + '" data-key="tab-' + target + '"' + (cur ? ' aria-current="page"' : '') + '>' + inner + '</button>';
+  }
+  function tabsHtml() {
+    var h = tabBtn('intro', '<span>How it works</span>');
+    CASES.forEach(function (sc, ci) {
+      var st = caseStatus(ci);
+      h += tabBtn(String(ci), '<span class="num">' + (ci + 1) + '</span><span>' + esc(sc.title) + '</span><span class="dot ' + st + '" aria-hidden="true"></span><span class="sr-only">, ' + STATUS_TEXT[st] + '</span>');
+    });
+    var cst = compareStatus();
+    h += tabBtn('compare', '<span>Compare</span><span class="dot ' + cst + '" aria-hidden="true"></span><span class="sr-only">, ' + STATUS_TEXT[cst] + '</span>');
+    h += tabBtn('summary', '<span>Summary</span>');
+    h += '<button type="button" class="tab tab-save" data-action="save">Save progress</button>';
+    return h;
+  }
+
+  /* =====================================================================
+     INTRO
+     ===================================================================== */
+  function introHtml() {
+    var h = noticeHtml() + '<div class="intro-grid"><div>' +
+      '<h2 class="sr-only" tabindex="-1" data-key="view-heading">How it works</h2>' +
+      '<p class="lede">Every chronic wound starts as normal physiology that stopped working. In each case you\'ll explore the healthy system, break it, and then trace the patient\'s findings back to what failed.</p>' +
+      '<div class="objective"><span>Connects to these learning objectives</span>' + A.objectives.map(esc).join('<br>') + '</div>' +
+      '<h2 class="sub-h">Each case has four stages</h2><ol class="steps">' +
+      '<li><strong>Normal.</strong> Review the healthy physiology, then use a model to test how the system responds to everyday demands.</li>' +
+      '<li><strong>Break it.</strong> Introduce the failure, such as a narrowed artery or leaking valves. Predict what will happen before you run the model.</li>' +
+      '<li><strong>Read the signs.</strong> Link each finding in the patient to the mechanism that produces it, then explain the wound in your own words.</li>' +
+      '<li><strong>Debrief.</strong> See the path from normal physiology to what breaks to what you observe.</li>' +
+      '</ol><p>When all four cases are done, <strong>Compare</strong> puts the ulcers side by side with a sorting task and four mystery patients.</p>' +
+      '<p>Links labeled <strong>Beyond the handout</strong> open free readings for ideas the guided learning doesn\'t cover. The models use simplified teaching values, not clinical thresholds.</p>' +
+      '<p class="muted">Allow 10 to 12 minutes per case and about 10 minutes for Compare. Progress isn\'t saved automatically: use <strong>Save progress</strong> to download a file you can load later, and print your summary before closing the page.</p>' +
+      '<div class="actions"><button type="button" class="btn" data-action="load">Load saved progress</button></div>' +
+      '</div><aside class="legend"><h2>The path in every case</h2><ol>' +
+      '<li><span class="lnode" aria-hidden="true">1</span><div><strong>Normal physiology</strong><p>How the skin and its supply normally stay healthy</p></div></li>' +
+      '<li><span class="lnode" aria-hidden="true">2</span><div><strong>What breaks</strong><p>The specific failure in this condition</p></div></li>' +
+      '<li><span class="lnode" aria-hidden="true">3</span><div><strong>What you see</strong><p>Location, appearance, pain, and surrounding skin</p></div></li>' +
+      '</ol></aside></div><section class="case-list"><h2>Cases</h2>';
+    var firstOpen = -1;
+    for (var i = 0; i < CASES.length; i++) if (caseStatus(i) !== 'complete') { firstOpen = i; break; }
+    CASES.forEach(function (sc, ci) {
+      var st = caseStatus(ci);
+      var btn = { none: 'Start case', progress: 'Continue', complete: 'Review' }[st];
+      h += '<div class="case-row"><span class="n" aria-hidden="true">' + (ci + 1) + '</span><div><h3>' + esc(sc.title) + '</h3><p>' + esc(sc.tagline) + '</p></div>' +
+        '<button type="button" class="btn' + (ci === firstOpen ? ' primary' : '') + '" data-action="nav" data-target="' + ci + '" aria-label="' + esc(btn + ': ' + sc.title) + '">' + btn + '</button></div>';
+    });
+    h += '<div class="case-row"><span class="n" aria-hidden="true">+</span><div><h3>Compare the ulcers</h3><p>Sort features and identify four mystery patients</p></div>' +
+      '<button type="button" class="btn' + (firstOpen === -1 && compareStatus() !== 'complete' ? ' primary' : '') + '" data-action="nav" data-target="compare">' + ({ none: 'Start', progress: 'Continue', complete: 'Review' }[compareStatus()]) + '</button></div>';
+    return h + '</section>';
+  }
+
+  /* =====================================================================
+     CASE SHELL
+     ===================================================================== */
+  function caseHtml(ci) {
+    var sc = CASES[ci], s = S[ci];
+    if (!stageUnlocked(ci, s.stage)) {
+      var avail = STAGES.filter(function (x) { return stageUnlocked(ci, x); });
+      s.stage = avail[avail.length - 1];
+    }
+    var started = caseStatus(ci) !== 'none';
+    var h = noticeHtml() + '<header class="case-head"><div><p class="kicker">Case ' + (ci + 1) + ' of ' + CASES.length + '</p><h2 tabindex="-1" data-key="view-heading">' + esc(sc.title) + '</h2></div>' +
+      (started ? '<div><button type="button" class="btn small" data-action="reset" data-key="reset">' + (s.resetArmed ? 'Select again to erase this case' : 'Reset this case') + '</button></div>' : '') + '</header>';
+    h += stepperHtml(ci);
+    var collapsible = s.stage === 'break' || s.stage === 'debrief';
+    var open = !collapsible || vigOpen[ci + '-' + s.stage];
+    h += '<div class="vignette' + (open ? '' : ' clamped') + '"><p id="vig-' + ci + '"><strong>The patient.</strong> ' + esc(sc.vignette) + '</p>' +
+      (collapsible ? '<button type="button" class="btn link vig-toggle" data-action="vignette" data-key="vig-toggle" aria-expanded="' + !!open + '" aria-controls="vig-' + ci + '">' + (open ? 'Show less' : 'Show the full case') + '</button>' : '') + '</div>';
+    ensureRun(ci);
+    if (s.stage === 'normal') h += normalHtml(ci);
+    else if (s.stage === 'break') h += breakHtml(ci);
+    else if (s.stage === 'signs') h += signsHtml(ci);
+    else h += debriefHtml(ci);
+    return h;
+  }
+  function stepperHtml(ci) {
+    var s = S[ci];
+    var h = '<nav class="stepper" aria-label="Stages of this case"><ol>';
+    STAGES.forEach(function (st, i) {
+      var done = st === 'debrief' ? false : stageDone(ci, st), open = stageUnlocked(ci, st), cur = s.stage === st;
+      var state = done ? 'done' : open ? 'open' : 'locked';
+      h += '<li><button type="button" class="step ' + state + (cur ? ' current' : '') + '" data-action="stage" data-stage="' + st + '" data-key="step-' + st + '"' +
+        (open ? '' : ' disabled title="Finish ' + STAGE_NAMES[STAGES[i - 1]] + ' first"') + (cur ? ' aria-current="step"' : '') + '><span class="sn" aria-hidden="true">' + (done ? CHECK_SVG : (i + 1)) + '</span><span class="sl">' + STAGE_NAMES[st] + '</span>' +
+        '<span class="sr-only">' + (done ? ', done' : open ? '' : ', locked until earlier stages are done') + '</span></button></li>';
+    });
+    return h + '</ol></nav>';
+  }
+  function nextStageBtn(ci, cur) {
+    var nx = STAGES[STAGES.indexOf(cur) + 1];
+    if (!nx || !stageDone(ci, cur)) return '';
+    return '<div class="stage-next"><button type="button" class="btn primary" data-action="stage" data-stage="' + nx + '" data-key="next-stage">Continue to ' + STAGE_NAMES[nx] + '</button></div>';
+  }
+
+  /* ---------------- model panel ---------------- */
+  var LOCK_SVG = '<svg viewBox="0 0 20 20" width="14" height="14" aria-hidden="true" focusable="false"><rect x="4" y="9" width="12" height="9" rx="2" fill="currentColor"/><path d="M7 9V6.5a3 3 0 0 1 6 0V9" fill="none" stroke="currentColor" stroke-width="2"/></svg>';
+  var vigOpen = {};
+  function ensureRun(ci) {
+    var s = S[ci];
+    if (s.stage !== 'normal' && s.stage !== 'break') return;
+    var eff = effCtrl(ci, s.stage);
+    if (!s.run || !sameCtrl(s.run.ctrl, eff)) runModel(ci);
+  }
+  function controlsHtml(ci, stage) {
+    var m = modelOf(ci), eff = effCtrl(ci, stage);
+    var h = '';
+    if (stage === 'normal') h += '<p class="lock-banner">' + LOCK_SVG + '<span>Disease settings stay at healthy values here. They unlock in Break it.</span></p>';
+    m.controls.forEach(function (ctl) {
+      var locked = stage === 'normal' && ctl.role === 'break';
+      var other = ctl.disabledWhen && ctl.disabledWhen(eff);
+      var val = eff[ctl.id];
+      if (ctl.kind === 'radio') {
+        var seg = ctl.options.every(function (o) { return o.label.length <= 12; });
+        h += '<fieldset class="ctl' + (locked ? ' locked' : '') + (other ? ' muted-ctl' : '') + '"><legend>' + esc(ctl.label) +
+          (locked ? ' <span class="lock-tag">' + LOCK_SVG + '<span class="sr-only">locked at the healthy value</span></span>' : '') +
+          (other ? ' <span class="lock-note">' + esc(ctl.disabledNote) + '</span>' : '') + '</legend>' +
+          '<div class="opts ' + (seg ? 'seg' : 'stack') + '"' + (seg ? ' style="grid-template-columns:repeat(' + ctl.options.length + ',minmax(0,1fr))"' : '') + '>';
+        ctl.options.forEach(function (o) {
+          var on = !other && String(val) === o.value;
+          h += '<label class="opt' + (on ? ' on' : '') + '"><input type="radio" name="ctl-' + ci + '-' + ctl.id + '" value="' + esc(o.value) + '" data-input="ctl" data-ctl="' + ctl.id + '" data-key="ctl-' + ctl.id + '-' + esc(o.value) + '"' + (on ? ' checked' : '') + (locked || other ? ' disabled' : '') + '><span>' + esc(o.label) + '</span></label>';
+        });
+        h += '</div></fieldset>';
+      } else {
+        h += '<fieldset class="ctl"><legend>' + esc(ctl.label) + '</legend><div class="range-row"><input type="range" min="' + ctl.min + '" max="' + ctl.max + '" step="' + ctl.step + '" value="' + val + '" data-input="ctl-range" data-ctl="' + ctl.id + '" data-key="ctl-' + ctl.id + '" aria-label="' + esc(ctl.label + ' in ' + ctl.unit) + '"><output id="out-' + ctl.id + '">' + esc(val + ' ' + ctl.unit) + '</output></div></fieldset>';
+      }
+    });
+    h += '<p class="live-note">The model updates as soon as you change a setting.' + (m.showsPrev ? ' A dashed line shows the previous setting.' : '') + '</p>';
+    return h;
+  }
+  function modelPanel(ci, stage, heading) {
+    var s = S[ci], m = modelOf(ci);
+    return '<section class="model-panel" id="model-' + ci + '" tabindex="-1" data-key="model" aria-labelledby="model-h"><h3 class="panel-title" id="model-h">' + esc(heading) + '</h3><p class="panel-sub">' + esc(m.note) + '</p>' +
+      '<div class="sim-grid"><div class="sim-controls">' + controlsHtml(ci, stage) + '</div><div class="sim-out">' + m.render(s.run, s.prev, animateRun) + '</div></div></section>';
+  }
+  function describePreset(ci, preset) {
+    var m = modelOf(ci);
+    return m.controls.filter(function (ctl) { return preset[ctl.id] !== undefined; }).map(function (ctl) {
+      return ctl.label + ': ' + (ctl.kind === 'range' ? preset[ctl.id] + ' ' + ctl.unit : optLabel(ctl, preset[ctl.id]).toLowerCase());
+    }).join('; ');
+  }
+  function challengesHtml(ci, stage) {
+    var s = S[ci], sc = CASES[ci], m = modelOf(ci);
+    var list = challengesFor(ci, stage);
+    var h = '<h3 class="panel-title chal-h">' + (stage === 'normal' ? 'Check the healthy system' : 'Predict, then run') + '</h3>' +
+      '<p class="panel-sub">' + (stage === 'normal' ? 'Complete these to unlock Break it.' : 'Commit to a prediction first. Running a challenge loads its settings into the model above.') + '</p><ol class="chals">';
+    var seeBtn = '<button type="button" class="btn link see-model" data-action="scroll-model">See it in the model</button>';
+    list.forEach(function (x) {
+      var ch = x.ch, i = x.i, done = challengeDone(ci, i);
+      h += '<li class="chal' + (done ? ' done' : '') + '"><h4>' + esc(ch.title) + '</h4>';
+      if (ch.type === 'predict') {
+        var res = s.results[i];
+        h += '<p>' + esc(ch.question) + '</p><p class="muted small">Settings: ' + esc(describePreset(ci, ch.preset)) + '.</p>' +
+          '<fieldset class="ctl"><legend class="sr-only">Your prediction</legend><div class="opts stack">';
+        ch.options.forEach(function (o) {
+          var on = s.preds[i] === o.value, isAns = res && res.actual === o.value;
+          h += '<label class="opt' + (on ? ' on' : '') + (isAns ? ' answer' : '') + '"><input type="radio" name="pred-' + ci + '-' + i + '" value="' + esc(o.value) + '" data-input="pred" data-ch="' + i + '" data-key="pred-' + i + '-' + esc(o.value) + '"' + (on ? ' checked' : '') + (res ? ' disabled' : '') + '><span>' + esc(o.label) + '</span></label>';
+        });
+        h += '</div></fieldset>';
+        if (!res) h += '<div class="actions"><button type="button" class="btn" data-action="challenge" data-ch="' + i + '" data-key="chal-' + i + '"' + (s.preds[i] ? '' : ' disabled') + '>Run with these settings</button>' + (s.preds[i] ? '' : '<span class="status-line">Choose a prediction first.</span>') + '</div>';
+        else {
+          var ok = res.pred === res.actual;
+          var actualLabel = (ch.options.filter(function (o) { return o.value === res.actual; })[0] || {}).label || (m.labels[ch.measure] && m.labels[ch.measure][res.actual]) || res.actual;
+          h += '<div class="wi-expl fb" tabindex="-1" data-key="fb-' + i + '"><p><span class="mark ' + (ok ? 'ok' : 'no') + '">' + (ok ? CHECK_SVG + '<b>Your prediction matched.</b>' : CROSS_SVG + '<b>Not quite.</b>') + '</span> <b>Model result:</b> ' + esc(actualLabel) + '.</p><p>' + esc(ch.explanation) + '</p>' + moreLink(ci, ch.more) + seeBtn + '</div>';
+        }
+      } else {
+        var doneQ = s.qDone[i];
+        h += '<fieldset class="ctl"><legend class="q-legend">' + esc(ch.question) + '</legend><div class="opts stack">';
+        ch.options.forEach(function (o, k) {
+          var on = s.qAnswers[i] === k, isAns = doneQ && k === ch.answer;
+          h += '<label class="opt' + (on ? ' on' : '') + (isAns ? ' answer' : '') + '"><input type="radio" name="q-' + ci + '-' + i + '" value="' + k + '" data-input="q" data-ch="' + i + '" data-key="q-' + i + '-' + k + '"' + (on ? ' checked' : '') + (doneQ ? ' disabled' : '') + '><span>' + esc(o) + '</span></label>';
+        });
+        h += '</div></fieldset>';
+        if (!doneQ) h += '<div class="actions"><button type="button" class="btn" data-action="question" data-ch="' + i + '" data-key="qbtn-' + i + '"' + (s.qAnswers[i] === undefined ? ' disabled' : '') + '>Check answer</button>' + (s.qAnswers[i] === undefined ? '<span class="status-line">Choose an answer first.</span>' : '') + '</div>';
+        else {
+          var okQ = s.qAnswers[i] === ch.answer;
+          h += '<div class="wi-expl fb" tabindex="-1" data-key="fb-' + i + '"><p><span class="mark ' + (okQ ? 'ok' : 'no') + '">' + (okQ ? CHECK_SVG + '<b>Correct.</b>' : CROSS_SVG + '<b>Not quite.</b> The answer is “' + esc(ch.options[ch.answer]) + '.”') + '</span></p><p>' + esc(ch.explanation) + '</p>' + moreLink(ci, ch.more) + '</div>';
+        }
+      }
+      h += '</li>';
+    });
+    return h + '</ol>';
+  }
+  function stageProgress(ci, st) {
+    if (stageDone(ci, st)) return nextStageBtn(ci, st);
+    var nx = STAGES[STAGES.indexOf(st) + 1];
+    if (st === 'signs') {
+      var sg = S[ci].signs;
+      return '<p class="stage-progress">' + (sg.submitted ? 'Save your explanation to unlock ' : 'Submit your answers and save an explanation to unlock ') + STAGE_NAMES[nx] + '.</p>';
+    }
+    var list = challengesFor(ci, st), done = list.filter(function (x) { return challengeDone(ci, x.i); }).length;
+    return '<p class="stage-progress">' + done + ' of ' + list.length + ' ' + plural(list.length, 'challenge') + ' done. Finish ' + (list.length - done === 1 ? 'the last one' : 'the rest') + ' to unlock ' + STAGE_NAMES[nx] + '.</p>';
+  }
+
+  /* ---------------- stages ---------------- */
+  function normalHtml(ci) {
+    var sc = CASES[ci];
+    var h = '<section class="stage-panel"><h3 class="stage-title">Normal physiology</h3><p class="stage-lede">' + esc(sc.normal.intro) + ' Read the cards, try the model, then complete the checks below it.</p><div class="points">';
+    sc.normal.points.forEach(function (p) {
+      h += '<div class="point"><h4>' + esc(p.title) + '</h4><p>' + esc(p.text) + '</p>' + (p.ref ? '<p class="point-ref">' + esc(p.ref) + '</p>' : '') + moreLink(ci, p.more) + '</div>';
+    });
+    h += '</div>' + modelPanel(ci, 'normal', 'Explore the healthy system') + challengesHtml(ci, 'normal') + '</section>';
+    return h + stageProgress(ci, 'normal');
+  }
+  function breakHtml(ci) {
+    var sc = CASES[ci];
+    var h = '<section class="stage-panel"><h3 class="stage-title">Break it</h3><p class="change-card">' + esc(sc.breakIntro) + '</p>' +
+      '<p class="stage-lede">Every setting is unlocked now. Explore freely, and for each challenge below, commit to a prediction before you run it.</p>' +
+      modelPanel(ci, 'break', 'Break the system') + challengesHtml(ci, 'break') + '</section>';
+    return h + stageProgress(ci, 'break');
+  }
+  function signsHtml(ci) {
+    var sc = CASES[ci], s = S[ci], sg = s.signs;
+    var h = '<section class="stage-panel"><h3 class="stage-title">Read the signs</h3>' +
+      '<p class="stage-lede">Each finding below comes from the patient. Choose the mechanism that produces it. You get one submission, then you\'ll see the reasoning for every finding.</p><ol class="wi-list">';
+    sc.signs.forEach(function (it, i) {
+      var res = sg.submitted ? (sg.answers[i] === it.answer ? ' right' : ' wrong') : '';
+      h += '<li class="wi-item' + res + '"><fieldset><legend><span class="wi-about">Finding</span><span class="wi-q">' + esc(it.feature) + '</span></legend><div class="opts stack">';
+      it.options.forEach(function (o, k) {
+        var on = sg.answers[i] === k, isAns = sg.submitted && k === it.answer;
+        h += '<label class="opt' + (on ? ' on' : '') + (isAns ? ' answer' : '') + '"><input type="radio" name="sign-' + ci + '-' + i + '" value="' + k + '" data-input="sign" data-item="' + i + '" data-key="sign-' + i + '-' + k + '"' + (on ? ' checked' : '') + (sg.submitted ? ' disabled' : '') + '><span>' + esc(o) + '</span></label>';
+      });
+      h += '</div>';
+      if (sg.submitted) {
+        var ok = sg.answers[i] === it.answer;
+        h += '<p class="wi-expl"><span class="mark ' + (ok ? 'ok' : 'no') + '">' + (ok ? CHECK_SVG + '<b>Correct.</b>' : CROSS_SVG + '<b>Not quite.</b>') + '</span> ' + esc(it.explanation) + moreLink(ci, it.more) + '</p>';
+      }
+      h += '</fieldset></li>';
+    });
+    h += '</ol>';
+    var answered = Object.keys(sg.answers).length;
+    if (!sg.submitted) {
+      h += '<div class="actions"><button type="button" class="btn primary" data-action="signs-submit" data-key="signs-submit"' + (answered === sc.signs.length ? '' : ' disabled') + '>Submit</button><span class="status-line">' + answered + ' of ' + sc.signs.length + ' answered.</span></div>';
+    } else {
+      h += '<p class="score-line" tabindex="-1" data-key="signs-score"><b>' + signsScore(ci) + ' of ' + sc.signs.length + '</b> findings linked to the right mechanism.</p>';
+      h += '<section class="write-box explain" aria-labelledby="explain-h"><h3 id="explain-h" tabindex="-1" data-key="explain-heading">Explain it</h3>' +
+        '<label for="expl-' + ci + '">' + esc(sc.explainPrompt) + '</label>' +
+        '<textarea id="expl-' + ci + '" data-input="explain" data-key="expl">' + esc(s.explanation) + '</textarea>' +
+        (s.explainError ? '<p class="err" role="alert">' + esc(s.explainError) + '</p>' : '') +
+        '<div class="actions"><button type="button" class="btn primary" data-action="explain-submit" data-key="explain-submit">' + (s.explained ? 'Save changes' : 'Save explanation') + '</button>' +
+        '<span class="status-line">' + (s.explained ? 'Saved. You can keep editing until you print your summary.' : 'Ungraded. A few sentences is plenty.') + '</span></div></section>';
+    }
+    return h + '</section>' + stageProgress(ci, 'signs');
+  }
+  function debriefHtml(ci) {
+    var sc = CASES[ci], s = S[ci];
+    var h = '<section class="stage-panel"><h3 class="stage-title">Debrief: from normal to wound</h3>' +
+      '<div class="map" role="table" aria-label="Normal physiology, what breaks, and what you see">' +
+      '<div class="map-row map-head" role="row"><span role="columnheader">Normal physiology</span><span role="columnheader">What breaks</span><span role="columnheader">What you see</span></div>';
+    sc.map.forEach(function (r) {
+      h += '<div class="map-row" role="row"><span role="cell" class="m-normal">' + esc(r.normal) + '</span><span role="cell" class="m-break">' + esc(r.breaks) + '</span><span role="cell" class="m-see">' + esc(r.see) + '</span></div>';
+    });
+    h += '</div>';
+    var n = scoreStage(ci, 'normal'), b = scoreStage(ci, 'break'), rev = revisitCase(ci);
+    h += '<div class="deb-cols"><div><h4 class="deb-h">How you did</h4><dl class="results">' +
+      '<dt>Normal</dt><dd>' + n.right + ' of ' + n.total + ' correct.</dd>' +
+      '<dt>Break it</dt><dd>' + b.right + ' of ' + b.total + ' correct.</dd>' +
+      '<dt>Signs</dt><dd>' + signsScore(ci) + ' of ' + sc.signs.length + ' linked correctly.</dd></dl>' +
+      '<h4 class="deb-h">Your explanation</h4><blockquote class="pred-quote">' + esc(s.explanation) + '</blockquote></div>' +
+      '<div><h4 class="deb-h">Worth revisiting</h4>';
+    if (rev.length) {
+      h += '<ul class="revisit">' + rev.map(function (r) {
+        return '<li><span class="small muted">' + esc(r.kind) + '</span><q>' + esc(r.text) + '</q><p>' + esc(r.why) + moreLink(ci, r.more) + '</p></li>';
+      }).join('') + '</ul>';
+    } else h += '<p class="small">Nothing here. Every prediction and finding matched the mechanism.</p>';
+    h += '</div></div>' + readingList(ci, 'Beyond the handout', 'Free readings for the ideas in this case that go past the guided learning handout.') + '</section>';
+    var next = ci < CASES.length - 1
+      ? '<button type="button" class="btn primary" data-action="nav" data-target="' + (ci + 1) + '">Go to case ' + (ci + 2) + ': ' + esc(CASES[ci + 1].title) + '</button>'
+      : '<button type="button" class="btn primary" data-action="nav" data-target="compare">Compare the ulcers</button>';
+    return h + '<div class="next-row">' + next + '<button type="button" class="btn" data-action="nav" data-target="summary">View summary</button></div>';
+  }
+
+  /* =====================================================================
+     COMPARE
+     ===================================================================== */
+  function columnLabel(id) { return (CMP.columns.filter(function (c) { return c.id === id; })[0] || {}).label || id; }
+  function compareHtml() {
+    var h = noticeHtml() + '<header class="case-head"><div><p class="kicker">Synthesis</p><h2 tabindex="-1" data-key="view-heading">Compare the ulcers</h2></div></header>' +
+      '<p class="stage-lede">' + esc(CMP.intro) + '</p>';
+    // sort board
+    h += '<section class="stage-panel" aria-labelledby="sort-h"><h3 class="stage-title" id="sort-h">Sort the features</h3>' +
+      '<p class="stage-lede">Place each feature under the ulcer it best describes. Drag it, or select it and then choose a column. You get one submission.</p>';
+    var unplaced = CMP.chips.map(function (_, i) { return i; }).filter(function (i) { return !CS.placed['c' + i]; });
+    h += '<div class="sort-board' + (CS.sortSubmitted ? ' submitted' : '') + '">';
+    if (!CS.sortSubmitted) {
+      h += '<div class="tray-wrap"><h4 class="panel-title" id="tray-h">Features</h4><p class="panel-sub">' + unplaced.length + ' left to place.</p><div class="bank wide" data-tdrop="tray" role="group" aria-labelledby="tray-h">' +
+        (unplaced.length ? unplaced.map(function (i) { return chipBtn(i); }).join('') : '<p class="bank-empty">All features placed.</p>') + '</div></div>';
+    }
+    h += '<div class="sort-cols">';
+    CMP.columns.forEach(function (col) {
+      var here = CMP.chips.map(function (_, i) { return i; }).filter(function (i) { return CS.placed['c' + i] === col.id; });
+      h += '<div class="sort-col" data-tdrop="' + col.id + '"><h4>' + esc(col.label) + '</h4>' +
+        (here.length ? '<div class="iv-chips">' + here.map(function (i) { return placedChip(i); }).join('') + '</div>' : '<p class="small muted">No features yet.</p>') +
+        (!CS.sortSubmitted && selected ? '<button type="button" class="iv-place" data-action="chip-target" data-target="' + col.id + '" data-key="ct-' + col.id + '">Place selected feature here</button>' : '') + '</div>';
+    });
+    h += '</div></div>';
+    if (!CS.sortSubmitted) h += '<div class="actions"><button type="button" class="btn primary" data-action="sort-submit" data-key="sort-submit"' + (unplaced.length ? ' disabled' : '') + '>Submit sorting</button><span class="status-line">' + (unplaced.length ? 'Place every feature to submit.' : 'Ready to submit.') + '</span></div>';
+    else h += '<p class="score-line" tabindex="-1" data-key="sort-score"><b>' + sortScore() + ' of ' + CMP.chips.length + '</b> features sorted correctly.</p>';
+    h += '</section>';
+    // mysteries
+    h += '<section class="stage-panel" aria-labelledby="myst-h"><h3 class="stage-title" id="myst-h">Mystery patients</h3>' +
+      '<p class="stage-lede">For each patient, identify the ulcer type and the physiology that best explains it. Some patients have more than one problem.</p><ol class="wi-list">';
+    var allAnswered = true;
+    CMP.mysteries.forEach(function (my, i) {
+      if (CS.mType[i] === undefined || CS.mMech[i] === undefined) allAnswered = false;
+      var res = CS.mSubmitted ? ((CS.mType[i] === my.type && CS.mMech[i] === my.mechAnswer) ? ' right' : ' wrong') : '';
+      h += '<li class="wi-item mystery' + res + '"><p class="myst-text"><b>Patient ' + (i + 1) + '.</b> ' + esc(my.text) + '</p>' +
+        '<fieldset class="ctl"><legend class="q-legend">Which type of ulcer is this?</legend><div class="opts grid2">';
+      CMP.typeOptions.forEach(function (o, k) {
+        var on = CS.mType[i] === k, isAns = CS.mSubmitted && k === my.type;
+        h += '<label class="opt' + (on ? ' on' : '') + (isAns ? ' answer' : '') + '"><input type="radio" name="mt-' + i + '" value="' + k + '" data-input="mtype" data-item="' + i + '" data-key="mt-' + i + '-' + k + '"' + (on ? ' checked' : '') + (CS.mSubmitted ? ' disabled' : '') + '><span>' + esc(o) + '</span></label>';
+      });
+      h += '</div></fieldset><fieldset class="ctl"><legend class="q-legend">' + esc(my.mechQuestion) + '</legend><div class="opts stack">';
+      my.mechOptions.forEach(function (o, k) {
+        var on = CS.mMech[i] === k, isAns = CS.mSubmitted && k === my.mechAnswer;
+        h += '<label class="opt' + (on ? ' on' : '') + (isAns ? ' answer' : '') + '"><input type="radio" name="mm-' + i + '" value="' + k + '" data-input="mmech" data-item="' + i + '" data-key="mm-' + i + '-' + k + '"' + (on ? ' checked' : '') + (CS.mSubmitted ? ' disabled' : '') + '><span>' + esc(o) + '</span></label>';
+      });
+      h += '</div></fieldset>';
+      if (CS.mSubmitted) {
+        var tOk = CS.mType[i] === my.type, mOk = CS.mMech[i] === my.mechAnswer;
+        h += '<p class="wi-expl"><span class="mark ' + (tOk ? 'ok' : 'no') + '">' + (tOk ? CHECK_SVG + '<b>Type correct.</b>' : CROSS_SVG + '<b>Type:</b> ' + esc(CMP.typeOptions[my.type]) + '.') + '</span> ' +
+          '<span class="mark ' + (mOk ? 'ok' : 'no') + '">' + (mOk ? CHECK_SVG + '<b>Mechanism correct.</b>' : CROSS_SVG + '<b>Mechanism:</b> ' + esc(my.mechOptions[my.mechAnswer]) + '.') + '</span> ' + esc(my.explanation) + '</p>';
+      }
+      h += '</li>';
+    });
+    h += '</ol>';
+    if (!CS.mSubmitted) h += '<div class="actions"><button type="button" class="btn primary" data-action="mystery-submit" data-key="myst-submit"' + (allAnswered ? '' : ' disabled') + '>Submit answers</button><span class="status-line">Answer both questions for every patient.</span></div>';
+    else {
+      var ms = mysteryScores();
+      h += '<p class="score-line" tabindex="-1" data-key="myst-score"><b>' + ms.type + ' of ' + CMP.mysteries.length + '</b> types and <b>' + ms.mech + ' of ' + CMP.mysteries.length + '</b> mechanisms correct.</p>';
+    }
+    h += '</section><div class="next-row"><button type="button" class="btn primary" data-action="nav" data-target="summary">View summary</button></div>';
+    return h;
+  }
+  function chipBtn(i) {
+    var id = 'c' + i, sel = selected === id;
+    return '<button type="button" class="token' + (sel ? ' selected' : '') + '" draggable="true" data-action="chip" data-chip="' + id + '" data-key="chip-' + id + '" aria-pressed="' + sel + '">' + esc(CMP.chips[i].text) + '</button>';
+  }
+  function placedChip(i) {
+    var c = CMP.chips[i], id = 'c' + i;
+    if (CS.sortSubmitted) {
+      var ok = CS.placed[id] === c.column;
+      return '<div class="chip ' + (ok ? 'right' : 'wrong') + '"><p class="chip-t">' + (ok ? CHECK_SVG : CROSS_SVG) + '<span>' + esc(c.text) + '</span></p>' +
+        '<p class="chip-x">' + (ok ? '' : '<b>Belongs with: ' + esc(columnLabel(c.column)) + '.</b> ') + esc(c.why) + '</p></div>';
+    }
+    return '<div class="chip">' + chipBtn(i) + '<button type="button" class="return" data-action="chip-return" data-chip="' + id + '" aria-label="Return this feature to the list">&times;</button></div>';
+  }
+
+  /* =====================================================================
+     SUMMARY
+     ===================================================================== */
+  function summaryHtml() {
+    var today = new Date().toLocaleDateString(undefined, { year: 'numeric', month: 'long', day: 'numeric' });
+    var done = CASES.filter(function (_, ci) { return caseStatus(ci) === 'complete'; }).length;
+    var h = noticeHtml() + '<div class="sum-head"><div><p class="kicker">' + esc(A.course) + ', ' + esc(A.unit) + '</p><h2 tabindex="-1" data-key="view-heading">Your summary: ' + esc(A.title) + '</h2>' +
+      '<p class="muted">' + done + ' of ' + CASES.length + ' cases complete. Compare ' + STATUS_TEXT[compareStatus()] + '. ' + esc(today) + '</p></div>' +
+      '<div class="name-field"><label for="sname">Your name</label><input id="sname" type="text" autocomplete="name" data-input="name" value="' + esc(studentName) + '"></div></div>' +
+      '<div class="actions no-print"><button type="button" class="btn primary" data-action="print">Print or save as PDF</button><button type="button" class="btn" data-action="save">Save progress file</button><button type="button" class="btn" data-action="load">Load saved progress</button></div>' +
+      '<p class="print-note">If no print dialog opens, press Ctrl+P on Windows or Cmd+P on a Mac.</p>';
+    CASES.forEach(function (sc, ci) {
+      var s = S[ci], st = caseStatus(ci);
+      h += '<section class="sum-case' + (st === 'complete' ? ' done' : '') + '"><h3>Case ' + (ci + 1) + ': ' + esc(sc.title) + '</h3>';
+      if (st === 'none') { h += '<p class="sum-meta">Not started.</p></section>'; return; }
+      var n = scoreStage(ci, 'normal'), b = scoreStage(ci, 'break');
+      h += '<p class="sum-meta">' + (st === 'complete' ? 'Complete.' : 'In progress.') + '</p><dl class="results">' +
+        '<dt>Normal</dt><dd>' + n.right + ' of ' + n.total + ' correct' + (stageDone(ci, 'normal') ? '.' : ' so far.') + '</dd>' +
+        '<dt>Break it</dt><dd>' + b.right + ' of ' + b.total + ' correct' + (stageDone(ci, 'break') ? '.' : ' so far.') + '</dd>' +
+        (s.signs.submitted ? '<dt>Signs</dt><dd>' + signsScore(ci) + ' of ' + sc.signs.length + ' linked correctly.</dd>' : '') + '</dl>' +
+        '<p class="sum-q">' + esc(sc.explainPrompt) + '</p><p class="sum-a">' + (s.explained ? esc(s.explanation) : '<span class="muted">No explanation saved.</span>') + '</p>';
+      var rev = revisitCase(ci);
+      if (rev.length) h += '<p class="sum-q">Worth revisiting</p><ul class="sum-list">' + rev.map(function (r) { return '<li><span class="muted">' + esc(r.kind) + ':</span> ' + esc(r.text) + '</li>'; }).join('') + '</ul>';
+      h += '</section>';
+    });
+    h += '<section class="sum-case' + (compareStatus() === 'complete' ? ' done' : '') + '"><h3>Compare the ulcers</h3>';
+    if (compareStatus() === 'none') h += '<p class="sum-meta">Not started.</p>';
+    else {
+      h += '<dl class="results">' + (CS.sortSubmitted ? '<dt>Sorting</dt><dd>' + sortScore() + ' of ' + CMP.chips.length + ' features correct.</dd>' : '<dt>Sorting</dt><dd>Not submitted.</dd>');
+      if (CS.mSubmitted) { var ms = mysteryScores(); h += '<dt>Mystery patients</dt><dd>' + ms.type + ' of ' + CMP.mysteries.length + ' types and ' + ms.mech + ' of ' + CMP.mysteries.length + ' mechanisms correct.</dd>'; }
+      else h += '<dt>Mystery patients</dt><dd>Not submitted.</dd>';
+      h += '</dl>';
+      var missed = [];
+      if (CS.sortSubmitted) CMP.chips.forEach(function (c, i) { if (CS.placed['c' + i] !== c.column) missed.push('Feature: ' + c.text + ' (belongs with ' + columnLabel(c.column) + ')'); });
+      if (CS.mSubmitted) CMP.mysteries.forEach(function (my, i) { if (CS.mType[i] !== my.type || CS.mMech[i] !== my.mechAnswer) missed.push('Patient ' + (i + 1) + ': ' + CMP.typeOptions[my.type]); });
+      if (missed.length) h += '<p class="sum-q">Worth revisiting</p><ul class="sum-list">' + missed.map(function (t) { return '<li>' + esc(t) + '</li>'; }).join('') + '</ul>';
+    }
+    return h + '</section>';
+  }
+
+  /* =====================================================================
+     RENDER LOOP
+     ===================================================================== */
+  function render() {
+    elTabs.innerHTML = tabsHtml();
+    elApp.innerHTML = view === 'intro' ? introHtml() : view === 'compare' ? compareHtml() : view === 'summary' ? summaryHtml() : caseHtml(view);
+    animateRun = false;
+    var showToast = selected !== null && view === 'compare';
+    elToast.classList.toggle('show', showToast);
+    if (showToast) elToast.querySelector('span').textContent = 'Feature selected. Choose a column to place it.';
+    var curTab = elTabs.querySelector('[aria-current="page"]');
+    if (curTab) {
+      var l = curTab.offsetLeft, r = l + curTab.offsetWidth;
+      if (l < elTabs.scrollLeft) elTabs.scrollLeft = l - 12;
+      else if (r > elTabs.scrollLeft + elTabs.clientWidth) elTabs.scrollLeft = r - elTabs.clientWidth + 12;
+    }
+    if (focusKey) {
+      var el = document.querySelector('[data-key="' + focusKey + '"]');
+      if (el) el.focus();
+      focusKey = null;
+    }
+  }
+  function clearTransient() {
+    selected = null; notice = '';
+    S.forEach(function (s) { s.resetArmed = false; });
+  }
+  function go(target) {
+    view = (target === 'intro' || target === 'summary' || target === 'compare') ? target : Number(target);
+    clearTransient();
+    focusKey = 'view-heading';
+    render();
+    window.scrollTo(0, 0);
+  }
+  function goStage(ci, st) {
+    if (!stageUnlocked(ci, st)) return;
+    var s = S[ci];
+    s.stage = st;
+    clearTransient();
+    // entering Normal: show healthy settings; entering Break it: keep current settings
+    if (st === 'normal') { s.run = null; s.prev = null; }
+    focusKey = 'step-' + st;
+    render();
+    var stepper = document.querySelector('.stepper');
+    if (stepper) stepper.scrollIntoView({ block: 'start' });
+  }
+  function runModel(ci) {
+    var s = S[ci], m = modelOf(ci);
+    var eff = effCtrl(ci, s.stage);
+    var r = m.compute(eff);
+    r.ctrl = eff;
+    s.prev = s.run;
+    s.run = r;
+    animateRun = true;
+    return r;
+  }
+
+  /* =====================================================================
+     EVENTS
+     ===================================================================== */
+  document.addEventListener('click', function (e) {
+    var t = e.target.closest('[data-action]');
+    if (!t) return;
+    var a = t.dataset.action;
+
+    if (a === 'nav') return go(t.dataset.target);
+    if (a === 'print') return window.print();
+    if (a === 'save') return saveProgress();
+    if (a === 'load') return document.getElementById('loadfile').click();
+    if (a === 'cancel-select') { selected = null; announce('Selection canceled.'); return render(); }
+
+    if (view === 'compare') return compareClick(a, t);
+    if (typeof view !== 'number') return;
+    var ci = view, s = S[ci], sc = CASES[ci];
+    if (a !== 'reset') s.resetArmed = false;
+
+    switch (a) {
+      case 'stage': return goStage(ci, t.dataset.stage);
+      case 'reset':
+        if (!s.resetArmed) { s.resetArmed = true; focusKey = 'reset'; return render(); }
+        S[ci] = freshCase(ci);
+        announce('Case reset.');
+        focusKey = 'view-heading';
+        return render();
+      case 'scroll-model': {
+        var panel = document.querySelector('.model-panel');
+        if (panel) { panel.scrollIntoView({ block: 'start', behavior: 'smooth' }); panel.focus({ preventScroll: true }); }
+        return;
+      }
+      case 'vignette': {
+        var vk = ci + '-' + s.stage;
+        vigOpen[vk] = !vigOpen[vk];
+        focusKey = 'vig-toggle';
+        return render();
+      }
+      case 'challenge': {
+        var i = Number(t.dataset.ch), ch = sc.challenges[i];
+        if (!s.preds[i]) return;
+        Object.keys(ch.preset).forEach(function (k) {
+          var ctl = modelOf(ci).controls.filter(function (x) { return x.id === k; })[0];
+          s.ctrl[k] = ctl && ctl.kind === 'range' ? Number(ch.preset[k]) : String(ch.preset[k]);
+        });
+        var res = runModel(ci);
+        s.results[i] = { pred: s.preds[i], actual: res.cats[ch.measure] };
+        announce((s.results[i].pred === s.results[i].actual ? 'Your prediction matched. ' : 'Not quite. ') + 'Model result and explanation shown below the challenge. The model above now shows these settings.');
+        focusKey = 'fb-' + i;
+        return render();
+      }
+      case 'question': {
+        var qi = Number(t.dataset.ch);
+        if (s.qAnswers[qi] === undefined) return;
+        s.qDone[qi] = true;
+        announce(s.qAnswers[qi] === sc.challenges[qi].answer ? 'Correct.' : 'Not quite. Explanation shown.');
+        focusKey = 'fb-' + qi;
+        return render();
+      }
+      case 'signs-submit':
+        if (Object.keys(s.signs.answers).length < sc.signs.length) return;
+        s.signs.submitted = true;
+        announce(signsScore(ci) + ' of ' + sc.signs.length + ' findings linked correctly. Explanations shown. Now explain the wound in your own words.');
+        focusKey = 'signs-score';
+        return render();
+      case 'explain-submit':
+        if (words(s.explanation) < 5) { s.explainError = 'Write at least a sentence or two before saving.'; focusKey = 'expl'; return render(); }
+        s.explainError = '';
+        var first = !s.explained;
+        s.explained = true;
+        announce(first ? 'Explanation saved. The debrief is now open.' : 'Changes saved.');
+        focusKey = first ? 'next-stage' : 'explain-submit';
+        return render();
+    }
+  });
+
+  function compareClick(a, t) {
+    switch (a) {
+      case 'chip': {
+        if (CS.sortSubmitted) return;
+        var id = t.dataset.chip;
+        selected = selected === id ? null : id;
+        announce(selected ? 'Selected: ' + CMP.chips[Number(id.slice(1))].text + '. Now choose a column.' : 'Feature deselected.');
+        focusKey = (selected && window.innerWidth < 900) ? 'ct-' + CMP.columns[0].id : 'chip-' + id;
+        return render();
+      }
+      case 'chip-target': {
+        if (!selected) return;
+        var chip = selected;
+        CS.placed[chip] = t.dataset.target;
+        selected = null;
+        announce('Placed under ' + columnLabel(t.dataset.target) + '.');
+        var nextChip = CMP.chips.map(function (_, i) { return 'c' + i; }).filter(function (x) { return !CS.placed[x]; })[0];
+        focusKey = nextChip ? 'chip-' + nextChip : 'sort-submit';
+        return render();
+      }
+      case 'chip-return':
+        delete CS.placed[t.dataset.chip];
+        if (selected === t.dataset.chip) selected = null;
+        announce('Feature returned to the list.');
+        focusKey = 'chip-' + t.dataset.chip;
+        return render();
+      case 'sort-submit':
+        if (CMP.chips.some(function (_, i) { return !CS.placed['c' + i]; })) return;
+        CS.sortSubmitted = true; selected = null;
+        announce(sortScore() + ' of ' + CMP.chips.length + ' features sorted correctly. Reasoning shown on each feature.');
+        focusKey = 'sort-score';
+        return render();
+      case 'mystery-submit':
+        if (CMP.mysteries.some(function (_, i) { return CS.mType[i] === undefined || CS.mMech[i] === undefined; })) return;
+        CS.mSubmitted = true;
+        var ms = mysteryScores();
+        announce(ms.type + ' types and ' + ms.mech + ' mechanisms correct. Explanations shown.');
+        focusKey = 'myst-score';
+        return render();
+    }
+  }
+
+  document.addEventListener('change', function (e) {
+    var t = e.target, d = t.dataset.input;
+    if (!d) return;
+    if (view === 'compare') {
+      if (d === 'mtype') CS.mType[Number(t.dataset.item)] = Number(t.value);
+      else if (d === 'mmech') CS.mMech[Number(t.dataset.item)] = Number(t.value);
+      else return;
+      focusKey = t.dataset.key;
+      return render();
+    }
+    if (typeof view !== 'number') return;
+    var s = S[view];
+    if (d === 'ctl' || d === 'ctl-range') {
+      s.ctrl[t.dataset.ctl] = d === 'ctl-range' ? Number(t.value) : t.value;
+      var r = runModel(view), m = modelOf(view), lbl = [];
+      Object.keys(r.cats).forEach(function (k) { if (m.labels[k] && m.labels[k][r.cats[k]]) lbl.push(m.labels[k][r.cats[k]]); });
+      announce('Model updated. ' + lbl.join('. ') + '.');
+    }
+    else if (d === 'pred') s.preds[Number(t.dataset.ch)] = t.value;
+    else if (d === 'q') s.qAnswers[Number(t.dataset.ch)] = Number(t.value);
+    else if (d === 'sign') s.signs.answers[Number(t.dataset.item)] = Number(t.value);
+    else return;
+    focusKey = t.dataset.key;
+    render();
+  });
+
+  document.addEventListener('input', function (e) {
+    var t = e.target, d = t.dataset.input;
+    if (!d) return;
+    if (d === 'name') { studentName = t.value; return; }
+    if (typeof view !== 'number') return;
+    var s = S[view];
+    if (d === 'explain') s.explanation = t.value;
+    else if (d === 'ctl-range') {
+      var ctl = modelOf(view).controls.filter(function (x) { return x.id === t.dataset.ctl; })[0];
+      var out = document.getElementById('out-' + t.dataset.ctl);
+      if (out) out.textContent = t.value + ' ' + ctl.unit;
+    }
+  });
+
+  document.addEventListener('keydown', function (e) {
+    if (e.key === 'Escape' && selected) {
+      var id = selected; selected = null;
+      announce('Selection canceled.');
+      focusKey = 'chip-' + id;
+      render();
+    }
+  });
+
+  /* drag and drop on the compare board (tap-to-place covers touch and keyboard) */
+  function clearHover() { var hs = document.querySelectorAll('.drop-hover'); for (var i = 0; i < hs.length; i++) hs[i].classList.remove('drop-hover'); }
+  document.addEventListener('dragstart', function (e) {
+    var t = e.target.closest && e.target.closest('[data-chip]');
+    if (!t || view !== 'compare' || CS.sortSubmitted) return;
+    dragChip = t.dataset.chip;
+    try { e.dataTransfer.setData('text/plain', dragChip); e.dataTransfer.effectAllowed = 'move'; } catch (err) { /* ignore */ }
+    t.classList.add('dragging');
+  });
+  document.addEventListener('dragover', function (e) {
+    if (!dragChip) return;
+    var t = e.target.closest && e.target.closest('[data-tdrop]');
+    if (!t) return;
+    e.preventDefault();
+    if (!t.classList.contains('drop-hover')) { clearHover(); t.classList.add('drop-hover'); }
+  });
+  document.addEventListener('dragleave', function (e) {
+    var t = e.target.closest && e.target.closest('[data-tdrop]');
+    if (t && !t.contains(e.relatedTarget)) t.classList.remove('drop-hover');
+  });
+  document.addEventListener('drop', function (e) {
+    if (!dragChip) return;
+    var t = e.target.closest && e.target.closest('[data-tdrop]');
+    if (!t) return;
+    e.preventDefault();
+    if (t.dataset.tdrop === 'tray') delete CS.placed[dragChip];
+    else { CS.placed[dragChip] = t.dataset.tdrop; announce('Placed under ' + columnLabel(t.dataset.tdrop) + '.'); }
+    dragChip = null; selected = null;
+    render();
+  });
+  document.addEventListener('dragend', function () {
+    dragChip = null; clearHover();
+    var d = document.querySelectorAll('.dragging'); for (var i = 0; i < d.length; i++) d[i].classList.remove('dragging');
+  });
+
+  /* =====================================================================
+     SAVE AND LOAD
+     ===================================================================== */
+  function saveProgress() {
+    var data = JSON.stringify({ app: SAVE_APP, v: SAVE_VERSION, saved: new Date().toISOString(), name: studentName, ids: CASES.map(function (c) { return c.id; }), cases: S, compare: CS });
+    var fileName = 'normal-to-wound-progress' + (studentName.trim() ? '-' + studentName.trim().toLowerCase().replace(/[^a-z0-9]+/g, '-') : '') + '.json';
+    try {
+      var blob = new Blob([data], { type: 'application/json' });
+      var url = URL.createObjectURL(blob);
+      var link = document.createElement('a');
+      link.href = url; link.download = fileName;
+      document.body.appendChild(link); link.click(); link.remove();
+      setTimeout(function () { URL.revokeObjectURL(url); }, 2000);
+      notice = 'Progress file downloaded as ' + fileName + '. Use Load saved progress to pick up where you left off.';
+    } catch (err) {
+      notice = 'This browser blocked the download. Print your summary instead to keep a record.';
+    }
+    announce(notice);
+    render();
+  }
+  document.getElementById('loadfile').addEventListener('change', function (e) {
+    var file = e.target.files && e.target.files[0];
+    if (!file) return;
+    var reader = new FileReader();
+    reader.onload = function () {
+      try {
+        var d = JSON.parse(reader.result);
+        if (d.app !== SAVE_APP || d.v !== SAVE_VERSION || !Array.isArray(d.cases)) throw new Error('format');
+        CASES.forEach(function (sc, ci) {
+          var idx = (d.ids || []).indexOf(sc.id), st = idx > -1 ? d.cases[idx] : null;
+          if (st && st.ctrl && st.signs) {
+            st.resetArmed = false;
+            if (st.run) st.run = null;
+            st.prev = null;
+            S[ci] = st;
+          }
+        });
+        if (d.compare && d.compare.placed) CS = d.compare;
+        studentName = d.name || studentName;
+        notice = 'Progress loaded.';
+      } catch (err) {
+        notice = 'That file couldn\'t be loaded. Choose a progress file saved from this activity.';
+      }
+      e.target.value = '';
+      selected = null;
+      announce(notice);
+      render();
+    };
+    reader.readAsText(file);
+  });
+
+  document.getElementById('app-title').textContent = A.title + ': ' + A.subtitle;
+  document.title = A.title + ': ' + A.subtitle;
+  render();
+})();
+</script>
+</body>
+</html>
